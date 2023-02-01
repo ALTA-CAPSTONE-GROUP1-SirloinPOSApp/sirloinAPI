@@ -5,9 +5,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/joho/godotenv"
 	"github.com/midtrans/midtrans-go"
 	"github.com/midtrans/midtrans-go/coreapi"
@@ -19,6 +16,10 @@ var (
 	KEYID             string = ""
 	ACCESSKEY         string = ""
 	MIDTRANSSERVERKEY string = ""
+	AWS_REGION        string = ""
+	S3_KEY            string = ""
+	S3_SECRET         string = ""
+	AWS_BUCKET        string = ""
 )
 
 type AppConfig struct {
@@ -31,6 +32,10 @@ type AppConfig struct {
 	keyid             string
 	accesskey         string
 	midtransserverkey string
+	AWSREGION         string
+	S3KEY             string
+	S3SECRET          string
+	AWSBUCKET         string
 }
 
 func InitConfig() *AppConfig {
@@ -40,6 +45,25 @@ func InitConfig() *AppConfig {
 func ReadEnv() *AppConfig {
 	app := AppConfig{}
 	isRead := true
+	// AWS S3 Bucket
+	if val, found := os.LookupEnv("AWS_REGION"); found {
+		app.AWSREGION = val
+		isRead = false
+	}
+	if val, found := os.LookupEnv("S3_KEY"); found {
+		app.S3KEY = val
+		isRead = false
+	}
+	if val, found := os.LookupEnv("S3_SECRET"); found {
+		app.S3SECRET = val
+		isRead = false
+	}
+	if val, found := os.LookupEnv("AWS_BUCKET"); found {
+		app.AWSBUCKET = val
+		isRead = false
+	}
+
+	// midtrans
 	if val, found := os.LookupEnv("MIDTRANSSERVERKEY"); found {
 		app.keyid = val
 		isRead = false
@@ -56,11 +80,15 @@ func ReadEnv() *AppConfig {
 		ACCESSKEY = val
 
 	}
+
+	// JWT
 	if val, found := os.LookupEnv("JWT_KEY"); found {
 		app.jwtKey = val
 		isRead = false
 		JWT_KEY = val
 	}
+
+	// DATABASE
 	if val, found := os.LookupEnv("DBUSER"); found {
 		app.DBUser = val
 		isRead = false
@@ -109,18 +137,13 @@ func ReadEnv() *AppConfig {
 		KEYID = app.keyid
 		ACCESSKEY = app.accesskey
 		MIDTRANSSERVERKEY = app.midtransserverkey
+		AWS_REGION = app.AWSREGION
+		S3_KEY = app.S3KEY
+		S3_SECRET = app.S3SECRET
+		AWS_BUCKET = app.AWSBUCKET
 	}
 
 	return &app
-}
-
-func S3Config() *session.Session {
-	s3Config := &aws.Config{
-		Region:      aws.String("ap-southeast-1"),
-		Credentials: credentials.NewStaticCredentials(KEYID, ACCESSKEY, ""),
-	}
-	s3Session, _ := session.NewSession(s3Config)
-	return s3Session
 }
 
 func MidtransSnapClient() snap.Client {
