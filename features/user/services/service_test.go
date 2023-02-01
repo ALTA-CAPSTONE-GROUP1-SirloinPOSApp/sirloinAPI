@@ -1,66 +1,96 @@
 package service
 
-// import (
-// 	"ecommerceapi/features/user"
-// 	"ecommerceapi/helper"
-// 	"ecommerceapi/mocks"
-// 	"errors"
-// 	"mime/multipart"
-// 	"testing"
-// 	"time"
+import (
+	"errors"
+	"sirloinapi/features/user"
+	"sirloinapi/helper"
+	"sirloinapi/mocks"
+	"testing"
 
-// 	"github.com/golang-jwt/jwt"
-// 	"github.com/stretchr/testify/assert"
-// 	"github.com/stretchr/testify/mock"
-// 	"golang.org/x/crypto/bcrypt"
-// )
+	"github.com/stretchr/testify/assert"
+)
 
-// func TestRegister(t *testing.T) {
-// 	data := mocks.NewUserData(t)
+func TestRegister(t *testing.T) {
+	data := mocks.NewUserData(t)
+	password := "Amr12345"
+	hash := helper.GeneratePassword(password)
+	newUser := user.Core{
+		Email:        "mfauzanptra@gmail.com",
+		BusinessName: "Muhamad Fauzan Putra",
+		PhoneNumber:  "085659171799",
+		Address:      "Jln. Lembayung No 24, Bantul, Yogyakarta",
+	}
+	expectedData := user.Core{
+		Email:        "mfauzanptra@gmail.com",
+		BusinessName: "Muhamad Fauzan Putra",
+		PhoneNumber:  "085659171799",
+		Address:      "Jln. Lembayung No 24, Bantul, Yogyakarta",
+	}
 
-// 	newUser := user.Core{
-// 		Email:       "mfauzanptra@gmail.com",
-// 		Name:        "Muhamad Fauzan Putra",
-// 		PhoneNumber: "085659171799",
-// 		Password:    "paupau99",
-// 		Address:     "Jln. Lembayung No 24, Bantul, Yogyakarta",
-// 	}
-// 	expectedData := user.Core{
-// 		Email:       "mfauzanptra@gmail.com",
-// 		Name:        "Muhamad Fauzan Putra",
-// 		PhoneNumber: "085659171799",
-// 		Password:    "paupau99",
-// 		Address:     "Jln. Lembayung No 24, Bantul, Yogyakarta",
-// 	}
+	t.Run("success register", func(t *testing.T) {
+		newUser.Password = hash
+		data.On("Register", newUser).Return(expectedData, nil).Once()
+		srv := New(data)
+		newUser.Password = password
+		res, err := srv.Register(newUser)
+		assert.Nil(t, err)
+		assert.Equal(t, expectedData.ID, res.ID)
+		assert.Equal(t, expectedData.BusinessName, res.BusinessName)
+		data.AssertExpectations(t)
+	})
 
-// 	t.Run("success register", func(t *testing.T) {
-// 		data.On("Register", mock.Anything).Return(expectedData, nil).Once()
-// 		srv := New(data)
-// 		res, err := srv.Register(newUser)
-// 		assert.Nil(t, err)
-// 		assert.Equal(t, expectedData.ID, res.ID)
-// 		assert.Equal(t, expectedData.Name, res.Name)
-// 		data.AssertExpectations(t)
-// 	})
+	t.Run("Duplicate email", func(t *testing.T) {
+		newUser.Password = hash
+		data.On("Register", newUser).Return(user.Core{}, errors.New("Duplicate users.email")).Once()
+		srv := New(data)
+		newUser.Password = password
+		res, err := srv.Register(newUser)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "user already exist")
+		assert.Equal(t, res.BusinessName, "")
+		data.AssertExpectations(t)
 
-// 	t.Run("duplicate", func(t *testing.T) {
-// 		data.On("Register", mock.Anything).Return(user.Core{}, errors.New("duplicated")).Once()
-// 		srv := New(data)
-// 		res, err := srv.Register(newUser)
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "user already exist")
-// 		assert.Equal(t, res.Name, "")
-// 	})
+	})
 
-// 	t.Run("server problem", func(t *testing.T) {
-// 		data.On("Register", mock.Anything).Return(user.Core{}, errors.New("server error")).Once()
-// 		srv := New(data)
-// 		res, err := srv.Register(newUser)
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "server")
-// 		assert.Equal(t, res.Name, "")
-// 	})
-// }
+	t.Run("Duplicate phone number", func(t *testing.T) {
+		newUser.Password = hash
+		data.On("Register", newUser).Return(user.Core{}, errors.New("Duplicate users.phone_number")).Once()
+		srv := New(data)
+		newUser.Password = password
+		res, err := srv.Register(newUser)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "phone number already exist")
+		assert.Equal(t, res.BusinessName, "")
+		data.AssertExpectations(t)
+
+	})
+
+	t.Run("server problem", func(t *testing.T) {
+		newUser.Password = hash
+		data.On("Register", newUser).Return(user.Core{}, errors.New("server error")).Once()
+		srv := New(data)
+		newUser.Password = password
+		res, err := srv.Register(newUser)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "server")
+		assert.Equal(t, res.BusinessName, "")
+		data.AssertExpectations(t)
+
+	})
+
+	t.Run("validation problem", func(t *testing.T) {
+		newUser.Password = hash
+		srv := New(data)
+		newUser.Password = password
+		newUser.PhoneNumber = "ojaosdjoasidj"
+		res, err := srv.Register(newUser)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "validation")
+		assert.Equal(t, res.BusinessName, "")
+
+	})
+
+}
 
 // func TestLogn(t *testing.T) {
 // 	data := mocks.NewUserData(t)
