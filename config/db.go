@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"log"
+	user "sirloinapi/features/user/data"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -21,7 +22,7 @@ func InitDB(ac AppConfig) *gorm.DB {
 }
 
 func Migrate(db *gorm.DB) {
-	// db.AutoMigrate(user.User{})
+	db.AutoMigrate(user.User{})
 	// db.AutoMigrate(item.Item{})
 	// db.AutoMigrate(cart.Cart{})
 	// if !db.Migrator().HasColumn(&cart.CartItem{}, "Qty") {

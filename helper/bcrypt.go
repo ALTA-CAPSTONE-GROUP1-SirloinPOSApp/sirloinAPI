@@ -1,25 +1,28 @@
 package helper
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"errors"
-	"log"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
-func GeneratePassword(password string) (string, error) {
-	hashed, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		log.Println("bcrypt error ", err.Error())
-		return "", errors.New("password process error")
-	}
-	return string(hashed), nil
+func GeneratePassword(password string) string {
+	var tmp1, tmp2 []byte
+	hash := md5.Sum([]byte(password))
+	num := len(hash) / 2
+	tmp2, tmp1 = hash[:num], hash[len(hash)-num:]
+	hash = md5.Sum([]byte(tmp1))
+	tmp1 = hash[num:]
+	hash = md5.Sum([]byte(tmp2))
+	tmp2 = hash[:num]
+	res := append(tmp2, tmp1...)
+	return hex.EncodeToString(res[:])
 }
 
-func ComparePassword(hashed, password string) error {
-	if err := bcrypt.CompareHashAndPassword([]byte(hashed), []byte(password)); err != nil {
-		log.Println("login compare", err.Error())
-		return errors.New("password tidak sesuai ")
+func ComparePassword(hashedPassword, password string) error {
+	password = GeneratePassword(password)
+	if hashedPassword != password {
+		return errors.New("password not match")
 	}
 	return nil
 }
