@@ -92,7 +92,7 @@ func (ps *productSvc) Delete(token interface{}, productId uint) error {
 func (ps *productSvc) GetUserProducts(token interface{}) ([]product.Core, error) {
 	userID := helper.ExtractToken(token)
 	if userID <= 0 {
-		log.Println("\terror extract token delete product service")
+		log.Println("\terror extract token getUserProduct product service")
 		return []product.Core{}, errors.New("user not found")
 	}
 
