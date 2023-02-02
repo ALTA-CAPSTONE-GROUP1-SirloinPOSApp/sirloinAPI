@@ -1,9 +1,12 @@
 package helper
 
 import (
+	"errors"
 	"fmt"
 	"mime/multipart"
+	"path/filepath"
 	_config "sirloinapi/config"
+	"strconv"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -83,4 +86,27 @@ func CheckFileSize(size int64) error {
 	}
 
 	return nil
+}
+
+func UploadProductPhotoS3(file multipart.FileHeader, productId int) (string, error) {
+	s3Session := _config.GetSession()
+	uploader := s3manager.NewUploader(s3Session)
+	src, err := file.Open()
+	if err != nil {
+		return "", err
+	}
+	defer src.Close()
+	ext := filepath.Ext(file.Filename)
+
+	cnv := strconv.Itoa(productId)
+	res, err := uploader.Upload(&s3manager.UploadInput{
+		Bucket: aws.String(_config.AWS_BUCKET),
+		Key:    aws.String("files/products/" + cnv + "/product_photo_" + fmt.Sprint(productId) + ext),
+		Body:   src,
+	})
+	if err != nil {
+		return "", errors.New("problem with upload post photo")
+	}
+
+	return res.Location, nil
 }

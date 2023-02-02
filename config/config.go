@@ -129,13 +129,17 @@ func ReadEnv() *AppConfig {
 		}
 		app.DBName = os.Getenv("DBNAME")
 		app.jwtKey = os.Getenv("JWTKEY")
-		app.keyid = os.Getenv("KEYID")
-		app.accesskey = os.Getenv("ACCESSKEY")
+		// app.keyid = os.Getenv("KEYID")
+		// app.accesskey = os.Getenv("ACCESSKEY")
 		app.midtransserverkey = os.Getenv("MIDTRANSSERVERKEY")
+		app.AWSREGION = os.Getenv("AWSREGION")
+		app.S3KEY = os.Getenv("S3KEY")
+		app.S3SECRET = os.Getenv("S3SECRET")
+		app.AWSBUCKET = os.Getenv("AWSBUCKET")
 
 		JWT_KEY = app.jwtKey
-		KEYID = app.keyid
-		ACCESSKEY = app.accesskey
+		// KEYID = app.keyid
+		// ACCESSKEY = app.accesskey
 		MIDTRANSSERVERKEY = app.midtransserverkey
 		AWS_REGION = app.AWSREGION
 		S3_KEY = app.S3KEY
