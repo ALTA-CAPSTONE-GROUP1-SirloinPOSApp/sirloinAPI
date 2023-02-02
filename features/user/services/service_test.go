@@ -6,8 +6,11 @@ import (
 	"sirloinapi/helper"
 	"sirloinapi/mocks"
 	"testing"
+	"time"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestRegister(t *testing.T) {
@@ -92,284 +95,353 @@ func TestRegister(t *testing.T) {
 
 }
 
-// func TestLogn(t *testing.T) {
-// 	data := mocks.NewUserData(t)
-// 	t.Run("succcess login", func(t *testing.T) {
-// 		email := "mfauzanptra@gmail.com"
-// 		password := "paupau99"
-// 		hashed, _ := bcrypt.GenerateFromPassword([]byte("paupau99"), bcrypt.DefaultCost)
+func TestLogn(t *testing.T) {
+	data := mocks.NewUserData(t)
+	// input dan respond untuk mock data
+	password := "Amr12345"
+	hashed := helper.GeneratePassword(password)
+	inputData := user.Core{
+		Email:    "jerr@alterra.id",
+		Password: password,
+	}
+	expectedData := user.Core{
+		Email:        "mfauzanptra@gmail.com",
+		BusinessName: "Muhamad Fauzan Putra",
+		PhoneNumber:  "085659171799",
+		Password:     hashed,
+		Address:      "Jln. Lembayung No 24, Bantul, Yogyakarta",
+	}
+	t.Run("succcess login", func(t *testing.T) {
 
-// 		expectedData := user.Core{
-// 			Email:       "mfauzanptra@gmail.com",
-// 			Name:        "Muhamad Fauzan Putra",
-// 			PhoneNumber: "085659171799",
-// 			Password:    string(hashed),
-// 			Address:     "Jln. Lembayung No 24, Bantul, Yogyakarta",
-// 		}
-// 		data.On("Login", email).Return(expectedData, nil)
-// 		srv := New(data)
-// 		token, res, err := srv.Login(email, password)
-// 		assert.Nil(t, err)
-// 		assert.Equal(t, expectedData.Email, res.Email)
-// 		assert.NotNil(t, token)
-// 		data.AssertExpectations(t)
-// 	})
+		// res dari data akan mengembalik password yang sudah di hash
+		data.On("Login", inputData.Email).Return(expectedData, nil).Once()
+		srv := New(data)
+		inputData.Password = password
+		token, res, err := srv.Login(inputData.Email, inputData.Password)
+		assert.Nil(t, err)
+		assert.Equal(t, expectedData.Email, res.Email)
+		assert.NotNil(t, token)
+		data.AssertExpectations(t)
+	})
 
-// 	t.Run("not found", func(t *testing.T) {
-// 		inputEmail := "mfp@gmail.com"
-// 		data.On("Login", inputEmail).Return(user.Core{}, errors.New("data not found"))
+	t.Run("server problem", func(t *testing.T) {
+		data.On("Login", inputData.Email).Return(user.Core{}, errors.New("server error")).Once()
+		srv := New(data)
+		token, res, err := srv.Login(inputData.Email, inputData.Password)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "server")
+		assert.Empty(t, token)
+		assert.Equal(t, uint(0), res.ID)
+		data.AssertExpectations(t)
+	})
 
-// 		srv := New(data)
-// 		token, res, err := srv.Login(inputEmail, "be1422")
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "not found")
-// 		assert.Empty(t, token)
-// 		assert.Equal(t, uint(0), res.ID)
-// 		data.AssertExpectations(t)
-// 	})
+	t.Run("not found", func(t *testing.T) {
+		data.On("Login", inputData.Email).Return(user.Core{}, errors.New("data not found")).Once()
+		srv := New(data)
+		token, res, err := srv.Login(inputData.Email, inputData.Password)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "not found")
+		assert.Empty(t, token)
+		assert.Equal(t, uint(0), res.ID)
+		data.AssertExpectations(t)
+	})
 
-// 	t.Run("wrong password", func(t *testing.T) {
-// 		inputEmail := "mfauzanptra@gmail.com"
-// 		hashed, _ := bcrypt.GenerateFromPassword([]byte("paupau99"), bcrypt.DefaultCost)
-// 		expData := user.Core{
-// 			Email:       "mfauzanptra@gmail.com",
-// 			Name:        "Muhamad Fauzan Putra",
-// 			PhoneNumber: "085659171799",
-// 			Password:    string(hashed),
-// 			Address:     "Jln. Lembayung No 24, Bantul, Yogyakarta",
-// 		}
-// 		data.On("Login", inputEmail).Return(expData, nil)
+	t.Run("wrong password", func(t *testing.T) {
+		data.On("Login", inputData.Email).Return(expectedData, nil)
+		srv := New(data)
+		token, res, err := srv.Login(inputData.Email, "Abe12345")
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "wrong password")
+		assert.Empty(t, token)
+		assert.Equal(t, uint(0), res.ID)
+		data.AssertExpectations(t)
+	})
 
-// 		srv := New(data)
-// 		token, res, err := srv.Login(inputEmail, "be1423")
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "wrong password")
-// 		assert.Empty(t, token)
-// 		assert.Equal(t, uint(0), res.ID)
-// 		data.AssertExpectations(t)
-// 	})
-// }
+}
 
-// func TestProfile(t *testing.T) {
-// 	data := mocks.NewUserData(t)
+func TestProfile(t *testing.T) {
+	data := mocks.NewUserData(t)
+	expectedData := user.Core{
+		Email:        "mfauzanptra@gmail.com",
+		BusinessName: "Muhamad Fauzan Putra",
+		PhoneNumber:  "085659171799",
+		Address:      "Jln. Lembayung No 24, Bantul, Yogyakarta",
+	}
+	t.Run("Sukses lihat profile", func(t *testing.T) {
+		data.On("Profile", uint(1)).Return(expectedData, nil).Once()
+		srv := New(data)
+		claims := jwt.MapClaims{}
+		claims["authorized"] = true
+		claims["userID"] = 1
+		claims["exp"] = time.Now().Add(time.Hour * 1).Unix() //Token expires after 1 hour
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-// 	t.Run("Sukses lihat profile", func(t *testing.T) {
-// 		resData := user.Core{ID: uint(1), Name: "jerry", Email: "jerry@alterra.id", PhoneNumber: "08123456"}
+		token.Valid = true
 
-// 		data.On("Profile", uint(1)).Return(resData, nil).Once()
+		res, err := srv.Profile(token)
+		assert.Nil(t, err)
+		assert.Equal(t, expectedData.ID, res.ID)
+		data.AssertExpectations(t)
+	})
 
-// 		srv := New(data)
+	t.Run("jwt tidak valid", func(t *testing.T) {
+		srv := New(data)
 
-// 		claims := jwt.MapClaims{}
-// 		claims["authorized"] = true
-// 		claims["userID"] = 1
-// 		claims["exp"] = time.Now().Add(time.Hour * 1).Unix() //Token expires after 1 hour
-// 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		_, token := helper.GenerateJWT(1)
 
-// 		token.Valid = true
+		res, err := srv.Profile(token)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "not found")
+		assert.Equal(t, uint(0), res.ID)
+	})
 
-// 		res, err := srv.Profile(token)
-// 		assert.Nil(t, err)
-// 		assert.Equal(t, resData.ID, res.ID)
-// 		data.AssertExpectations(t)
-// 	})
+	t.Run("data tidak ditemukan", func(t *testing.T) {
+		data.On("Profile", uint(4)).Return(user.Core{}, errors.New("data not found")).Once()
 
-// 	t.Run("jwt tidak valid", func(t *testing.T) {
-// 		srv := New(data)
+		srv := New(data)
 
-// 		_, token := helper.GenerateJWT(1)
+		_, token := helper.GenerateJWT(4)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		res, err := srv.Profile(pToken)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "not found")
+		assert.Equal(t, uint(0), res.ID)
+		data.AssertExpectations(t)
+	})
 
-// 		res, err := srv.Profile(token)
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "not found")
-// 		assert.Equal(t, uint(0), res.ID)
-// 	})
+	t.Run("masalah di server", func(t *testing.T) {
+		data.On("Profile", mock.Anything).Return(user.Core{}, errors.New("terdapat masalah pada server")).Once()
+		srv := New(data)
 
-// 	t.Run("data tidak ditemukan", func(t *testing.T) {
-// 		data.On("Profile", uint(4)).Return(user.Core{}, errors.New("data not found")).Once()
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		res, err := srv.Profile(pToken)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "server")
+		assert.Equal(t, uint(0), res.ID)
+		data.AssertExpectations(t)
+	})
+}
 
-// 		srv := New(data)
+func TestUpdate(t *testing.T) {
+	data := mocks.NewUserData(t)
+	password := "Amr12345"
+	hash := helper.GeneratePassword(password)
+	updUser := user.Core{
+		Email:        "mfauzanptra@gmail.com",
+		BusinessName: "Muhamad Fauzan Putra",
+		PhoneNumber:  "085659171799",
+		Address:      "Jln. Lembayung No 24, Bantul, Yogyakarta",
+	}
+	expectedData := user.Core{
+		Email:        "mfauzanptra@gmail.com",
+		BusinessName: "Muhamad Fauzan Putra",
+		PhoneNumber:  "085659171799",
+		Address:      "Jln. Lembayung No 24, Bantul, Yogyakarta",
+	}
 
-// 		_, token := helper.GenerateJWT(4)
-// 		pToken := token.(*jwt.Token)
-// 		pToken.Valid = true
-// 		res, err := srv.Profile(pToken)
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "not found")
-// 		assert.Equal(t, uint(0), res.ID)
-// 		data.AssertExpectations(t)
-// 	})
+	t.Run("not found", func(t *testing.T) {
+		data.On("Update", uint(1), updUser).Return(user.Core{}, errors.New("data not found")).Once()
+		srv := New(data)
 
-// 	t.Run("masalah di server", func(t *testing.T) {
-// 		data.On("Profile", mock.Anything).Return(user.Core{}, errors.New("terdapat masalah pada server")).Once()
-// 		srv := New(data)
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
 
-// 		_, token := helper.GenerateJWT(1)
-// 		pToken := token.(*jwt.Token)
-// 		pToken.Valid = true
-// 		res, err := srv.Profile(pToken)
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "server")
-// 		assert.Equal(t, uint(0), res.ID)
-// 		data.AssertExpectations(t)
-// 	})
-// }
+		res, err := srv.Update(pToken, updUser)
+		assert.NotNil(t, err)
+		assert.Equal(t, res.BusinessName, "")
+		data.AssertExpectations(t)
+	})
 
-// func TestUpdate(t *testing.T) {
-// 	data := mocks.NewUserData(t)
-// 	updUser := user.Core{
-// 		Name:        "fauzan",
-// 		Email:       "mfauzanptra@gmail.com",
-// 		PhoneNumber: "085659171799",
-// 	}
-// 	expectedData := user.Core{
-// 		Name:        "fauzan",
-// 		Email:       "mfauzanptra@gmail.com",
-// 		PhoneNumber: "085659171799",
-// 	}
-// 	var a *multipart.FileHeader
-// 	t.Run("update success", func(t *testing.T) {
-// 		data.On("Profile", uint(1)).Return(expectedData, nil).Once()
-// 		data.On("Update", uint(1), mock.Anything).Return(expectedData, nil).Once()
-// 		srv := New(data)
+	t.Run("server problem", func(t *testing.T) {
+		data.On("Update", uint(1), updUser).Return(user.Core{}, errors.New("server problem")).Once()
+		srv := New(data)
 
-// 		_, token := helper.GenerateJWT(1)
-// 		pToken := token.(*jwt.Token)
-// 		pToken.Valid = true
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
 
-// 		res, err := srv.Update(pToken, updUser, a)
-// 		assert.Nil(t, err)
-// 		assert.Equal(t, expectedData.ID, res.ID)
-// 		assert.Equal(t, expectedData.Name, res.Name)
-// 		data.AssertExpectations(t)
-// 	})
+		res, err := srv.Update(pToken, updUser)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "server")
+		assert.Equal(t, res.BusinessName, "")
+		data.AssertExpectations(t)
+	})
 
-// 	t.Run("jwt not valid", func(t *testing.T) {
-// 		srv := New(data)
+	t.Run("update success", func(t *testing.T) {
+		updUser.Password = hash
+		data.On("Update", uint(1), updUser).Return(expectedData, nil).Once()
+		srv := New(data)
 
-// 		_, token := helper.GenerateJWT(1)
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		updUser.Password = password
+		res, err := srv.Update(pToken, updUser)
+		assert.Nil(t, err)
+		assert.Equal(t, expectedData.ID, res.ID)
+		assert.Equal(t, expectedData.BusinessName, res.BusinessName)
+		data.AssertExpectations(t)
+	})
 
-// 		res, err := srv.Update(token, updUser, a)
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "token error")
-// 		assert.Equal(t, uint(0), res.ID)
-// 	})
+	t.Run("user / email already exist", func(t *testing.T) {
+		updUser.Password = hash
+		data.On("Update", uint(1), updUser).Return(user.Core{}, errors.New("Duplicate users.email")).Once()
+		srv := New(data)
 
-// 	t.Run("not found", func(t *testing.T) {
-// 		data.On("Profile", uint(2)).Return(user.Core{}, errors.New("data not found")).Once()
-// 		srv := New(data)
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		updUser.Password = password
+		res, err := srv.Update(pToken, updUser)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "user already exist")
+		assert.Equal(t, res.BusinessName, "")
+		data.AssertExpectations(t)
+	})
 
-// 		_, token := helper.GenerateJWT(2)
-// 		pToken := token.(*jwt.Token)
-// 		pToken.Valid = true
+	t.Run("phone number already exist", func(t *testing.T) {
+		updUser.Password = hash
+		data.On("Update", uint(1), updUser).Return(user.Core{}, errors.New("Duplicate users.phone_number")).Once()
+		srv := New(data)
 
-// 		res, err := srv.Update(pToken, updUser, a)
-// 		assert.NotNil(t, err)
-// 		assert.Equal(t, res.Name, "")
-// 		data.AssertExpectations(t)
-// 	})
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		updUser.Password = password
+		res, err := srv.Update(pToken, updUser)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "phone number already exist")
+		assert.Equal(t, res.BusinessName, "")
+		data.AssertExpectations(t)
+	})
 
-// 	t.Run("server problem", func(t *testing.T) {
-// 		data.On("Profile", uint(1)).Return(user.Core{}, errors.New("server problem")).Once()
-// 		srv := New(data)
+	t.Run("Password validasi", func(t *testing.T) {
+		srv := New(data)
 
-// 		_, token := helper.GenerateJWT(1)
-// 		pToken := token.(*jwt.Token)
-// 		pToken.Valid = true
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		updUser.Password = "123"
+		res, err := srv.Update(pToken, updUser)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "password")
+		assert.Equal(t, res.BusinessName, "")
+	})
 
-// 		res, err := srv.Update(pToken, updUser, a)
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "server")
-// 		assert.Equal(t, res.Name, "")
-// 		data.AssertExpectations(t)
-// 	})
+	t.Run("Business name validasi", func(t *testing.T) {
+		srv := New(data)
 
-// 	t.Run("not found", func(t *testing.T) {
-// 		data.On("Profile", uint(2)).Return(expectedData, nil).Once()
-// 		data.On("Update", mock.Anything, mock.Anything).Return(user.Core{}, errors.New("data not found")).Once()
-// 		srv := New(data)
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		updUser.Password = password
+		updUser.BusinessName = "AMR#%^%"
+		res, err := srv.Update(pToken, updUser)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "alpha_space")
+		assert.Equal(t, res.BusinessName, "")
+	})
 
-// 		_, token := helper.GenerateJWT(2)
-// 		pToken := token.(*jwt.Token)
-// 		pToken.Valid = true
+	t.Run("Email validasi", func(t *testing.T) {
+		srv := New(data)
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		updUser.Password = password
+		updUser.BusinessName = "Toko Ira"
+		updUser.Email = "tokoira.com"
+		res, err := srv.Update(pToken, updUser)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "email")
+		assert.Equal(t, res.BusinessName, "")
+	})
 
-// 		res, err := srv.Update(pToken, updUser, a)
-// 		assert.NotNil(t, err)
-// 		assert.Equal(t, res.Name, "")
-// 		data.AssertExpectations(t)
-// 	})
+	t.Run("Phone number validasi", func(t *testing.T) {
+		srv := New(data)
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		updUser.Password = password
+		updUser.BusinessName = "Toko Ira"
+		updUser.Email = "tokoira@gmail.com"
+		updUser.PhoneNumber = "oiajsdojhasodi"
+		res, err := srv.Update(pToken, updUser)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "PhoneNumber")
+		assert.Equal(t, res.BusinessName, "")
+	})
 
-// 	t.Run("server problem", func(t *testing.T) {
-// 		data.On("Profile", uint(1)).Return(expectedData, nil).Once()
-// 		data.On("Update", mock.Anything, mock.Anything).Return(user.Core{}, errors.New("server problem")).Once()
-// 		srv := New(data)
+	t.Run("jwt not valid", func(t *testing.T) {
+		srv := New(data)
 
-// 		_, token := helper.GenerateJWT(1)
-// 		pToken := token.(*jwt.Token)
-// 		pToken.Valid = true
+		_, token := helper.GenerateJWT(1)
 
-// 		res, err := srv.Update(pToken, updUser, a)
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "server")
-// 		assert.Equal(t, res.Name, "")
-// 		data.AssertExpectations(t)
-// 	})
-// }
+		res, err := srv.Update(token, updUser)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "token error")
+		assert.Equal(t, uint(0), res.ID)
+	})
 
-// func TestDelete(t *testing.T) {
-// 	data := mocks.NewUserData(t)
-// 	t.Run("success delete", func(t *testing.T) {
-// 		data.On("Delete", uint(1)).Return(nil).Once()
+}
 
-// 		srv := New(data)
+func TestDelete(t *testing.T) {
+	data := mocks.NewUserData(t)
+	t.Run("success delete", func(t *testing.T) {
+		data.On("Delete", uint(1)).Return(nil).Once()
 
-// 		claims := jwt.MapClaims{}
-// 		claims["authorized"] = true
-// 		claims["userID"] = 1
-// 		claims["exp"] = time.Now().Add(time.Hour * 1).Unix() //Token expires after 1 hour
-// 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		srv := New(data)
 
-// 		token.Valid = true
+		claims := jwt.MapClaims{}
+		claims["authorized"] = true
+		claims["userID"] = 1
+		claims["exp"] = time.Now().Add(time.Hour * 1).Unix() //Token expires after 1 hour
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-// 		err := srv.Delete(token)
-// 		assert.Nil(t, err)
-// 		data.AssertExpectations(t)
-// 	})
+		token.Valid = true
 
-// 	t.Run("jwt not valid", func(t *testing.T) {
-// 		srv := New(data)
+		err := srv.Delete(token)
+		assert.Nil(t, err)
+		data.AssertExpectations(t)
+	})
 
-// 		_, token := helper.GenerateJWT(1)
+	t.Run("jwt not valid", func(t *testing.T) {
+		srv := New(data)
 
-// 		err := srv.Delete(token)
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "not found")
-// 	})
+		_, token := helper.GenerateJWT(1)
 
-// 	t.Run("data not found", func(t *testing.T) {
-// 		data.On("Delete", uint(4)).Return(errors.New("data not found")).Once()
+		err := srv.Delete(token)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "not found")
+	})
 
-// 		srv := New(data)
+	t.Run("data not found", func(t *testing.T) {
+		data.On("Delete", uint(4)).Return(errors.New("data not found")).Once()
 
-// 		_, token := helper.GenerateJWT(4)
-// 		pToken := token.(*jwt.Token)
-// 		pToken.Valid = true
-// 		err := srv.Delete(pToken)
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "not found")
-// 		data.AssertExpectations(t)
-// 	})
+		srv := New(data)
 
-// 	t.Run("masalah di server", func(t *testing.T) {
-// 		data.On("Delete", mock.Anything).Return(errors.New("terdapat masalah pada server")).Once()
-// 		srv := New(data)
+		_, token := helper.GenerateJWT(4)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		err := srv.Delete(pToken)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "not found")
+		data.AssertExpectations(t)
+	})
 
-// 		_, token := helper.GenerateJWT(1)
-// 		pToken := token.(*jwt.Token)
-// 		pToken.Valid = true
-// 		err := srv.Delete(pToken)
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "server")
-// 		data.AssertExpectations(t)
-// 	})
-// }
+	t.Run("masalah di server", func(t *testing.T) {
+		data.On("Delete", mock.Anything).Return(errors.New("terdapat masalah pada server")).Once()
+		srv := New(data)
+
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		err := srv.Delete(pToken)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "server")
+		data.AssertExpectations(t)
+	})
+}
