@@ -50,6 +50,9 @@ func (uc *userControl) Register() echo.HandlerFunc {
 			} else if strings.Contains(err.Error(), "BusinessName") && strings.Contains(err.Error(), "alpha_space") {
 				log.Println("error running register service: business names must be alpha_space")
 				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("business names are only allowed to contain letters and spaces"))
+			} else if strings.Contains(err.Error(), "Email") && strings.Contains(err.Error(), "email") {
+				log.Println("error running register service: Email must be email format")
+				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("incorrect e-mail format"))
 			} else {
 				log.Println("error running register service")
 				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
