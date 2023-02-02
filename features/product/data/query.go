@@ -104,3 +104,13 @@ func (pq *productQuery) GetProductById(userId, productId uint) (product.Core, er
 
 	return prod, nil
 }
+func (pq *productQuery) GetAdminProducts() ([]product.Core, error) {
+	userProd := []product.Core{}
+	err := pq.db.Raw("SELECT p.id , upc , category , product_name , minimum_stock , stock , buying_price , price , product_image , supplier , items_sold FROM products p JOIN users u ON u.id = p.user_id WHERE p.deleted_at IS NULL AND user_id = 1").Scan(&userProd).Error
+	if err != nil {
+		log.Println("\terror query get user product: ", err.Error())
+		return []product.Core{}, err
+	}
+
+	return userProd, nil
+}
