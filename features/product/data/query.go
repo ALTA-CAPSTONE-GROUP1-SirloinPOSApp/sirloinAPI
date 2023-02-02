@@ -70,6 +70,18 @@ func (pq *productQuery) Update(userId, productId uint, updProduct product.Core, 
 	return DataToCore(cnvP), nil
 }
 func (pq *productQuery) Delete(userId, productId uint) error {
+	qry := pq.db.Where("user_id = ?", userId).Delete(&Product{}, productId)
+
+	if aff := qry.RowsAffected; aff <= 0 {
+		log.Println("\tno rows affected: data not found")
+		return errors.New("data not found")
+	}
+
+	if err := qry.Error; err != nil {
+		log.Println("\tdelete query error: ", err.Error())
+		return err
+	}
+
 	return nil
 }
 func (pq *productQuery) GetUserProducts(userId uint) ([]product.Core, error) {
@@ -82,7 +94,13 @@ func (pq *productQuery) GetUserProducts(userId uint) ([]product.Core, error) {
 
 	return userProd, nil
 }
-func (pq *productQuery) GetProductById(productId uint) (product.Core, error) {
+func (pq *productQuery) GetProductById(userId, productId uint) (product.Core, error) {
+	prod := product.Core{}
+	err := pq.db.Raw("SELECT p.id , upc , category , product_name , minimum_stock , stock , buying_price , price , product_image , supplier FROM products p JOIN users u ON u.id = p.user_id WHERE p.deleted_at IS NULL AND p.id = ? AND u.id = ?", productId, userId).Scan(&prod).Error
+	if err != nil {
+		log.Println("\terror query get all product: ", err.Error())
+		return product.Core{}, err
+	}
 
-	return product.Core{}, nil
+	return prod, nil
 }
