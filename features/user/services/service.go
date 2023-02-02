@@ -105,15 +105,36 @@ func (uuc *userUseCase) Update(userToken interface{}, updateData user.Core) (use
 		hashed := helper.GeneratePassword(updateData.Password)
 		updateData.Password = hashed
 	}
-	// if updateData.BusinessName != "" {
+	if updateData.BusinessName != "" {
+		err := helper.Validasi(helper.ToValidate("bn", updateData))
+		if err != nil {
+			return user.Core{}, err
+		}
+	}
 
-	// }
+	if updateData.Email != "" {
+		err := helper.Validasi(helper.ToValidate("email", updateData))
+		if err != nil {
+			return user.Core{}, err
+		}
+	}
+
+	if updateData.PhoneNumber != "" {
+		err := helper.Validasi(helper.ToValidate("pn", updateData))
+		if err != nil {
+			return user.Core{}, err
+		}
+	}
 
 	res, err := uuc.qry.Update(uint(userId), updateData)
 	if err != nil {
 		errmsg := ""
 		if strings.Contains(err.Error(), "not found") {
 			errmsg = "data not found"
+		} else if strings.Contains(err.Error(), "Duplicate") && strings.Contains(err.Error(), "users.email") {
+			errmsg = "user already exist"
+		} else if strings.Contains(err.Error(), "Duplicate") && strings.Contains(err.Error(), "users.phone_number") {
+			errmsg = "phone number already exist"
 		} else {
 			errmsg = "server problem"
 		}

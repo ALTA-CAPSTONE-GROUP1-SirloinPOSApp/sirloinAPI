@@ -23,6 +23,17 @@ type PasswordValidate struct {
 	Password string `validate:"secure_password"`
 }
 
+type EmailValidate struct {
+	Email string `validate:"email"`
+}
+
+type PhoneNumberValidate struct {
+	PhoneNumber string `validate:"numeric"`
+}
+type BusinessNameValidate struct {
+	BusinessName string `validate:"alpha_space"`
+}
+
 func ToValidate(option string, data user.Core) interface{} {
 	switch option {
 	case "register":
@@ -36,6 +47,18 @@ func ToValidate(option string, data user.Core) interface{} {
 	case "password":
 		res := PasswordValidate{}
 		res.Password = data.Password
+		return res
+	case "email":
+		res := EmailValidate{}
+		res.Email = data.Email
+		return res
+	case "pn":
+		res := PhoneNumberValidate{}
+		res.PhoneNumber = data.PhoneNumber
+		return res
+	case "bn":
+		res := BusinessNameValidate{}
+		res.BusinessName = data.BusinessName
 		return res
 	default:
 		return nil

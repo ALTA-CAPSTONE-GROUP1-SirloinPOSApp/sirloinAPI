@@ -31,32 +31,7 @@ func (uc *userControl) Register() echo.HandlerFunc {
 
 		res, err := uc.srv.Register(*ToCore(input))
 		if err != nil {
-			log.Println("log on user handler: ", err)
-			if strings.Contains(err.Error(), "user already exist") {
-				log.Println("error running register service: user already exist")
-				return c.JSON(http.StatusConflict, helper.ErrorResponse("user or email already exist"))
-			} else if strings.Contains(err.Error(), "phone number already exist") {
-				log.Println("error running register service: phone number already exist")
-				return c.JSON(http.StatusConflict, helper.ErrorResponse("phone number already exist"))
-			} else if strings.Contains(err.Error(), "secure_password") {
-				log.Println("error running register service: the password does not meet security requirements")
-				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("password must be at least 8 characters long, must contain uppercase letters, must contain lowercase letters, must contain numbers, must not be too general"))
-			} else if strings.Contains(err.Error(), "required") {
-				log.Println("error running register service: required fields")
-				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("required fields must be filled"))
-			} else if strings.Contains(err.Error(), "PhoneNumber") && strings.Contains(err.Error(), "numeric") {
-				log.Println("error running register service: phone number must be numeric")
-				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("the phone number must be a number"))
-			} else if strings.Contains(err.Error(), "BusinessName") && strings.Contains(err.Error(), "alpha_space") {
-				log.Println("error running register service: business names must be alpha_space")
-				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("business names are only allowed to contain letters and spaces"))
-			} else if strings.Contains(err.Error(), "Email") && strings.Contains(err.Error(), "email") {
-				log.Println("error running register service: Email must be email format")
-				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("incorrect e-mail format"))
-			} else {
-				log.Println("error running register service")
-				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
-			}
+			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
 		return c.JSON(http.StatusCreated, map[string]interface{}{
 			"data":    ToResponse(res),
