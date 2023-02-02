@@ -102,13 +102,7 @@ func (uc *userControl) Update() echo.HandlerFunc {
 
 		res, err := uc.srv.Update(token, *ToCore(updatedData))
 		if err != nil {
-			if strings.Contains(err.Error(), "not found") {
-				log.Println("user not found: ", err.Error())
-				return c.JSON(http.StatusNotFound, helper.ErrorResponse("user not found"))
-			} else {
-				log.Println("error update service: ", err.Error())
-				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
-			}
+			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
 
 		return c.JSON(http.StatusOK, map[string]interface{}{
