@@ -27,6 +27,16 @@ func TestAdd(t *testing.T) {
 		Stock:        20,
 		// ProductImage: "Indomie.jpg",
 	}
+	inputDataVld := product.Core{
+		ProductName:  "Indomie goreng",
+		Upc:          "85191919891918519",
+		Category:     "makanan",
+		MinimumStock: 5,
+		BuyingPrice:  2000,
+		Price:        3000,
+		Supplier:     "saya",
+		// ProductImage: "Indomie.jpg",
+	}
 	resData := product.Core{
 		ProductName:  "Indomie goreng",
 		Upc:          "85191919891918519",
@@ -94,6 +104,17 @@ func TestAdd(t *testing.T) {
 		assert.Equal(t, uint(0), res.ID)
 		assert.ErrorContains(t, err, "server")
 		repo.AssertExpectations(t)
+	})
+
+	t.Run("validation error", func(t *testing.T) {
+		srv := New(repo)
+
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		res, err := srv.Add(pToken, inputDataVld, a)
+		assert.NotNil(t, err)
+		assert.Equal(t, uint(0), res.ID)
 	})
 }
 
