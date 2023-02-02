@@ -73,7 +73,14 @@ func (pq *productQuery) Delete(userId, productId uint) error {
 	return nil
 }
 func (pq *productQuery) GetUserProducts(userId uint) ([]product.Core, error) {
-	return []product.Core{}, nil
+	userProd := []product.Core{}
+	err := pq.db.Raw("SELECT p.id , upc , category , product_name , minimum_stock , stock , buying_price , price , product_image , supplier FROM products p JOIN users u ON u.id = p.user_id WHERE p.deleted_at IS NULL AND user_id = ?", userId).Scan(&userProd).Error
+	if err != nil {
+		log.Println("\terror query get user product: ", err.Error())
+		return []product.Core{}, err
+	}
+
+	return userProd, nil
 }
 func (pq *productQuery) GetProductById(productId uint) (product.Core, error) {
 

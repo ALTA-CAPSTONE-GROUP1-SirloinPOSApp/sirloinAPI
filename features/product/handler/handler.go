@@ -7,6 +7,7 @@ import (
 	"sirloinapi/features/product"
 	"sirloinapi/helper"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -92,7 +93,24 @@ func (pc *productControl) Delete() echo.HandlerFunc {
 }
 
 func (pc *productControl) GetUserProducts() echo.HandlerFunc {
-	return nil
+	return func(c echo.Context) error {
+		token := c.Get("user")
+
+		res, err := pc.srv.GetUserProducts(token)
+		if err != nil {
+			log.Println("error running GetAllProducts service: ", err.Error())
+			if strings.Contains(err.Error(), "not found") {
+				return c.JSON(http.StatusNotFound, helper.ErrorResponse("data not found"))
+			} else {
+				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
+			}
+		}
+
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"data":    res,
+			"message": "success show all products",
+		})
+	}
 }
 func (pc *productControl) GetProductById() echo.HandlerFunc {
 	return nil
