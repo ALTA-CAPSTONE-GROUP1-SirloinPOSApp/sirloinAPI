@@ -34,6 +34,27 @@ func (_m *UserData) Login(email string) (user.Core, error) {
 	return r0, r1
 }
 
+// Profile provides a mock function with given fields: id
+func (_m *UserData) Profile(id uint) (user.Core, error) {
+	ret := _m.Called(id)
+
+	var r0 user.Core
+	if rf, ok := ret.Get(0).(func(uint) user.Core); ok {
+		r0 = rf(id)
+	} else {
+		r0 = ret.Get(0).(user.Core)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint) error); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Register provides a mock function with given fields: newUser
 func (_m *UserData) Register(newUser user.Core) (user.Core, error) {
 	ret := _m.Called(newUser)

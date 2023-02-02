@@ -62,34 +62,34 @@ func (uc *userControl) Register() echo.HandlerFunc {
 	}
 }
 
-// func (uc *userControl) Login() echo.HandlerFunc {
-// 	return func(c echo.Context) error {
-// 		input := LoginReqest{}
-// 		if err := c.Bind(&input); err != nil {
-// 			log.Println("error login request: ", err.Error())
-// 			return c.JSON(http.StatusBadRequest, "wrong input")
-// 		}
+func (uc *userControl) Login() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		input := LoginReqest{}
+		if err := c.Bind(&input); err != nil {
+			log.Println("error login request: ", err.Error())
+			return c.JSON(http.StatusBadRequest, "wrong input")
+		}
 
-// 		token, res, err := uc.srv.Login(input.Email, input.Password)
-// 		if err != nil {
-// 			if strings.Contains(err.Error(), "password") {
-// 				log.Println("wrong password: ", err.Error())
-// 				return c.JSON(http.StatusUnauthorized, helper.ErrorResponse("wrong password"))
-// 			} else if strings.Contains(err.Error(), "not found") {
-// 				log.Println("user not found: ", err.Error())
-// 				return c.JSON(http.StatusNotFound, helper.ErrorResponse("user not found"))
-// 			} else {
-// 				log.Println("error login service: ", err.Error())
-// 				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
-// 			}
-// 		}
+		token, res, err := uc.srv.Login(input.Email, input.Password)
+		if err != nil {
+			if strings.Contains(err.Error(), "password") {
+				log.Println("wrong password: ", err.Error())
+				return c.JSON(http.StatusUnauthorized, helper.ErrorResponse("wrong password"))
+			} else if strings.Contains(err.Error(), "not found") {
+				log.Println("user not found: ", err.Error())
+				return c.JSON(http.StatusNotFound, helper.ErrorResponse("wrong email"))
+			} else {
+				log.Println("error login service: ", err.Error())
+				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
+			}
+		}
 
-// 		return c.JSON(http.StatusOK, map[string]interface{}{
-// 			"data":    ToLoginResp(res, token),
-// 			"message": "login success",
-// 		})
-// 	}
-// }
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"data":    ToLoginResp(res, token),
+			"message": "login success",
+		})
+	}
+}
 
 // func (uc *userControl) Profile() echo.HandlerFunc {
 // 	return func(c echo.Context) error {

@@ -1,6 +1,7 @@
 package data
 
 import (
+	"errors"
 	"log"
 	"sirloinapi/features/user"
 
@@ -30,25 +31,25 @@ func (uq *userQry) Register(newUser user.Core) (user.Core, error) {
 	return newUser, nil
 }
 
-// func (uq *userQry) Login(email string) (user.Core, error) {
-// 	res := User{}
+func (uq *userQry) Login(email string) (user.Core, error) {
+	res := User{}
 
-// 	if err := uq.db.Where("email = ?", email).First(&res).Error; err != nil {
-// 		log.Println("login query error: ", err.Error())
-// 		return user.Core{}, errors.New("user not found")
-// 	}
-// 	return ToCore(res), nil
-// }
+	if err := uq.db.Where("email = ?", email).First(&res).Error; err != nil {
+		log.Println("login query error: ", err.Error())
+		return user.Core{}, errors.New("user not found")
+	}
+	return ToCore(res), nil
+}
 
-// func (uq *userQry) Profile(id uint) (user.Core, error) {
-// 	res := User{}
-// 	if err := uq.db.Where("id = ?", id).First(&res).Error; err != nil {
-// 		log.Println("Get By ID query error", err.Error())
-// 		return user.Core{}, err
-// 	}
+func (uq *userQry) Profile(id uint) (user.Core, error) {
+	res := User{}
+	if err := uq.db.Where("id = ?", id).First(&res).Error; err != nil {
+		log.Println("Get By ID query error", err.Error())
+		return user.Core{}, err
+	}
 
-// 	return ToCore(res), nil
-// }
+	return ToCore(res), nil
+}
 
 // func (uq *userQry) Update(id uint, updateData user.Core) (user.Core, error) {
 // 	cnvUpd := CoreToData(updateData)

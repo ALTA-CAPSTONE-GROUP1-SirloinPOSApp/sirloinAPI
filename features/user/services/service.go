@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"log"
 	"sirloinapi/features/user"
 	"sirloinapi/helper"
 	"strings"
@@ -45,34 +46,30 @@ func (uuc *userUseCase) Register(newUser user.Core) (user.Core, error) {
 	return res, nil
 }
 
-// func (uuc *userUseCase) Login(email, password string) (string, user.Core, error) {
-// 	res, err := uuc.qry.Login(email)
+func (uuc *userUseCase) Login(email, password string) (string, user.Core, error) {
+	res, err := uuc.qry.Login(email)
 
-// 	if err != nil {
-// 		errmsg := ""
-// 		if strings.Contains(err.Error(), "not found") {
-// 			errmsg = err.Error()
-// 		} else {
-// 			errmsg = "server problem"
-// 		}
-// 		log.Println("error login query: ", err.Error())
-// 		return "", user.Core{}, errors.New(errmsg)
-// 	}
+	if err != nil {
+		errmsg := ""
+		if strings.Contains(err.Error(), "not found") {
+			errmsg = err.Error()
+		} else {
+			errmsg = "server problem"
+		}
+		log.Println("error login query: ", err.Error())
+		return "", user.Core{}, errors.New(errmsg)
+	}
 
-// 	if err := bcrypt.CompareHashAndPassword([]byte(res.Password), []byte(password)); err != nil {
-// 		log.Println("wrong password :", err.Error())
-// 		return "", user.Core{}, errors.New("wrong password")
-// 	}
+	if err := helper.ComparePassword(res.Password, password); err != nil {
+		log.Println("wrong password :", err.Error())
+		return "", user.Core{}, errors.New("wrong password")
+	}
 
-// 	claims := jwt.MapClaims{}
-// 	claims["authorized"] = true
-// 	claims["userID"] = res.ID
-// 	// claims["exp"] = time.Now().Add(time.Hour * 1).Unix() //Token expires after 1 hour
-// 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-// 	useToken, _ := token.SignedString([]byte(config.JWT_KEY))
+	//Token expires after 1 hour
+	token, _ := helper.GenerateJWT(int(res.ID))
 
-// 	return useToken, res, nil
-// }
+	return token, res, nil
+}
 
 // func (uuc *userUseCase) Profile(userToken interface{}) (user.Core, error) {
 // 	id := helper.ExtractToken(userToken)
