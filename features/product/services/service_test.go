@@ -400,3 +400,54 @@ func TestGetProductById(t *testing.T) {
 		repo.AssertExpectations(t)
 	})
 }
+
+func TestGetAdminProducts(t *testing.T) {
+	repo := mocks.NewProductData(t)
+	resdata := []product.Core{
+		{
+			ID:           1,
+			UserId:       1,
+			UserName:     "Fauzan",
+			ProductName:  "Adidas NMD",
+			ProductImage: "url",
+			Stock:        10,
+			Price:        900000,
+			Upc:          "15191981981981",
+			Category:     "food",
+		},
+	}
+
+	t.Run("success get all admin products", func(t *testing.T) {
+		repo.On("GetAdminProducts").Return(resdata, nil).Once()
+		srv := New(repo)
+
+		res, err := srv.GetAdminProducts()
+		assert.Nil(t, err)
+		assert.Equal(t, len(res), len(resdata))
+		repo.AssertExpectations(t)
+	})
+
+	t.Run("data not found", func(t *testing.T) {
+		repo.On("GetAdminProducts").Return([]product.Core{}, errors.New("data not found")).Once()
+
+		srv := New(repo)
+
+		res, err := srv.GetAdminProducts()
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "not found")
+		assert.Equal(t, 0, len(res))
+		repo.AssertExpectations(t)
+	})
+
+	t.Run("server problem", func(t *testing.T) {
+		repo.On("GetAdminProducts").Return([]product.Core{}, errors.New("server problem")).Once()
+
+		srv := New(repo)
+
+		res, err := srv.GetAdminProducts()
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "server")
+		assert.Equal(t, 0, len(res))
+		repo.AssertExpectations(t)
+	})
+}

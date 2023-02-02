@@ -28,6 +28,7 @@ type ProductHandler interface {
 	Delete() echo.HandlerFunc
 	GetUserProducts() echo.HandlerFunc
 	GetProductById() echo.HandlerFunc
+	GetAdminProducts() echo.HandlerFunc
 }
 
 type ProductService interface {
@@ -36,6 +37,7 @@ type ProductService interface {
 	Delete(token interface{}, productId uint) error
 	GetUserProducts(token interface{}) ([]Core, error)
 	GetProductById(token interface{}, productId uint) (Core, error)
+	GetAdminProducts() ([]Core, error)
 }
 
 type ProductData interface {
@@ -44,4 +46,5 @@ type ProductData interface {
 	Delete(userId, productId uint) error
 	GetUserProducts(userId uint) ([]Core, error)
 	GetProductById(userid, productId uint) (Core, error)
+	GetAdminProducts() ([]Core, error)
 }

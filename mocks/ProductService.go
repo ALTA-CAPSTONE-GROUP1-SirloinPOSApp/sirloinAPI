@@ -50,6 +50,29 @@ func (_m *ProductService) Delete(token interface{}, productId uint) error {
 	return r0
 }
 
+// GetAdminProducts provides a mock function with given fields:
+func (_m *ProductService) GetAdminProducts() ([]product.Core, error) {
+	ret := _m.Called()
+
+	var r0 []product.Core
+	if rf, ok := ret.Get(0).(func() []product.Core); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]product.Core)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetProductById provides a mock function with given fields: token, productId
 func (_m *ProductService) GetProductById(token interface{}, productId uint) (product.Core, error) {
 	ret := _m.Called(token, productId)

@@ -92,7 +92,7 @@ func (ps *productSvc) Delete(token interface{}, productId uint) error {
 func (ps *productSvc) GetUserProducts(token interface{}) ([]product.Core, error) {
 	userID := helper.ExtractToken(token)
 	if userID <= 0 {
-		log.Println("\terror extract token delete product service")
+		log.Println("\terror extract token getUserProduct product service")
 		return []product.Core{}, errors.New("user not found")
 	}
 
@@ -124,6 +124,19 @@ func (ps *productSvc) GetProductById(token interface{}, productId uint) (product
 			msg = "server problem"
 		}
 		return product.Core{}, errors.New(msg)
+	}
+	return res, nil
+}
+func (ps *productSvc) GetAdminProducts() ([]product.Core, error) {
+	res, err := ps.qry.GetAdminProducts()
+	if err != nil {
+		msg := ""
+		if strings.Contains(err.Error(), "not found") {
+			msg = "data not found"
+		} else {
+			msg = "server problem"
+		}
+		return []product.Core{}, errors.New(msg)
 	}
 	return res, nil
 }

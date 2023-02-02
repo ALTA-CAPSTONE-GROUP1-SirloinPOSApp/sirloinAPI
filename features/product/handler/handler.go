@@ -163,3 +163,21 @@ func (pc *productControl) GetProductById() echo.HandlerFunc {
 		})
 	}
 }
+func (pc *productControl) GetAdminProducts() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		res, err := pc.srv.GetAdminProducts()
+		if err != nil {
+			log.Println("error running GetAllProducts service: ", err.Error())
+			if strings.Contains(err.Error(), "not found") {
+				return c.JSON(http.StatusNotFound, helper.ErrorResponse("data not found"))
+			} else {
+				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
+			}
+		}
+
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"data":    ToGetProdsResp(res),
+			"message": "success show all products",
+		})
+	}
+}
