@@ -14,6 +14,10 @@ import (
 	ud "sirloinapi/features/user/data"
 	uh "sirloinapi/features/user/handler"
 	us "sirloinapi/features/user/services"
+
+	td "sirloinapi/features/transaction/data"
+	th "sirloinapi/features/transaction/handler"
+	ts "sirloinapi/features/transaction/services"
 )
 
 func main() {
@@ -29,6 +33,10 @@ func main() {
 	prodData := pd.New(db)
 	prodSrv := ps.New(prodData)
 	prodHdl := ph.New(prodSrv)
+
+	transData := td.New(db)
+	transSrv := ts.New(transData)
+	transHdl := th.New(transSrv)
 
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.CORS())
@@ -49,6 +57,8 @@ func main() {
 	e.PUT("/products/:product_id", prodHdl.Update(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.DELETE("/products/:product_id", prodHdl.Delete(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.GET("/products/:product_id", prodHdl.GetProductById(), middleware.JWT([]byte(config.JWT_KEY)))
+
+	e.POST("/transactions", transHdl.AddSell(), middleware.JWT([]byte(config.JWT_KEY)))
 
 	if err := e.Start(":8000"); err != nil {
 		log.Println(err.Error())
