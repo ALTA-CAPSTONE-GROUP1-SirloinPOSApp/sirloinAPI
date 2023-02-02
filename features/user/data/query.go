@@ -61,15 +61,15 @@ func (uq *userQry) Update(id uint, updateData user.Core) (user.Core, error) {
 	return updateData, nil
 }
 
-// func (uq *userQry) Delete(id uint) error {
-// 	user := User{}
-// 	qry := uq.db.Where("id = ?", id).Delete(&user)
-// 	if affrows := qry.RowsAffected; affrows <= 0 {
-// 		return errors.New("user doesn't exist")
-// 	}
-// 	if err := qry.Error; err != nil {
-// 		log.Println(err)
-// 		return err
-// 	}
-// 	return nil
-// }
+func (uq *userQry) Delete(id uint) error {
+	user := User{}
+	qry := uq.db.Where("id = ?", id).Delete(&user)
+	if affrows := qry.RowsAffected; affrows <= 0 {
+		return errors.New("user doesn't exist")
+	}
+	if err := qry.Error; err != nil {
+		log.Println(err)
+		return err
+	}
+	return nil
+}

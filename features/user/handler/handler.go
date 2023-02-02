@@ -107,24 +107,24 @@ func (uc *userControl) Update() echo.HandlerFunc {
 
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"data":    res,
-			"message": "success update user's data",
+			"message": "success update tenant profile",
 		})
 	}
 }
 
-// func (uc *userControl) Delete() echo.HandlerFunc {
-// 	return func(c echo.Context) error {
-// 		token := c.Get("user")
-// 		err := uc.srv.Delete(token)
-// 		if err != nil {
-// 			if strings.Contains(err.Error(), "not found") {
-// 				c.JSON(http.StatusNotFound, helper.ErrorResponse("user not found"))
-// 			} else {
-// 				c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
-// 			}
-// 		}
-// 		return c.JSON(http.StatusOK, map[string]interface{}{
-// 			"message": "success delete user",
-// 		})
-// 	}
-// }
+func (uc *userControl) Delete() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		token := c.Get("user")
+		err := uc.srv.Delete(token)
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				c.JSON(http.StatusNotFound, helper.ErrorResponse("user not found"))
+			} else {
+				c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
+			}
+		}
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"message": "success delete account data",
+		})
+	}
+}

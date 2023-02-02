@@ -13,6 +13,20 @@ type UserService struct {
 	mock.Mock
 }
 
+// Delete provides a mock function with given fields: userToken
+func (_m *UserService) Delete(userToken interface{}) error {
+	ret := _m.Called(userToken)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(interface{}) error); ok {
+		r0 = rf(userToken)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Login provides a mock function with given fields: email, password
 func (_m *UserService) Login(email string, password string) (string, user.Core, error) {
 	ret := _m.Called(email, password)

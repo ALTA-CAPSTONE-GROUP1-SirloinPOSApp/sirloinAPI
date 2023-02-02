@@ -50,20 +50,20 @@ func (_m *ProductService) Delete(token interface{}, productId uint) error {
 	return r0
 }
 
-// GetProductById provides a mock function with given fields: productId
-func (_m *ProductService) GetProductById(productId uint) (product.Core, error) {
-	ret := _m.Called(productId)
+// GetProductById provides a mock function with given fields: token, productId
+func (_m *ProductService) GetProductById(token interface{}, productId uint) (product.Core, error) {
+	ret := _m.Called(token, productId)
 
 	var r0 product.Core
-	if rf, ok := ret.Get(0).(func(uint) product.Core); ok {
-		r0 = rf(productId)
+	if rf, ok := ret.Get(0).(func(interface{}, uint) product.Core); ok {
+		r0 = rf(token, productId)
 	} else {
 		r0 = ret.Get(0).(product.Core)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(uint) error); ok {
-		r1 = rf(productId)
+	if rf, ok := ret.Get(1).(func(interface{}, uint) error); ok {
+		r1 = rf(token, productId)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -18,7 +18,7 @@ type UserHandler interface {
 	Login() echo.HandlerFunc
 	Profile() echo.HandlerFunc
 	Update() echo.HandlerFunc
-	// Delete() echo.HandlerFunc
+	Delete() echo.HandlerFunc
 }
 
 type UserService interface {
@@ -26,7 +26,7 @@ type UserService interface {
 	Login(email, password string) (string, Core, error)
 	Profile(userToken interface{}) (Core, error)
 	Update(userToken interface{}, updateData Core) (Core, error)
-	// Delete(userToken interface{}) error
+	Delete(userToken interface{}) error
 }
 
 type UserData interface {
@@ -34,5 +34,5 @@ type UserData interface {
 	Login(email string) (Core, error)
 	Profile(id uint) (Core, error)
 	Update(id uint, updateData Core) (Core, error)
-	// Delete(id uint) error
+	Delete(id uint) error
 }

@@ -144,20 +144,20 @@ func (uuc *userUseCase) Update(userToken interface{}, updateData user.Core) (use
 	return res, nil
 }
 
-// func (uuc *userUseCase) Delete(userToken interface{}) error {
-// 	userId := helper.ExtractToken(userToken)
-// 	if userId <= 0 {
-// 		return errors.New("data not found")
-// 	}
-// 	err := uuc.qry.Delete(uint(userId))
-// 	if err != nil {
-// 		msg := ""
-// 		if strings.Contains(err.Error(), "not found") {
-// 			msg = "data not found"
-// 		} else {
-// 			msg = "server problem"
-// 		}
-// 		return errors.New(msg)
-// 	}
-// 	return nil
-// }
+func (uuc *userUseCase) Delete(userToken interface{}) error {
+	userId := helper.ExtractToken(userToken)
+	if userId <= 0 {
+		return errors.New("data not found")
+	}
+	err := uuc.qry.Delete(uint(userId))
+	if err != nil {
+		msg := ""
+		if strings.Contains(err.Error(), "not found") {
+			msg = "data not found"
+		} else {
+			msg = "server problem"
+		}
+		return errors.New(msg)
+	}
+	return nil
+}

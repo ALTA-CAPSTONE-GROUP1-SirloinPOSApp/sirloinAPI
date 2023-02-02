@@ -50,20 +50,20 @@ func (_m *ProductData) Delete(userId uint, productId uint) error {
 	return r0
 }
 
-// GetProductById provides a mock function with given fields: productId
-func (_m *ProductData) GetProductById(productId uint) (product.Core, error) {
-	ret := _m.Called(productId)
+// GetProductById provides a mock function with given fields: userid, productId
+func (_m *ProductData) GetProductById(userid uint, productId uint) (product.Core, error) {
+	ret := _m.Called(userid, productId)
 
 	var r0 product.Core
-	if rf, ok := ret.Get(0).(func(uint) product.Core); ok {
-		r0 = rf(productId)
+	if rf, ok := ret.Get(0).(func(uint, uint) product.Core); ok {
+		r0 = rf(userid, productId)
 	} else {
 		r0 = ret.Get(0).(product.Core)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(uint) error); ok {
-		r1 = rf(productId)
+	if rf, ok := ret.Get(1).(func(uint, uint) error); ok {
+		r1 = rf(userid, productId)
 	} else {
 		r1 = ret.Error(1)
 	}
