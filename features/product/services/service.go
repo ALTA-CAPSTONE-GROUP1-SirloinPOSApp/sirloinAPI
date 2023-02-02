@@ -41,7 +41,25 @@ func (ps *productSvc) Add(token interface{}, newProduct product.Core, productIma
 	return res, nil
 }
 func (ps *productSvc) Update(token interface{}, productId uint, updProduct product.Core, productImage *multipart.FileHeader) (product.Core, error) {
-	return product.Core{}, nil
+	userId := helper.ExtractToken(token)
+	if userId <= 0 {
+		log.Println("\t error extract token add product")
+		return product.Core{}, errors.New("user not found")
+	}
+
+	res, err := ps.qry.Update(uint(userId), productId, updProduct, productImage)
+	if err != nil {
+		msg := ""
+		if strings.Contains(err.Error(), "not found") {
+			msg = "product data not found"
+		} else {
+			msg = "server problem"
+		}
+		log.Println("\terror update data in service: ", err.Error())
+		return product.Core{}, errors.New(msg)
+	}
+
+	return res, nil
 }
 func (ps *productSvc) Delete(token interface{}, productId uint) error {
 	return nil

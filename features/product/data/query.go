@@ -44,7 +44,30 @@ func (pq *productQuery) Add(userId uint, newProduct product.Core, productImage *
 	return DataToCore(cnvP), nil
 }
 func (pq *productQuery) Update(userId, productId uint, updProduct product.Core, productImage *multipart.FileHeader) (product.Core, error) {
-	return product.Core{}, nil
+	cnvP := CoreToData(updProduct)
+	cnvP.UserId = userId
+
+	if productImage != nil {
+		path, err := helper.UploadProductPhotoS3(*productImage, int(productId))
+		if err != nil {
+			log.Println("\terror upload product photo: ", err.Error())
+			return product.Core{}, err
+		}
+		cnvP.ProductImage = path
+	}
+
+	qry := pq.db.Where("id = ? AND user_id = ?", productId, userId).Updates(&cnvP)
+	if qry.RowsAffected <= 0 {
+		log.Println("\tupdate product query error: data not found")
+		return product.Core{}, errors.New("not found")
+	}
+
+	if err := qry.Error; err != nil {
+		log.Println("\tupdate product query error: ", err.Error())
+		return product.Core{}, errors.New("not found")
+	}
+
+	return DataToCore(cnvP), nil
 }
 func (pq *productQuery) Delete(userId, productId uint) error {
 	return nil

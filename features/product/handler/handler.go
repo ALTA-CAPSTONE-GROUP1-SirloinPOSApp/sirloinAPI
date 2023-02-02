@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sirloinapi/features/product"
 	"sirloinapi/helper"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 )
@@ -52,7 +53,39 @@ func (pc *productControl) Add() echo.HandlerFunc {
 	}
 }
 func (pc *productControl) Update() echo.HandlerFunc {
-	return nil
+	return func(c echo.Context) error {
+		token := c.Get("user")
+		var prodImg *multipart.FileHeader
+
+		productId := c.Param("product_id")
+		cProdId, _ := strconv.Atoi(productId)
+
+		input := AddProductReq{}
+		err := c.Bind(&input)
+		if err != nil {
+			log.Println("bind input error: ", err.Error())
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("wrong input"))
+		}
+
+		file, err := c.FormFile("product_image")
+		if file != nil && err == nil {
+			prodImg = file
+		} else if file != nil && err != nil {
+			log.Println("\terror read product image: ", err.Error())
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("wrong image input"))
+		}
+
+		res, err := pc.srv.Update(token, uint(cProdId), *ToCore(input), prodImg)
+		if err != nil {
+			log.Println("\terror running update post service")
+			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
+		}
+
+		return c.JSON(http.StatusCreated, map[string]interface{}{
+			"data":    res,
+			"message": "success update product",
+		})
+	}
 }
 func (pc *productControl) Delete() echo.HandlerFunc {
 	return nil
