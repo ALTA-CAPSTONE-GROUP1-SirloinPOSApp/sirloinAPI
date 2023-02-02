@@ -69,17 +69,6 @@ func ReadEnv() *AppConfig {
 		isRead = false
 		MIDTRANSSERVERKEY = val
 	}
-	if val, found := os.LookupEnv("KEYID"); found {
-		app.keyid = val
-		isRead = false
-		KEYID = val
-	}
-	if val, found := os.LookupEnv("ACCESSKEY"); found {
-		app.accesskey = val
-		isRead = false
-		ACCESSKEY = val
-
-	}
 
 	// JWT
 	if val, found := os.LookupEnv("JWT_KEY"); found {
@@ -129,8 +118,6 @@ func ReadEnv() *AppConfig {
 		}
 		app.DBName = os.Getenv("DBNAME")
 		app.jwtKey = os.Getenv("JWTKEY")
-		// app.keyid = os.Getenv("KEYID")
-		// app.accesskey = os.Getenv("ACCESSKEY")
 		app.midtransserverkey = os.Getenv("MIDTRANSSERVERKEY")
 		app.AWSREGION = os.Getenv("AWSREGION")
 		app.S3KEY = os.Getenv("S3KEY")
@@ -138,8 +125,6 @@ func ReadEnv() *AppConfig {
 		app.AWSBUCKET = os.Getenv("AWSBUCKET")
 
 		JWT_KEY = app.jwtKey
-		// KEYID = app.keyid
-		// ACCESSKEY = app.accesskey
 		MIDTRANSSERVERKEY = app.midtransserverkey
 		AWS_REGION = app.AWSREGION
 		S3_KEY = app.S3KEY
