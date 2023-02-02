@@ -91,7 +91,7 @@ func (pc *productControl) Update() echo.HandlerFunc {
 func (pc *productControl) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		token := c.Get("user")
-		input := c.Param("id_product")
+		input := c.Param("product_id")
 		cnv, err := strconv.Atoi(input)
 		if err != nil {
 			log.Println("\tRead param error: ", err.Error())
@@ -130,7 +130,7 @@ func (pc *productControl) GetUserProducts() echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusOK, map[string]interface{}{
-			"data":    res,
+			"data":    ToGetProdsResp(res),
 			"message": "success show all products",
 		})
 	}
@@ -139,7 +139,7 @@ func (pc *productControl) GetProductById() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		token := c.Get("user")
 
-		input := c.Param("id_product")
+		input := c.Param("product_id")
 		cnv, err := strconv.Atoi(input)
 		if err != nil {
 			log.Println("\tRead param error: ", err.Error())
@@ -158,7 +158,7 @@ func (pc *productControl) GetProductById() echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusOK, map[string]interface{}{
-			"data":    res,
+			"data":    ToGetProdResp(res),
 			"message": "success get product by id",
 		})
 	}

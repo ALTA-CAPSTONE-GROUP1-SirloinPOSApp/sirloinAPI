@@ -7,19 +7,27 @@ import (
 	"sirloinapi/features/product"
 	"sirloinapi/helper"
 	"strings"
+
+	"github.com/go-playground/validator/v10"
 )
 
 type productSvc struct {
 	qry product.ProductData
+	vld *validator.Validate
 }
 
 func New(data product.ProductData) product.ProductService {
 	return &productSvc{
 		qry: data,
+		vld: validator.New(),
 	}
 }
 
 func (ps *productSvc) Add(token interface{}, newProduct product.Core, productImage *multipart.FileHeader) (product.Core, error) {
+	err := ps.vld.Struct(newProduct)
+	if err != nil {
+		return product.Core{}, err
+	}
 	userId := helper.ExtractToken(token)
 	if userId <= 0 {
 		log.Println("\t error extract token add product")
