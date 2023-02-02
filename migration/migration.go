@@ -2,6 +2,7 @@ package migration
 
 import (
 	product "sirloinapi/features/product/data"
+	trans "sirloinapi/features/transaction/data"
 	user "sirloinapi/features/user/data"
 
 	"gorm.io/gorm"
@@ -10,6 +11,8 @@ import (
 func Migrate(db *gorm.DB) {
 	db.AutoMigrate(user.User{})
 	db.AutoMigrate(product.Product{})
+	db.AutoMigrate(trans.Transaction{})
+	db.AutoMigrate(trans.TransactionProduct{})
 	// db.AutoMigrate(cart.Cart{})
 	// if !db.Migrator().HasColumn(&cart.CartItem{}, "Qty") {
 	// 	db.Migrator().AddColumn(&cart.CartItem{}, "Qty")
