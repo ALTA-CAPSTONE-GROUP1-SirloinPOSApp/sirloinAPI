@@ -41,6 +41,8 @@ func main() {
 
 	//product
 	e.POST("/products", prodHdl.Add(), middleware.JWT([]byte(config.JWT_KEY)))
+	e.PUT("/products/:product_id", prodHdl.Update(), middleware.JWT([]byte(config.JWT_KEY)))
+	e.GET("/products", prodHdl.Add(), middleware.JWT([]byte(config.JWT_KEY)))
 
 	if err := e.Start(":8000"); err != nil {
 		log.Println(err.Error())
