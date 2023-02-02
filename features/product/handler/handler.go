@@ -91,7 +91,7 @@ func (pc *productControl) Update() echo.HandlerFunc {
 func (pc *productControl) Delete() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		token := c.Get("user")
-		input := c.Param("id_product")
+		input := c.Param("product_id")
 		cnv, err := strconv.Atoi(input)
 		if err != nil {
 			log.Println("\tRead param error: ", err.Error())
