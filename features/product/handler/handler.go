@@ -130,7 +130,7 @@ func (pc *productControl) GetUserProducts() echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusOK, map[string]interface{}{
-			"data":    res,
+			"data":    ToGetProdsResp(res),
 			"message": "success show all products",
 		})
 	}
@@ -158,7 +158,7 @@ func (pc *productControl) GetProductById() echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusOK, map[string]interface{}{
-			"data":    res,
+			"data":    ToGetProdResp(res),
 			"message": "success get product by id",
 		})
 	}
