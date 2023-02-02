@@ -23,7 +23,7 @@ func New(ud user.UserData) user.UserService {
 }
 
 func (uuc *userUseCase) Register(newUser user.Core) (user.Core, error) {
-	err := helper.Validasi(helper.ToRegister(newUser))
+	err := helper.Validasi(helper.ToValidate("register", newUser))
 	if err != nil {
 		return user.Core{}, err
 	}
@@ -98,9 +98,16 @@ func (uuc *userUseCase) Update(userToken interface{}, updateData user.Core) (use
 		return user.Core{}, errors.New("extract token error")
 	}
 	if updateData.Password != "" {
+		err := helper.Validasi(helper.ToValidate("password", updateData))
+		if err != nil {
+			return user.Core{}, err
+		}
 		hashed := helper.GeneratePassword(updateData.Password)
 		updateData.Password = hashed
 	}
+	// if updateData.BusinessName != "" {
+
+	// }
 
 	res, err := uuc.qry.Update(uint(userId), updateData)
 	if err != nil {

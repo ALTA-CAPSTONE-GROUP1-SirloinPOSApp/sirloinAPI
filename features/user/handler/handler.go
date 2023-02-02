@@ -113,32 +113,32 @@ func (uc *userControl) Profile() echo.HandlerFunc {
 	}
 }
 
-// func (uc *userControl) Update() echo.HandlerFunc {
-// 	return func(c echo.Context) error {
-// 		token := c.Get("user")
+func (uc *userControl) Update() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		token := c.Get("user")
 
-// 		updatedData := RegisterRequest{}
-// 		if err := c.Bind(&updatedData); err != nil {
-// 			return c.JSON(http.StatusBadRequest, "wrong input format")
-// 		}
+		updatedData := RegisterRequest{}
+		if err := c.Bind(&updatedData); err != nil {
+			return c.JSON(http.StatusBadRequest, "wrong input format")
+		}
 
-// 		res, err := uc.srv.Update(token, *ToCore(updatedData))
-// 		if err != nil {
-// 			if strings.Contains(err.Error(), "not found") {
-// 				log.Println("user not found: ", err.Error())
-// 				return c.JSON(http.StatusNotFound, helper.ErrorResponse("user not found"))
-// 			} else {
-// 				log.Println("error update service: ", err.Error())
-// 				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
-// 			}
-// 		}
+		res, err := uc.srv.Update(token, *ToCore(updatedData))
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				log.Println("user not found: ", err.Error())
+				return c.JSON(http.StatusNotFound, helper.ErrorResponse("user not found"))
+			} else {
+				log.Println("error update service: ", err.Error())
+				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
+			}
+		}
 
-// 		return c.JSON(http.StatusOK, map[string]interface{}{
-// 			"data":    res,
-// 			"message": "success update user's data",
-// 		})
-// 	}
-// }
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"data":    res,
+			"message": "success update user's data",
+		})
+	}
+}
 
 // func (uc *userControl) Delete() echo.HandlerFunc {
 // 	return func(c echo.Context) error {

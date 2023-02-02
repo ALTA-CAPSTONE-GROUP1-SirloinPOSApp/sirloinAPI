@@ -10,6 +10,7 @@ import (
 
 var validate *validator.Validate
 
+// user struct validation
 type RegisterValidate struct {
 	BusinessName string `validate:"required,alpha_space"`
 	Email        string `validate:"required,email"`
@@ -18,13 +19,26 @@ type RegisterValidate struct {
 	Password     string `validate:"required,secure_password"`
 }
 
-func ToRegister(data user.Core) RegisterValidate {
-	return RegisterValidate{
-		Email:        data.Email,
-		BusinessName: data.BusinessName,
-		PhoneNumber:  data.PhoneNumber,
-		Address:      data.Address,
-		Password:     data.Password,
+type PasswordValidate struct {
+	Password string `validate:"secure_password"`
+}
+
+func ToValidate(option string, data user.Core) interface{} {
+	switch option {
+	case "register":
+		res := RegisterValidate{}
+		res.Email = data.Email
+		res.BusinessName = data.BusinessName
+		res.PhoneNumber = data.PhoneNumber
+		res.Password = data.Password
+		res.Address = data.Address
+		return res
+	case "password":
+		res := PasswordValidate{}
+		res.Password = data.Password
+		return res
+	default:
+		return nil
 	}
 }
 

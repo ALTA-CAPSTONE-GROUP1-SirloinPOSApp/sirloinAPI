@@ -17,7 +17,7 @@ type UserHandler interface {
 	Register() echo.HandlerFunc
 	Login() echo.HandlerFunc
 	Profile() echo.HandlerFunc
-	// Update() echo.HandlerFunc
+	Update() echo.HandlerFunc
 	// Delete() echo.HandlerFunc
 }
 
