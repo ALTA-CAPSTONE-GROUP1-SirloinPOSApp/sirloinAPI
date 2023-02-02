@@ -255,101 +255,148 @@ func TestDelete(t *testing.T) {
 	})
 }
 
-// func TestGetAllProducts(t *testing.T) {
-// 	repo := mocks.NewProductData(t)
-// 	resdata := []product.Core{
-// 		{
-// 			ID:           1,
-// 			UserId:       1,
-// 			UserName:     "Fauzan",
-// 			Name:         "Adidas NMD",
-// 			ProductImage: "url",
-// 			Description:  "sepatu",
-// 			Stock:        10,
-// 			Price:        900000,
-// 		},
-// 	}
-// 	t.Run("success get all products", func(t *testing.T) {
-// 		repo.On("GetAllProducts").Return(resdata, nil).Once()
-// 		srv := New(repo)
+func TestGetAllProducts(t *testing.T) {
+	repo := mocks.NewProductData(t)
+	resdata := []product.Core{
+		{
+			ID:           1,
+			UserId:       1,
+			UserName:     "Fauzan",
+			ProductName:  "Adidas NMD",
+			ProductImage: "url",
+			Stock:        10,
+			Price:        900000,
+			Upc:          "15191981981981",
+			Category:     "food",
+		},
+	}
 
-// 		res, err := srv.GetAllProducts()
-// 		assert.Nil(t, err)
-// 		assert.Equal(t, len(res), len(resdata))
-// 		repo.AssertExpectations(t)
-// 	})
+	t.Run("success get all user products", func(t *testing.T) {
+		repo.On("GetUserProducts", uint(1)).Return(resdata, nil).Once()
+		srv := New(repo)
 
-// 	t.Run("data not found", func(t *testing.T) {
-// 		repo.On("GetAllProducts").Return([]product.Core{}, errors.New("data not found")).Once()
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
 
-// 		srv := New(repo)
+		res, err := srv.GetUserProducts(pToken)
+		assert.Nil(t, err)
+		assert.Equal(t, len(res), len(resdata))
+		repo.AssertExpectations(t)
+	})
 
-// 		res, err := srv.GetAllProducts()
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "not found")
-// 		assert.Equal(t, 0, len(res))
-// 		repo.AssertExpectations(t)
-// 	})
+	t.Run("jwt not valid", func(t *testing.T) {
+		srv := New(repo)
 
-// 	t.Run("server problem", func(t *testing.T) {
-// 		repo.On("GetAllProducts").Return([]product.Core{}, errors.New("server problem")).Once()
+		_, token := helper.GenerateJWT(0)
 
-// 		srv := New(repo)
+		_, err := srv.GetUserProducts(token)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "not found")
+	})
 
-// 		res, err := srv.GetAllProducts()
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "server")
-// 		assert.Equal(t, 0, len(res))
-// 		repo.AssertExpectations(t)
-// 	})
-// }
+	t.Run("data not found", func(t *testing.T) {
+		repo.On("GetUserProducts", uint(1)).Return([]product.Core{}, errors.New("data not found")).Once()
 
-// func TestGetProductById(t *testing.T) {
-// 	repo := mocks.NewProductData(t)
-// 	productId := uint(1)
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
 
-// 	resdata := product.Core{
-// 		ID:           1,
-// 		UserId:       1,
-// 		UserName:     "Fauzan",
-// 		Name:         "Adidas NMD",
-// 		ProductImage: "url",
-// 		Description:  "sepatu",
-// 		Stock:        10,
-// 		Price:        900000,
-// 	}
+		srv := New(repo)
 
-// 	t.Run("success get product detail by id", func(t *testing.T) {
-// 		repo.On("GetProductById", productId).Return(resdata, nil).Once()
-// 		srv := New(repo)
+		res, err := srv.GetUserProducts(pToken)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "not found")
+		assert.Equal(t, 0, len(res))
+		repo.AssertExpectations(t)
+	})
 
-// 		res, err := srv.GetProductById(productId)
-// 		assert.Nil(t, err)
-// 		assert.Equal(t, res.UserName, resdata.UserName)
-// 		repo.AssertExpectations(t)
-// 	})
+	t.Run("server problem", func(t *testing.T) {
+		repo.On("GetUserProducts", uint(1)).Return([]product.Core{}, errors.New("server problem")).Once()
 
-// 	t.Run("data not found", func(t *testing.T) {
-// 		repo.On("GetProductById", productId).Return(product.Core{}, errors.New("data not found")).Once()
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
 
-// 		srv := New(repo)
+		srv := New(repo)
 
-// 		res, err := srv.GetProductById(productId)
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "not found")
-// 		assert.Equal(t, res.ID, uint(0))
-// 		repo.AssertExpectations(t)
-// 	})
+		res, err := srv.GetUserProducts(pToken)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "server")
+		assert.Equal(t, 0, len(res))
+		repo.AssertExpectations(t)
+	})
+}
 
-// 	t.Run("server problem", func(t *testing.T) {
-// 		repo.On("GetProductById", productId).Return(product.Core{}, errors.New("server problem")).Once()
+func TestGetProductById(t *testing.T) {
+	repo := mocks.NewProductData(t)
+	productId := uint(1)
 
-// 		srv := New(repo)
+	resdata := product.Core{
+		ID:           1,
+		UserId:       1,
+		UserName:     "Fauzan",
+		ProductName:  "Adidas NMD",
+		ProductImage: "url",
+		Stock:        10,
+		Price:        900000,
+		Upc:          "15191981981981",
+		Category:     "food",
+	}
 
-// 		res, err := srv.GetProductById(productId)
-// 		assert.NotNil(t, err)
-// 		assert.ErrorContains(t, err, "server")
-// 		assert.Equal(t, res.ID, uint(0))
-// 		repo.AssertExpectations(t)
-// 	})
-// }
+	t.Run("success get product detail by id", func(t *testing.T) {
+		repo.On("GetProductById", uint(1), productId).Return(resdata, nil).Once()
+		srv := New(repo)
+
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		res, err := srv.GetProductById(pToken, productId)
+		assert.Nil(t, err)
+		assert.Equal(t, res.UserName, resdata.UserName)
+		repo.AssertExpectations(t)
+	})
+
+	t.Run("jwt not valid", func(t *testing.T) {
+		srv := New(repo)
+
+		_, token := helper.GenerateJWT(1)
+
+		_, err := srv.GetProductById(token, productId)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "not found")
+	})
+
+	t.Run("data not found", func(t *testing.T) {
+		repo.On("GetProductById", uint(1), productId).Return(product.Core{}, errors.New("data not found")).Once()
+
+		srv := New(repo)
+
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		res, err := srv.GetProductById(pToken, productId)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "not found")
+		assert.Equal(t, res.ID, uint(0))
+		repo.AssertExpectations(t)
+	})
+
+	t.Run("server problem", func(t *testing.T) {
+		repo.On("GetProductById", uint(1), productId).Return(product.Core{}, errors.New("server problem")).Once()
+
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		srv := New(repo)
+
+		res, err := srv.GetProductById(pToken, productId)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "server")
+		assert.Equal(t, res.ID, uint(0))
+		repo.AssertExpectations(t)
+	})
+}
