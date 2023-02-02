@@ -31,7 +31,7 @@ type UserService interface {
 
 type UserData interface {
 	Register(newUser Core) (Core, error)
-	// Login(email string) (Core, error)
+	Login(email string) (Core, error)
 	// Profile(id uint) (Core, error)
 	// Update(id uint, updateData Core) (Core, error)
 	// Delete(id uint) error

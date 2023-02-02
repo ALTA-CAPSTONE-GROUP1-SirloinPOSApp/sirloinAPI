@@ -13,6 +13,27 @@ type UserData struct {
 	mock.Mock
 }
 
+// Login provides a mock function with given fields: email
+func (_m *UserData) Login(email string) (user.Core, error) {
+	ret := _m.Called(email)
+
+	var r0 user.Core
+	if rf, ok := ret.Get(0).(func(string) user.Core); ok {
+		r0 = rf(email)
+	} else {
+		r0 = ret.Get(0).(user.Core)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(email)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Register provides a mock function with given fields: newUser
 func (_m *UserData) Register(newUser user.Core) (user.Core, error) {
 	ret := _m.Called(newUser)
