@@ -51,15 +51,15 @@ func (uq *userQry) Profile(id uint) (user.Core, error) {
 	return ToCore(res), nil
 }
 
-// func (uq *userQry) Update(id uint, updateData user.Core) (user.Core, error) {
-// 	cnvUpd := CoreToData(updateData)
-// 	qry := uq.db.Model(&User{}).Where("id = ?", id).Updates(cnvUpd)
-// 	if err := qry.Error; err != nil {
-// 		log.Println("error update user query : ", err)
-// 		return updateData, err
-// 	}
-// 	return updateData, nil
-// }
+func (uq *userQry) Update(id uint, updateData user.Core) (user.Core, error) {
+	cnvUpd := CoreToData(updateData)
+	qry := uq.db.Model(&User{}).Where("id = ?", id).Updates(cnvUpd)
+	if err := qry.Error; err != nil {
+		log.Println("error update user query : ", err)
+		return updateData, err
+	}
+	return updateData, nil
+}
 
 // func (uq *userQry) Delete(id uint) error {
 // 	user := User{}

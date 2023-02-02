@@ -91,27 +91,27 @@ func (uc *userControl) Login() echo.HandlerFunc {
 	}
 }
 
-// func (uc *userControl) Profile() echo.HandlerFunc {
-// 	return func(c echo.Context) error {
-// 		token := c.Get("user")
+func (uc *userControl) Profile() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		token := c.Get("user")
 
-// 		res, err := uc.srv.Profile(token)
-// 		if err != nil {
-// 			if strings.Contains(err.Error(), "not found") {
-// 				log.Println("user not found: ", err.Error())
-// 				return c.JSON(http.StatusNotFound, helper.ErrorResponse("user not found"))
-// 			} else {
-// 				log.Println("error profile service: ", err.Error())
-// 				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
-// 			}
-// 		}
+		res, err := uc.srv.Profile(token)
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				log.Println("user not found: ", err.Error())
+				return c.JSON(http.StatusNotFound, helper.ErrorResponse("user not found"))
+			} else {
+				log.Println("error profile service: ", err.Error())
+				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
+			}
+		}
 
-// 		return c.JSON(http.StatusOK, map[string]interface{}{
-// 			"data":    ToResponse(res),
-// 			"message": "get profile success",
-// 		})
-// 	}
-// }
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"data":    ToResponse(res),
+			"message": "success get tenant profile",
+		})
+	}
+}
 
 // func (uc *userControl) Update() echo.HandlerFunc {
 // 	return func(c echo.Context) error {

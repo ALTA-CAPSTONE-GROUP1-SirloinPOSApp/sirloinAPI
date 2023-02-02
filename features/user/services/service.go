@@ -71,50 +71,50 @@ func (uuc *userUseCase) Login(email, password string) (string, user.Core, error)
 	return token, res, nil
 }
 
-// func (uuc *userUseCase) Profile(userToken interface{}) (user.Core, error) {
-// 	id := helper.ExtractToken(userToken)
-// 	if id <= 0 {
-// 		log.Println("error extraxt token")
-// 		return user.Core{}, errors.New("data not found")
-// 	}
-// 	res, err := uuc.qry.Profile(uint(id))
-// 	if err != nil {
-// 		errmsg := ""
-// 		if strings.Contains(err.Error(), "not found") {
-// 			errmsg = "data not found"
-// 		} else {
-// 			errmsg = "server problem"
-// 		}
-// 		log.Println("error profile query: ", err.Error())
-// 		return user.Core{}, errors.New(errmsg)
-// 	}
-// 	return res, nil
-// }
+func (uuc *userUseCase) Profile(userToken interface{}) (user.Core, error) {
+	id := helper.ExtractToken(userToken)
+	if id <= 0 {
+		log.Println("error extraxt token")
+		return user.Core{}, errors.New("data not found")
+	}
+	res, err := uuc.qry.Profile(uint(id))
+	if err != nil {
+		errmsg := ""
+		if strings.Contains(err.Error(), "not found") {
+			errmsg = "data not found"
+		} else {
+			errmsg = "server problem"
+		}
+		log.Println("error profile query: ", err.Error())
+		return user.Core{}, errors.New(errmsg)
+	}
+	return res, nil
+}
 
-// func (uuc *userUseCase) Update(userToken interface{}, updateData user.Core) (user.Core, error) {
-// 	userId := helper.ExtractToken(userToken)
-// 	if userId <= 0 {
-// 		log.Println("extract token error")
-// 		return user.Core{}, errors.New("extract token error")
-// 	}
-// 	if updateData.Password != "" {
-// 		hashed, _ := bcrypt.GenerateFromPassword([]byte(updateData.Password), bcrypt.DefaultCost)
-// 		updateData.Password = string(hashed)
-// 	}
+func (uuc *userUseCase) Update(userToken interface{}, updateData user.Core) (user.Core, error) {
+	userId := helper.ExtractToken(userToken)
+	if userId <= 0 {
+		log.Println("extract token error")
+		return user.Core{}, errors.New("extract token error")
+	}
+	if updateData.Password != "" {
+		hashed := helper.GeneratePassword(updateData.Password)
+		updateData.Password = hashed
+	}
 
-// 	res, err := uuc.qry.Update(uint(userId), updateData)
-// 	if err != nil {
-// 		errmsg := ""
-// 		if strings.Contains(err.Error(), "not found") {
-// 			errmsg = "data not found"
-// 		} else {
-// 			errmsg = "server problem"
-// 		}
-// 		log.Println("error update query: ", err.Error())
-// 		return user.Core{}, errors.New(errmsg)
-// 	}
-// 	return res, nil
-// }
+	res, err := uuc.qry.Update(uint(userId), updateData)
+	if err != nil {
+		errmsg := ""
+		if strings.Contains(err.Error(), "not found") {
+			errmsg = "data not found"
+		} else {
+			errmsg = "server problem"
+		}
+		log.Println("error update query: ", err.Error())
+		return user.Core{}, errors.New(errmsg)
+	}
+	return res, nil
+}
 
 // func (uuc *userUseCase) Delete(userToken interface{}) error {
 // 	userId := helper.ExtractToken(userToken)

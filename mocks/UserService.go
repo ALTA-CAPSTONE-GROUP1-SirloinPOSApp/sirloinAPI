@@ -41,6 +41,27 @@ func (_m *UserService) Login(email string, password string) (string, user.Core, 
 	return r0, r1, r2
 }
 
+// Profile provides a mock function with given fields: userToken
+func (_m *UserService) Profile(userToken interface{}) (user.Core, error) {
+	ret := _m.Called(userToken)
+
+	var r0 user.Core
+	if rf, ok := ret.Get(0).(func(interface{}) user.Core); ok {
+		r0 = rf(userToken)
+	} else {
+		r0 = ret.Get(0).(user.Core)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(interface{}) error); ok {
+		r1 = rf(userToken)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Register provides a mock function with given fields: newUser
 func (_m *UserService) Register(newUser user.Core) (user.Core, error) {
 	ret := _m.Called(newUser)
@@ -55,6 +76,27 @@ func (_m *UserService) Register(newUser user.Core) (user.Core, error) {
 	var r1 error
 	if rf, ok := ret.Get(1).(func(user.Core) error); ok {
 		r1 = rf(newUser)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// Update provides a mock function with given fields: userToken, updateData
+func (_m *UserService) Update(userToken interface{}, updateData user.Core) (user.Core, error) {
+	ret := _m.Called(userToken, updateData)
+
+	var r0 user.Core
+	if rf, ok := ret.Get(0).(func(interface{}, user.Core) user.Core); ok {
+		r0 = rf(userToken, updateData)
+	} else {
+		r0 = ret.Get(0).(user.Core)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(interface{}, user.Core) error); ok {
+		r1 = rf(userToken, updateData)
 	} else {
 		r1 = ret.Error(1)
 	}
