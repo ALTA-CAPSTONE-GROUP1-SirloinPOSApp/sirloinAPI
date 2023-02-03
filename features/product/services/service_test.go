@@ -93,7 +93,7 @@ func TestAdd(t *testing.T) {
 	})
 
 	t.Run("server problem", func(t *testing.T) {
-		repo.On("Add", uint(1), inputData, a).Return(product.Core{}, errors.New("server problem"))
+		repo.On("Add", uint(1), inputData, a).Return(product.Core{}, errors.New("server problem")).Once()
 		srv := New(repo)
 
 		_, token := helper.GenerateJWT(1)
@@ -115,6 +115,20 @@ func TestAdd(t *testing.T) {
 		res, err := srv.Add(pToken, inputDataVld, a)
 		assert.NotNil(t, err)
 		assert.Equal(t, uint(0), res.ID)
+	})
+
+	t.Run("duplicated product", func(t *testing.T) {
+		repo.On("Add", uint(1), inputData, a).Return(product.Core{}, errors.New("duplicated product")).Once()
+		srv := New(repo)
+
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		res, err := srv.Add(pToken, inputData, a)
+		assert.NotNil(t, err)
+		assert.Equal(t, uint(0), res.ID)
+		assert.ErrorContains(t, err, "duplicated")
+		repo.AssertExpectations(t)
 	})
 }
 
