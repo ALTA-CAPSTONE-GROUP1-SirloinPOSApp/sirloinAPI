@@ -11,6 +11,7 @@ import (
 	pd "sirloinapi/features/product/data"
 	ph "sirloinapi/features/product/handler"
 	ps "sirloinapi/features/product/services"
+
 	ud "sirloinapi/features/user/data"
 	uh "sirloinapi/features/user/handler"
 	us "sirloinapi/features/user/services"
@@ -18,6 +19,10 @@ import (
 	td "sirloinapi/features/transaction/data"
 	th "sirloinapi/features/transaction/handler"
 	ts "sirloinapi/features/transaction/services"
+
+	cd "sirloinapi/features/customer/data"
+	ch "sirloinapi/features/customer/handler"
+	cs "sirloinapi/features/customer/services"
 )
 
 func main() {
@@ -37,6 +42,10 @@ func main() {
 	transData := td.New(db)
 	transSrv := ts.New(transData)
 	transHdl := th.New(transSrv)
+
+	cusData := cd.New(db)
+	cusSrv := cs.New(cusData)
+	cusHdl := ch.New(cusSrv)
 
 	e.Pre(middleware.RemoveTrailingSlash())
 	e.Use(middleware.CORS())
@@ -58,6 +67,9 @@ func main() {
 	e.DELETE("/products/:product_id", prodHdl.Delete(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.GET("/products/:product_id", prodHdl.GetProductById(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.GET("/products/admin", prodHdl.GetAdminProducts(), middleware.JWT([]byte(config.JWT_KEY)))
+
+	//customer
+	e.POST("/customers", cusHdl.Add(), middleware.JWT([]byte(config.JWT_KEY)))
 
 	//transaction
 	e.POST("/transactions", transHdl.AddSell(), middleware.JWT([]byte(config.JWT_KEY)))
