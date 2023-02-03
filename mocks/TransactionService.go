@@ -13,6 +13,27 @@ type TransactionService struct {
 	mock.Mock
 }
 
+// AddBuy provides a mock function with given fields: token, uCart
+func (_m *TransactionService) AddBuy(token interface{}, uCart transaction.Cart) (transaction.Core, error) {
+	ret := _m.Called(token, uCart)
+
+	var r0 transaction.Core
+	if rf, ok := ret.Get(0).(func(interface{}, transaction.Cart) transaction.Core); ok {
+		r0 = rf(token, uCart)
+	} else {
+		r0 = ret.Get(0).(transaction.Core)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(interface{}, transaction.Cart) error); ok {
+		r1 = rf(token, uCart)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // AddSell provides a mock function with given fields: token, uCart
 func (_m *TransactionService) AddSell(token interface{}, uCart transaction.Cart) (transaction.Core, error) {
 	ret := _m.Called(token, uCart)
