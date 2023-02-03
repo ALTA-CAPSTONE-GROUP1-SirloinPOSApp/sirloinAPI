@@ -311,6 +311,14 @@ paths:
                 message: "success add product"
         400:
           $ref: '#/components/responses/400'
+        409:
+          description: "product already exist"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                message: "duplicated product"
         500:
           $ref: '#/components/responses/500'
 
@@ -587,18 +595,20 @@ paths:
                   - id: 12
                     tenant_id: 1
                     tenant_name: "tenant1"
-                    total_price : 550000
+                    total_bill : 550000
                     created_at: "2023-01-26T02:11:48"
-                    order_status: "success"
-                    invoice_number: "INV/01"
+                    transaction_status: "success"
+                    invoice_number: "INV/12"
                     invoice_url: "invoice.pdf"
                     payment_url: "url"
                   - id: 21
                     tenant_id: 2
                     tenant_name: "tenant2"
-                    total_price : 1000000
+                    total_bill : 1000000
                     created_at: "2023-01-27T02:11:48"
-                    order_status: "success"
+                    transaction_status: "success"
+                    invoice_number: "INV/21"
+                    invoice_url: "invoice.pdf"
                     payment_url: "url"
                 message: "success get transaction history"
         400:
@@ -635,7 +645,7 @@ paths:
                   id: 1
                   user_id: 2
                   tenant_name: "tenant1"
-                  total_price : 550000
+                  total_bill : 550000
                   created_at: "2023-01-26T02:11:48"
                   order_status: "success"
                   invoice_number: "INV/01"
@@ -918,20 +928,24 @@ paths:
                     customer_id: 1
                     customer_name: "customer1"
                     total_price : 550000
+                    discount: 0.10
+                    total_bill: 495000
                     created_at: "2023-01-26T02:11:48"
                     transaction_status: "success"
                     invoice_number: "INV/01"
                     invoice_url: "invoice.pdf"
-                    qrcode_url: "url"
+                    payment_url: "url"
                   - id: 2
                     customer_id: 2
                     customer_name: "customer2"
                     total_price : 1000000
+                    discount: 0.10
+                    total_bill: 900000
                     created_at: "2023-01-27T02:11:48"
                     transaction_status: "success"
                     invoice_number: "INV/02"
                     invoice_url: "invoice.pdf"
-                    qrcode_url: "url"
+                    payment_url: "url"
                 message: "success get transaction history"
         400:
           $ref: '#/components/responses/400'
@@ -1007,6 +1021,8 @@ paths:
                   customer_id: 1
                   customer_name: "customer1"
                   total_price : 550000
+                  discount: 0.10
+                  total_bill: 495000
                   created_at: "2023-01-26T02:11:48"
                   order_status: "success"
                   invoice_url: "https://mediasosial.s3.ap-southeast-1.amazonaws.com/invoice/InvoiceSimple-PDF-Template.pdf"
