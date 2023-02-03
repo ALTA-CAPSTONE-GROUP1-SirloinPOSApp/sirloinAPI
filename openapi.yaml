@@ -1,0 +1,1196 @@
+openapi: 3.0.0
+servers:
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/CAPSTONE-Group1/sirloinPOSAPI/1.0.0
+  - description: main url
+    url: https://bluepath.my.id
+    
+info:
+  description: This is the API documentation for Sirloin POS Application created by Group 1
+
+                Capstone Project Alterra Academy
+  version: "1.0.0"
+  title: Sirloin POS API
+  contact:
+    name: Groups 1
+    
+tags:
+  - name: Auth
+  - name: Users
+  - name: Admin
+  - name: Products
+  - name: Customers
+  - name: Transactions
+  
+paths:
+  /register:
+    post:
+      tags:
+        - "Auth"
+      description: "For register new tenant"
+      summary: "register new tenant"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                business_name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                address:
+                  type: string
+                phone_number:
+                  type: string
+                password:
+                  type: string
+                  format: password
+            example:
+              business_name: "warung saya"
+              email: "mfp910@example.com"
+              address: "Jl. Kebenaran No. 10"
+              phone_number: "0812334455"
+              password: "warungsaya123"
+      responses:
+        201:
+          description: "success register new tenant"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                message: "success created account"
+        400:
+          $ref: '#/components/responses/400uservalidasi'
+        409:
+          $ref: '#/components/responses/409uservalidasi'
+        500:
+          $ref: '#/components/responses/500'
+    
+  /login:
+    post:
+      tags:
+        - "Auth"
+      summary: "login"
+      description: "login for tenant that already registered and login for super admin"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+            example:
+              email: "mfp910@example.com"
+              password: "warungsaya123"
+      responses:
+        200:
+          description: "success login"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                data:
+                  id: 1
+                  business_name: "warung saya"
+                  email: "mfp910@example.com"
+                  token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJ1c2VySUQiOjR9.QTZxERh4CwC_UnL_eJvTi_A_qdLeBZ-IjR4nqoxjodk"
+                  phone_number: "08123456"
+                  address: "Jl. Kebenaran No. 10"
+                message: "login success"
+        401:
+          description: "wrong password"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "wrong password"
+        404:
+          description: "user not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "wrong email"
+        500:
+          $ref: '#/components/responses/500'
+      
+  /users:
+    get:
+      tags:
+        - "Users"
+      summary: "get tenant profile"
+      description: "get tenant profile"
+      security:
+        - JWTAuth: []
+      responses:
+        200:
+          description: "success get tenant profile"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                data:
+                  id: 1
+                  business_name: "warung saya"
+                  email: "mfp910@example.com"
+                  phone_number: "08123456"
+                  address: "Jl. Kebenaran No. 10"
+                message: "success get tenant profile"
+        404:
+          description: "account data not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "account data not found"
+        500:
+          $ref: '#/components/responses/500'
+
+    put:
+      tags:
+        - "Users"
+      summary: "update tenant details"
+      description: "for updating tenant details"
+      security:
+        - JWTAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                business_name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                address:
+                  type: string
+                phone_number:
+                  type: string
+                password:
+                  type: string
+                  format: password
+            example:
+              id: 1
+              business_name: "warung saya"
+              email: "mfp910@example.com"
+              phone_number: "08123456"
+              address: "Jl. Kebenaran No. 10"
+              password: "warungsaya321"
+      responses:
+        200:
+          description: "success update profile"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                data:
+                  id: 1
+                  business_name: "warung saya"
+                  email: "mfp910@example.com"
+                  phone_number: "08123456"
+                  address: "Jl. Kebenaran No. 10"
+                  password: "warungsaya321"
+                message: "success update tenant profile"
+        400:
+          $ref: '#/components/responses/400uservalidasi'
+        409:
+          $ref: '#/components/responses/409uservalidasi'
+        500:
+          $ref: '#/components/responses/500'
+
+    delete:
+      tags:
+        - "Users"
+      summary: "delete tenant"
+      description: "deleting tenant account"
+      security:
+        - JWTAuth: []
+      responses:
+        200:
+          description: "success delete account"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "success delete account data"
+        404:
+          description: "ID not found"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+              example:
+                message: "user not found"
+        500:
+          $ref: '#/components/responses/500'
+
+  /products:
+    post:
+      tags:
+        - "Products"
+      summary: "add product"
+      description: "super admin and tenant can add products for their business"
+      security:
+        - JWTAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                upc:
+                  type: string
+                category:
+                  type: string
+                product_name:
+                  type: string
+                stock:
+                  type: integer
+                minimum_stock:
+                  type: integer
+                buying_price:
+                  type: number
+                price:
+                  type: number
+                product_image:
+                  type: string
+                supplier:
+                  type: string
+            example:
+              upc: "2196581516161"
+              category: "food"
+              product_name: "Indomie goreng"
+              minimum_stock: 5
+              stock: 20
+              buying_price: 3000
+              price: 3500
+              product_image: "indomie_goreng.png"
+              supplier: "PT. Indofood Sukses Makmur"
+      responses:
+        201:
+          description: "success add product"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                message: "success add product"
+        400:
+          $ref: '#/components/responses/400'
+        500:
+          $ref: '#/components/responses/500'
+
+    get:
+      tags:
+        - "Products"
+      summary: "Get all products"
+      description: "Get all products"
+      security:
+        - JWTAuth: []
+      responses:
+        200:
+          description: "success get all products"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObjectArr'
+              example:
+                data:
+                  - id: 1
+                    upc: "2196581516161"
+                    category: "food"
+                    product_name: "Indomie goreng"
+                    minimum_stock: 5
+                    stock: 20
+                    buying_price: 3000
+                    price: 3500
+                    product_image: "indomie_goreng.png"
+                    supplier: "PT. Indofood Sukses Makmur"
+                  - id: 2
+                    upc: "1651981918191"
+                    category: "food"
+                    product_name: "pulpen joyko"
+                    minimum_stock: 5
+                    stock: 100
+                    buying_price: 5000
+                    price: 8000
+                    product_image: "pulpen.png"
+                    supplier: "PT. Joyko"
+                message: "success get all products"
+        400:
+          $ref: '#/components/responses/400'
+        500:
+          $ref: '#/components/responses/500'
+
+  /products/{product_id}:
+    put:
+      tags:
+        - "Products"
+      summary: "update detail product"
+      description: "updating detail product or stock"
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: product_id
+          description: "id product"
+          required: true
+          in: path
+          schema:
+            description: "id of the product"
+            type: string
+            example: 1
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                upc:
+                  type: string
+                category:
+                  type: string
+                product_name:
+                  type: string
+                stock:
+                  type: integer
+                minimum_stock:
+                  type: integer
+                buying_price:
+                  type: number
+                price:
+                  type: number
+                product_image:
+                  type: string
+                supplier:
+                  type: string
+            example:
+              upc: "2196581516161"
+              category: "food"
+              product_name: "Indomie goreng"
+              minimum_stock: 5
+              stock: 20
+              buying_price: 3000
+              price: 3500
+              product_image: "indomie_goreng.png"
+              supplier: "PT. Indofood Sukses Makmur"
+      responses:
+        200:
+          description: "success update detail product"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                message: "success update detail product"
+        400:
+          $ref: '#/components/responses/400'
+        500:
+          $ref: '#/components/responses/500'
+    get:
+      tags:
+        - "Products"
+      summary: "get detail product"
+      description: "get detail product by ID"
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: product_id
+          description: "product id"
+          required: true
+          in: path
+          schema:
+            description: "product id"
+            type: string
+            example: 1
+      responses:
+        200:
+          description: "success get detail product"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                data:
+                  id: 1
+                  upc: "2196581516161"
+                  category: "food"
+                  product_name: "Indomie goreng"
+                  minimum_stock: 5
+                  stock: 20
+                  buying_price: 3000
+                  price: 3500
+                  product_image: "indomie_goreng.png"
+                  supplier: "PT. Indofood Sukses Makmur"
+                message: "success get detail product"
+        404:
+          description: "wrong input"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
+              example:
+                message: "product not found"
+        500:
+          $ref: '#/components/responses/500'
+
+    delete:
+      tags:
+        - "Products"
+      summary: "delete product"
+      description: "deleted product by ID product"
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: product_id
+          description: "id product"
+          required: true
+          in: path
+          schema:
+            description: "id product"
+            type: string
+            example: 1
+      responses:
+        200:
+          description: "success delete product"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                message: "success delete product"
+        404:
+          description: "wrong input"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
+              example:
+                message: "product not found"
+        500:
+          $ref: '#/components/responses/500'
+  
+  /products/admin:
+    get:
+      tags:
+        - "Admin"
+      summary: "Get all Super Admin products"
+      description: "Get all Super Admin products"
+      security:
+        - JWTAuth: []
+      responses:
+        200:
+          description: "success get all Super Admin products"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObjectArr'
+              example:
+                data:
+                  - id: 1
+                    upc: "2196581516161"
+                    category: "food"
+                    product_name: "Indomie goreng"
+                    minimum_stock: 5
+                    stock: 20
+                    buying_price: 3000
+                    price: 3500
+                    product_image: "indomie_goreng.png"
+                    supplier: "PT. Indofood Sukses Makmur"
+                  - id: 2
+                    upc: "1651981918191"
+                    category: "food"
+                    product_name: "pulpen joyko"
+                    minimum_stock: 5
+                    stock: 100
+                    buying_price: 5000
+                    price: 8000
+                    product_image: "pulpen.png"
+                    supplier: "PT. Joyko"
+                message: "success get all Super Admin products"
+        400:
+          $ref: '#/components/responses/400'
+        500:
+          $ref: '#/components/responses/500'
+  /transactions/admin:
+     get:
+      tags:
+        - "Admin"
+      summary: "get super admin selling history"
+      description: |
+        - Get Transaction history.<br/>
+        - Can be filtered by start date (from) and end date (to) in the query parameter. This filter is optional. The date format should be YYYY-MM-DD.<br/> 
+      parameters: 
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      security:
+        - JWTAuth: []
+      responses:
+        200:
+          description: "success get transaction history"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                data:
+                  - id: 12
+                    tenant_id: 1
+                    tenant_name: "tenant1"
+                    total_price : 550000
+                    created_at: "2023-01-26T02:11:48"
+                    order_status: "success"
+                    invoice_number: "INV/01"
+                    invoice_url: "invoice.pdf"
+                    payment_url: "url"
+                  - id: 21
+                    tenant_id: 2
+                    tenant_name: "tenant2"
+                    total_price : 1000000
+                    created_at: "2023-01-27T02:11:48"
+                    order_status: "success"
+                    payment_url: "url"
+                message: "success get transaction history"
+        400:
+          $ref: '#/components/responses/400'
+        500:
+          $ref: '#/components/responses/500'
+  
+  /transactions/{transaction_id}/admin:
+    get:
+      tags:
+        - "Admin"
+      summary: "get Transaction details"
+      description: "get Transaction details"
+      parameters:
+        - name: transaction_id
+          description: "transaction id"
+          required: true
+          in: path
+          schema:
+            description: "transaction id"
+            type: string
+            example: 1
+      security:
+        - JWTAuth: []
+      responses:
+        200:
+          description: "success get Transaction details"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                data:
+                  id: 1
+                  user_id: 2
+                  tenant_name: "tenant1"
+                  total_price : 550000
+                  created_at: "2023-01-26T02:11:48"
+                  order_status: "success"
+                  invoice_number: "INV/01"
+                  invoice_url: "https://mediasosial.s3.ap-southeast-1.amazonaws.com/invoice/InvoiceSimple-PDF-Template.pdf"
+                  payment_url: "url"
+                  items:
+                    - product_id: 1
+                      product_name: "indomie goreng"
+                      price: 3500
+                      quantity: 2
+                      total_price: 7000
+                      product_image: "indomie_goreng.png"
+                    - product_id: 2
+                      product_name: "kecap sedap"
+                      price: 15000
+                      quantity: 1
+                      total_price: 15000
+                      product_image: "kecap_sedap.png"
+          
+                message: "success get transaction details"
+        400:
+          $ref: '#/components/responses/400'
+        500:
+          $ref: '#/components/responses/500'
+          
+  /customers:
+    post:
+      tags:
+        - "Customers"
+      description: "For input new customer"
+      summary: "input new customer"
+      security:
+        - JWTAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                name:
+                  type: string
+                address:
+                  type: string
+                phone_number:
+                  type: string
+            example:
+              email: "example@gmail.com"
+              name : "example"
+              address: "Jl. Kan Saja No.1"
+              phone_number: "0888716184"
+      responses:
+        201:
+          description: "success register new customer"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                message: "success add new customer"
+        400:
+          $ref: '#/components/responses/400'
+        409:
+          description: "email already registered"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                message: "email or phone number already registered"
+        500:
+          $ref: '#/components/responses/500'
+    get:
+      tags:
+        - "Customers"
+      summary: "Get all customers"
+      description: "Get all customers"
+      security:
+        - JWTAuth: []
+      responses:
+        200:
+          description: "success get all customers"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObjectArr'
+              example:
+                data:
+                  - id: 1
+                    email: "cust@gmail.com"
+                    name: "customer"
+                    phone_number: "08123456789"
+                    address: "Jl. Kan Saja No. 10"
+                  - id: 2
+                    email: "cust2@gmail.com"
+                    name: "customer2"
+                    phone_number: "080989999"
+                    address: "Jl. Kan Saja No. 11"
+                message: "success get all customers"
+        400:
+          $ref: '#/components/responses/400'
+        500:
+          $ref: '#/components/responses/500'
+          
+  /cutomers/{customer_id}:
+    put:
+      tags:
+        - "Customers"
+      description: "For edit customer data"
+      summary: "Edit customer data"
+      security:
+        - JWTAuth: []
+      parameters:
+        - name: customer_id
+          description: "customer id"
+          required: true
+          in: path
+          schema:
+            description: "customer id"
+            type: string
+            example: 1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                name:
+                  type: string
+                address:
+                  type: string
+                phone_number:
+                  type: string
+            example:
+              email: "example@gmail.com"
+              name : "example"
+              address: "Jl. Kan Saja No.1"
+              phone_number: "0888716184"
+      responses:
+        201:
+          description: "success register new tenant"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                message: "success edit customer data"
+        400:
+          $ref: '#/components/responses/400'
+        500:
+          $ref: '#/components/responses/500'
+    get:
+      tags:
+        - "Customers"
+      summary: "Get customer detail by id"
+      description: "Get customer detail by id"
+      parameters:
+        - name: customer_id
+          description: "customer id"
+          required: true
+          in: path
+          schema:
+            description: "customer id"
+            type: string
+            example: 1
+      security:
+        - JWTAuth: []
+      responses:
+        200:
+          description: "success get customer detail"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                data:
+                  id: 1
+                  email: "cust@gmail.com"
+                  name: "customer"
+                  phone_number: "08123456789"
+                  address: "Jl. Kan Saja No. 10"
+                message: "success get all customers"
+  /transactions:
+    post:
+      tags:
+        - "Transactions"
+      summary: "create new transaction"
+      description: "create transaction and request payment to payment gateway. If customer is not registered then customer_id = 0"
+      security:
+        - JWTAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: object
+                  example: 
+                    - product_id: 1
+                      quantity: 15
+                      price: 5000
+                    - product_id: 2
+                      quantity: 10
+                      price: 20000
+                    - product_id: 7
+                      quantity: 20
+                      price: 12000
+                customer_id:
+                  type: integer
+                  example: 1
+                payment_method:
+                  type: string
+                  example: "cashless"
+      responses:
+        201: 
+          description: "transaction created"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                data:
+                  id: 1
+                  customer_id: 1
+                  total_price: 550000
+                  order_date: "2023-01-26T02:11:48"
+                  order_status: "pending"
+                  qris_url: "qris.png"
+                message: "order created"
+        400:
+          $ref: '#/components/responses/400'
+        500:
+          $ref: '#/components/responses/500'
+
+    get:
+      tags:
+        - "Transactions"
+      summary: "get selling/buying history"
+      description: |
+        - Get Transaction history.<br/>
+        - Can be filtered by start date (from) and end date (to) in the query parameter. This filter is optional. The date format should be YYYY-MM-DD.<br/> 
+        - REQUIRED: query parameter status can filter buying or selling history. The value should be 'buy' or 'sell'
+      parameters: 
+        - name: status
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: to
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      security:
+        - JWTAuth: []
+      responses:
+        200:
+          description: "success get transaction history"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                data:
+                  - id: 1
+                    customer_id: 1
+                    customer_name: "customer1"
+                    total_price : 550000
+                    created_at: "2023-01-26T02:11:48"
+                    transaction_status: "success"
+                    invoice_number: "INV/01"
+                    invoice_url: "invoice.pdf"
+                    qrcode_url: "url"
+                  - id: 2
+                    customer_id: 2
+                    customer_name: "customer2"
+                    total_price : 1000000
+                    created_at: "2023-01-27T02:11:48"
+                    transaction_status: "success"
+                    invoice_number: "INV/02"
+                    invoice_url: "invoice.pdf"
+                    qrcode_url: "url"
+                message: "success get transaction history"
+        400:
+          $ref: '#/components/responses/400'
+        500:
+          $ref: '#/components/responses/500'
+  
+  /transactions/{transaction_id}:
+    put:
+      tags: 
+        - "Transactions"
+      summary: "update Transaction status"
+      description: "update Transaction status and generate invoice"
+      parameters:
+        - name: transaction_id
+          description: "transaction id"
+          required: true
+          in: path
+          schema:
+            description: "transaction id"
+            type: string
+            example: 1
+      security:
+        - JWTAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transaction_status:
+                  type: string
+                  example: "success"
+      responses:
+        200:
+          description: "success update transaction status"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                message: "success update transaction status"
+        400:
+          $ref: '#/components/responses/400'
+        500:
+          $ref: '#/components/responses/500'
+    get:
+      tags:
+        - "Transactions"
+      summary: "get Transaction details"
+      description: "get Transaction details"
+      parameters:
+        - name: transaction_id
+          description: "transaction id"
+          required: true
+          in: path
+          schema:
+            description: "transaction id"
+            type: string
+            example: 1
+      security:
+        - JWTAuth: []
+      responses:
+        200:
+          description: "success get Transaction history"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                data:
+                  id: 1
+                  customer_id: 1
+                  customer_name: "customer1"
+                  total_price : 550000
+                  created_at: "2023-01-26T02:11:48"
+                  order_status: "success"
+                  invoice_url: "https://mediasosial.s3.ap-southeast-1.amazonaws.com/invoice/InvoiceSimple-PDF-Template.pdf"
+                  items:
+                    - product_id: 1
+                      product_name: "indomie goreng"
+                      price: 3500
+                      quantity: 2
+                      total_price: 7000
+                      product_image: "indomie_goreng.png"
+                    - product_id: 2
+                      product_name: "kecap sedap"
+                      price: 15000
+                      quantity: 1
+                      total_price: 15000
+                      product_image: "kecap_sedap.png"
+          
+                message: "success get transaction history"
+        400:
+          $ref: '#/components/responses/400'
+        500:
+          $ref: '#/components/responses/500'
+          
+  /paymentnotification:
+    post:
+      tags:
+        - "Payment Notification"
+      summary: "recieve payment notification from midtrans"
+      description: "recieve payment notification from midtrans"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                order_id:
+                      type: string
+                      example: "transaction-1"
+      responses:
+        200:
+          description: "get order status"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                message: "success handling payment notification"
+        400:
+          $ref: '#/components/responses/400'
+        500:
+          $ref: '#/components/responses/500'
+  
+  /transactions/buy:
+    post:
+      tags:
+        - "Transactions"
+      summary: "create new buying transaction"
+      description: "create buying transaction from tenant to super admin and request payment to payment gateway"
+      security:
+        - JWTAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: object
+                  example: 
+                    - product_id: 1
+                      quantity: 15
+                    - product_id: 2
+                      quantity: 10
+                    - product_id: 7
+                      quantity: 20 
+      responses:
+        201: 
+          description: "transaction created"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                data:
+                  id: 1
+                  customer_id: 1
+                  total_price: 550000
+                  order_date: "2023-01-26T02:11:48"
+                  order_status: "pending"
+                  redirect_url: "https://app.sandbox.midtrans.com/snap/v3/redirection/b95128fb-f2ef-4e57-bd89-c4a187cca536"
+                message: "order created"
+        400:
+          $ref: '#/components/responses/400'
+        500:
+          $ref: '#/components/responses/500'
+components:
+  schemas:
+    responseObject:
+      type: object
+      properties:
+        data:
+          type: object
+        message:
+          type: string
+    responseObjectArr:
+      type: object
+      properties:
+        data:
+          type: array
+          items: 
+            type: object
+        message:
+          type: string
+  
+  securitySchemes:
+    JWTAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "user token"
+  responses:
+    400:
+      description: "error from user"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+          example:
+            message: "wrong input"
+    500:
+      description: "error from server"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+            example:
+              message: "server problem"
+    400uservalidasi:
+      description: "error from user"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/responseObject'
+          examples:
+            secure_password:
+              summary: password does not secure
+              value:
+                message: "password must be at least 8 characters long, must contain uppercase letters, must contain lowercase letters, must contain numbers, must not be too general"
+            required:
+              summary: required fields
+              value:
+                message: "required fields must be filled"
+            PhoneNumber:
+              summary: phone number must be numeric
+              value:
+                message: "the phone number must be a number"
+            BusinessName:
+              summary: business names must be alpha_space
+              value:
+                message: "business names are only allowed to contain letters and spaces"
+            Email:
+              summary: Email must be email format
+              value:
+                message: "incorrect e-mail format"
+    409uservalidasi:
+      description: "email or phone number already registered"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/responseObject'
+          examples:
+            user:
+              summary: user already exist
+              value:
+                message: "user or email already exist"
+            phone:
+              summary: phone number already exist
+              value:
+                message: "phone number already exist"
