@@ -43,8 +43,13 @@ func (pc *productControl) Add() echo.HandlerFunc {
 
 		res, err := pc.srv.Add(token, *ToCore(input), productImage)
 		if err != nil {
-			log.Println("\terror running add product service: ", err.Error())
-			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
+			if strings.Contains(err.Error(), "duplicated") {
+				log.Println("\terror running add product service: ", err.Error())
+				return c.JSON(http.StatusConflict, helper.ErrorResponse("duplicated product"))
+			} else {
+				log.Println("\terror running add product service: ", err.Error())
+				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
+			}
 		}
 
 		return c.JSON(http.StatusCreated, map[string]interface{}{

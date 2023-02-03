@@ -24,6 +24,19 @@ func (pq *productQuery) Add(userId uint, newProduct product.Core, productImage *
 	cnvP := CoreToData(newProduct)
 	cnvP.UserId = userId
 
+	existed := 0
+	pq.db.Raw("SELECT COUNT(*) FROM products p WHERE p.product_name = ?", cnvP.ProductName).Scan(&existed)
+	if existed >= 1 {
+		log.Println("duplicated product")
+		return product.Core{}, errors.New("duplicated product")
+	}
+	existed = 0
+	pq.db.Raw("SELECT COUNT(*) FROM products p WHERE p.upc = ?", cnvP.Upc).Scan(&existed)
+	if existed >= 1 {
+		log.Println("duplicated product")
+		return product.Core{}, errors.New("duplicated product")
+	}
+
 	err := pq.db.Create(&cnvP).Error
 	if err != nil {
 		log.Println("\tadd product query error: ", err.Error())

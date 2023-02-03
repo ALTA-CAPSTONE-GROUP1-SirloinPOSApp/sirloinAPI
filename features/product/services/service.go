@@ -39,6 +39,8 @@ func (ps *productSvc) Add(token interface{}, newProduct product.Core, productIma
 		msg := ""
 		if strings.Contains(err.Error(), "not found") {
 			msg = "data not found"
+		} else if strings.Contains(err.Error(), "duplicated") {
+			msg = "duplicated"
 		} else {
 			msg = "server problem"
 		}
