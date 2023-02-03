@@ -25,7 +25,7 @@ type Core struct {
 type TransactionHandler interface {
 	AddSell() echo.HandlerFunc
 	AddBuy() echo.HandlerFunc
-	// GetOrderHistory() echo.HandlerFunc
+	GetTransactionHistory() echo.HandlerFunc
 	// GetSellingHistory() echo.HandlerFunc
 	// NotificationTransactionStatus() echo.HandlerFunc
 	// UpdateStatus() echo.HandlerFunc
@@ -34,8 +34,7 @@ type TransactionHandler interface {
 type TransactionService interface {
 	AddSell(token interface{}, uCart Cart) (Core, error)
 	AddBuy(token interface{}, uCart Cart) (Core, error)
-
-	// GetOrderHistory(token interface{}) ([]Core, error)
+	GetTransactionHistory(token interface{}, status, from, to string) ([]Core, error)
 	// GetSellingHistory(token interface{}) ([]Core, error)
 	// NotificationTransactionStatus(transactionId string) error
 	// UpdateStatus(orderid uint, status string) error
@@ -44,7 +43,7 @@ type TransactionService interface {
 type TransactionData interface {
 	AddSell(userId uint, uCart Cart) (Core, error)
 	AddBuy(userId uint, uCart Cart) (Core, error)
-	// GetTransactionHistory(userId uint, status string) ([]Core, error)
+	GetTransactionHistory(userId uint, status, from, to string) ([]Core, error)
 	// GetSellingHistory(userId uint) ([]Core, error)
 	// NotificationTransactionStatus(transactionId, transStatus string) error
 	// UpdateStatus(orderid uint, status string) error
