@@ -26,6 +26,10 @@ func ToCore(data interface{}) *user.Core {
 		res.PhoneNumber = cnv.PhoneNumber
 		res.Password = cnv.Password
 		res.Address = cnv.Address
+	case LoginReqest:
+		cnv := docs
+		res.Email = cnv.Email
+		res.Password = cnv.Password
 	default:
 		return nil
 	}

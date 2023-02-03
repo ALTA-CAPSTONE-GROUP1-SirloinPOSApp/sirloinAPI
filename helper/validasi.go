@@ -3,6 +3,7 @@ package helper
 import (
 	"log"
 	"regexp"
+	"sirloinapi/features/customer"
 	"sirloinapi/features/user"
 
 	"github.com/go-playground/validator/v10"
@@ -17,6 +18,13 @@ type RegisterValidate struct {
 	Address      string `validate:"required"`
 	PhoneNumber  string `validate:"required,numeric"`
 	Password     string `validate:"required,secure_password"`
+}
+
+type AddCustomerValidate struct {
+	Name        string `validate:"required,alpha_space"`
+	Email       string `validate:"required,email"`
+	Address     string `validate:"required"`
+	PhoneNumber string `validate:"required,numeric"`
 }
 
 type PasswordValidate struct {
@@ -34,31 +42,50 @@ type BusinessNameValidate struct {
 	BusinessName string `validate:"alpha_space"`
 }
 
-func ToValidate(option string, data user.Core) interface{} {
+func ToValidate(option string, data interface{}) interface{} {
 	switch option {
 	case "register":
 		res := RegisterValidate{}
-		res.Email = data.Email
-		res.BusinessName = data.BusinessName
-		res.PhoneNumber = data.PhoneNumber
-		res.Password = data.Password
-		res.Address = data.Address
+		if v, ok := data.(user.Core); ok {
+			res.Email = v.Email
+			res.BusinessName = v.BusinessName
+			res.PhoneNumber = v.PhoneNumber
+			res.Password = v.Password
+			res.Address = v.Address
+		}
 		return res
 	case "password":
 		res := PasswordValidate{}
-		res.Password = data.Password
+		if v, ok := data.(user.Core); ok {
+			res.Password = v.Password
+		}
 		return res
 	case "email":
 		res := EmailValidate{}
-		res.Email = data.Email
+		if v, ok := data.(user.Core); ok {
+			res.Email = v.Email
+		}
 		return res
 	case "pn":
 		res := PhoneNumberValidate{}
-		res.PhoneNumber = data.PhoneNumber
+		if v, ok := data.(user.Core); ok {
+			res.PhoneNumber = v.PhoneNumber
+		}
 		return res
 	case "bn":
 		res := BusinessNameValidate{}
-		res.BusinessName = data.BusinessName
+		if v, ok := data.(user.Core); ok {
+			res.BusinessName = v.BusinessName
+		}
+		return res
+	case "customer":
+		res := AddCustomerValidate{}
+		if v, ok := data.(customer.Core); ok {
+			res.Email = v.Email
+			res.Name = v.Name
+			res.PhoneNumber = v.PhoneNumber
+			res.Address = v.Address
+		}
 		return res
 	default:
 		return nil

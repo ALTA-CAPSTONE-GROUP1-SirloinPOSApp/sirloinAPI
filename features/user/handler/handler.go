@@ -29,13 +29,14 @@ func (uc *userControl) Register() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("wrong input"))
 		}
 
-		res, err := uc.srv.Register(*ToCore(input))
+		// res, err := uc.srv.Register(*ToCore(input))
+		_, err := uc.srv.Register(*ToCore(input))
 		if err != nil {
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
 		return c.JSON(http.StatusCreated, map[string]interface{}{
-			"data":    ToResponse(res),
-			"message": "success register",
+			// "data":    ToResponse(res),
+			"message": "success created account",
 		})
 	}
 }
