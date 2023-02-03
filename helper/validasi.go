@@ -38,8 +38,8 @@ type EmailValidate struct {
 type PhoneNumberValidate struct {
 	PhoneNumber string `validate:"numeric"`
 }
-type BusinessNameValidate struct {
-	BusinessName string `validate:"alpha_space"`
+type AlphaSpaceValidate struct {
+	AlphaSpace string `validate:"alpha_space"`
 }
 
 func ToValidate(option string, data interface{}) interface{} {
@@ -65,17 +65,26 @@ func ToValidate(option string, data interface{}) interface{} {
 		if v, ok := data.(user.Core); ok {
 			res.Email = v.Email
 		}
+		if v, ok := data.(customer.Core); ok {
+			res.Email = v.Email
+		}
 		return res
 	case "pn":
 		res := PhoneNumberValidate{}
 		if v, ok := data.(user.Core); ok {
 			res.PhoneNumber = v.PhoneNumber
 		}
+		if v, ok := data.(customer.Core); ok {
+			res.PhoneNumber = v.PhoneNumber
+		}
 		return res
-	case "bn":
-		res := BusinessNameValidate{}
+	case "as":
+		res := AlphaSpaceValidate{}
 		if v, ok := data.(user.Core); ok {
-			res.BusinessName = v.BusinessName
+			res.AlphaSpace = v.BusinessName
+		}
+		if v, ok := data.(customer.Core); ok {
+			res.AlphaSpace = v.Name
 		}
 		return res
 	case "customer":
