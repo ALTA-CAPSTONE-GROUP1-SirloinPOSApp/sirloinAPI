@@ -34,11 +34,11 @@ func TestAddSell(t *testing.T) {
 		},
 	}
 	expectedData := transaction.Core{
-		ID:          1,
-		CustomerId:  1,
-		TotalPrice:  550000,
-		OrderStatus: "pending",
-		PaymentUrl:  "qris.png",
+		ID:                1,
+		CustomerId:        1,
+		TotalPrice:        550000,
+		TransactionStatus: "pending",
+		PaymentUrl:        "qris.png",
 	}
 	t.Run("transaction created", func(t *testing.T) {
 		data.On("AddSell", uint(userId), newCart).Return(expectedData, nil).Once()
@@ -76,7 +76,7 @@ func TestAddSell(t *testing.T) {
 		res, err := srv.AddSell(pToken, newCart)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "server")
-		assert.Equal(t, res.OrderStatus, "")
+		assert.Equal(t, res.TransactionStatus, "")
 		data.AssertExpectations(t)
 	})
 
@@ -90,7 +90,7 @@ func TestAddSell(t *testing.T) {
 		res, err := srv.AddSell(pToken, newCart)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "bad request")
-		assert.Equal(t, res.OrderStatus, "")
+		assert.Equal(t, res.TransactionStatus, "")
 		data.AssertExpectations(t)
 	})
 }
@@ -118,11 +118,11 @@ func TestAddBuy(t *testing.T) {
 		},
 	}
 	expectedData := transaction.Core{
-		ID:          1,
-		CustomerId:  1,
-		TotalPrice:  550000,
-		OrderStatus: "pending",
-		PaymentUrl:  "qris.png",
+		ID:                1,
+		CustomerId:        1,
+		TotalPrice:        550000,
+		TransactionStatus: "pending",
+		PaymentUrl:        "qris.png",
 	}
 	t.Run("transaction created", func(t *testing.T) {
 		data.On("AddBuy", uint(userId), newCart).Return(expectedData, nil).Once()
@@ -160,7 +160,7 @@ func TestAddBuy(t *testing.T) {
 		res, err := srv.AddBuy(pToken, newCart)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "server")
-		assert.Equal(t, res.OrderStatus, "")
+		assert.Equal(t, res.TransactionStatus, "")
 		data.AssertExpectations(t)
 	})
 
@@ -174,7 +174,7 @@ func TestAddBuy(t *testing.T) {
 		res, err := srv.AddBuy(pToken, newCart)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "bad request")
-		assert.Equal(t, res.OrderStatus, "")
+		assert.Equal(t, res.TransactionStatus, "")
 		data.AssertExpectations(t)
 	})
 }
