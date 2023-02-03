@@ -22,7 +22,7 @@ func PrintErrorResponse(msg string) (int, interface{}) {
 
 	if strings.Contains(msg, "user already exist") {
 		log.Println("error running register service: user already exist")
-		resp["message"] = "user or email already exist"
+		resp["message"] = "email already exist"
 		code = http.StatusConflict
 	} else if strings.Contains(msg, "phone number already exist") {
 		log.Println("error running register service: phone number already exist")
