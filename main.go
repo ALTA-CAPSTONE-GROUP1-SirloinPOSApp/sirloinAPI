@@ -62,6 +62,8 @@ func main() {
 	//transaction
 	e.POST("/transactions", transHdl.AddSell(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.POST("/transactions/buy", transHdl.AddBuy(), middleware.JWT([]byte(config.JWT_KEY)))
+	e.GET("/transactions", transHdl.GetTransactionHistory(), middleware.JWT([]byte(config.JWT_KEY)))
+	e.GET("/transactions/:transaction_id", transHdl.GetTransactionDetails(), middleware.JWT([]byte(config.JWT_KEY)))
 
 	if err := e.Start(":8000"); err != nil {
 		log.Println(err.Error())
