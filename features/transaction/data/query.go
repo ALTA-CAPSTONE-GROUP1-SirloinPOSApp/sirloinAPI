@@ -44,14 +44,14 @@ func (tq *transactionQuery) Discount(uCart transaction.Cart, totalPrice float64)
 
 func (tq *transactionQuery) CreateTransaction(userId uint, uCart transaction.Cart, productStatus string, totalPrice, disc, totalBill float64) Transaction {
 	return Transaction{
-		UserId:        userId,
-		CustomerId:    uCart.CustomerId,
-		TotalPrice:    totalPrice,
-		Discount:      disc,
-		TotalBill:     totalBill,
-		CreatedAt:     time.Now(),
-		ProductStatus: productStatus,
-		OrderStatus:   "pending",
+		UserId:            userId,
+		CustomerId:        uCart.CustomerId,
+		TotalPrice:        totalPrice,
+		Discount:          disc,
+		TotalBill:         totalBill,
+		CreatedAt:         time.Now(),
+		ProductStatus:     productStatus,
+		TransactionStatus: "pending",
 	}
 }
 
@@ -197,3 +197,8 @@ func (tq *transactionQuery) AddBuy(userId uint, uCart transaction.Cart) (transac
 
 	return DataToCoreT(transInput), nil
 }
+
+// func (tq *transactionQuery) GetTransactionHistory(userId uint, status string) ([]transaction.Core, error) {
+// 	trans := []transaction.Core{}
+
+// }
