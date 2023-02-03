@@ -75,8 +75,24 @@ func (ts *transSvc) GetTransactionHistory(token interface{}, status, from, to st
 		} else {
 			msg = "server problem"
 		}
-		log.Println("error calling getorderhistory data in service: ", err.Error())
+		log.Println("error calling gettransactionhistory data in service: ", err.Error())
 		return []transaction.Core{}, errors.New(msg)
+	}
+
+	return res, nil
+}
+
+func (ts *transSvc) GetTransactionDetails(transactionId uint) (transaction.TransactionRes, error) {
+	res, err := ts.qry.GetTransactionDetails(transactionId)
+	if err != nil {
+		msg := ""
+		if strings.Contains(err.Error(), "not found") {
+			msg = "data not found"
+		} else {
+			msg = "server problem"
+		}
+		log.Println("error calling GetTransactionDetails data in service: ", err.Error())
+		return transaction.TransactionRes{}, errors.New(msg)
 	}
 
 	return res, nil
