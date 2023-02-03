@@ -55,6 +55,50 @@ func (_m *TransactionService) AddSell(token interface{}, uCart transaction.Cart)
 	return r0, r1
 }
 
+// GetTransactionDetails provides a mock function with given fields: transactionId
+func (_m *TransactionService) GetTransactionDetails(transactionId uint) (transaction.TransactionRes, error) {
+	ret := _m.Called(transactionId)
+
+	var r0 transaction.TransactionRes
+	if rf, ok := ret.Get(0).(func(uint) transaction.TransactionRes); ok {
+		r0 = rf(transactionId)
+	} else {
+		r0 = ret.Get(0).(transaction.TransactionRes)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint) error); ok {
+		r1 = rf(transactionId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetTransactionHistory provides a mock function with given fields: token, status, from, to
+func (_m *TransactionService) GetTransactionHistory(token interface{}, status string, from string, to string) ([]transaction.Core, error) {
+	ret := _m.Called(token, status, from, to)
+
+	var r0 []transaction.Core
+	if rf, ok := ret.Get(0).(func(interface{}, string, string, string) []transaction.Core); ok {
+		r0 = rf(token, status, from, to)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]transaction.Core)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(interface{}, string, string, string) error); ok {
+		r1 = rf(token, status, from, to)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 type mockConstructorTestingTNewTransactionService interface {
 	mock.TestingT
 	Cleanup(func())
