@@ -60,6 +60,7 @@ func main() {
 	e.GET("/products/admin", prodHdl.GetAdminProducts(), middleware.JWT([]byte(config.JWT_KEY)))
 
 	e.POST("/transactions", transHdl.AddSell(), middleware.JWT([]byte(config.JWT_KEY)))
+	e.POST("/transactions/buy", transHdl.AddBuy(), middleware.JWT([]byte(config.JWT_KEY)))
 
 	if err := e.Start(":8000"); err != nil {
 		log.Println(err.Error())

@@ -148,7 +148,7 @@ func (tq *transactionQuery) AddBuy(userId uint, uCart transaction.Cart) (transac
 	totalBill, disc := tq.Discount(uCart, totalPrice)
 
 	//mmebuat transaksi
-	transInput := tq.CreateTransaction(userId, uCart, "sell", totalPrice, disc, totalBill)
+	transInput := tq.CreateTransaction(userId, uCart, "buy", totalPrice, disc, totalBill)
 
 	//input transaksi ke tabel
 	if err := tx.Create(&transInput).Error; err != nil {

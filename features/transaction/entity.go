@@ -24,6 +24,7 @@ type Core struct {
 
 type TransactionHandler interface {
 	AddSell() echo.HandlerFunc
+	AddBuy() echo.HandlerFunc
 	// GetOrderHistory() echo.HandlerFunc
 	// GetSellingHistory() echo.HandlerFunc
 	// NotificationTransactionStatus() echo.HandlerFunc

@@ -46,7 +46,7 @@ func (ts *transSvc) AddBuy(token interface{}, uCart transaction.Cart) (transacti
 		return transaction.Core{}, errors.New("user not found")
 	}
 
-	res, err := ts.qry.AddSell(uint(userId), uCart)
+	res, err := ts.qry.AddBuy(uint(userId), uCart)
 	if err != nil {
 		msg := ""
 		if strings.Contains(err.Error(), "bad request") {
