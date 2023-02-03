@@ -59,6 +59,7 @@ func main() {
 	e.GET("/products/:product_id", prodHdl.GetProductById(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.GET("/products/admin", prodHdl.GetAdminProducts(), middleware.JWT([]byte(config.JWT_KEY)))
 
+	//transaction
 	e.POST("/transactions", transHdl.AddSell(), middleware.JWT([]byte(config.JWT_KEY)))
 	e.POST("/transactions/buy", transHdl.AddBuy(), middleware.JWT([]byte(config.JWT_KEY)))
 
