@@ -13,6 +13,27 @@ type TransactionData struct {
 	mock.Mock
 }
 
+// AddBuy provides a mock function with given fields: userId, uCart
+func (_m *TransactionData) AddBuy(userId uint, uCart transaction.Cart) (transaction.Core, error) {
+	ret := _m.Called(userId, uCart)
+
+	var r0 transaction.Core
+	if rf, ok := ret.Get(0).(func(uint, transaction.Cart) transaction.Core); ok {
+		r0 = rf(userId, uCart)
+	} else {
+		r0 = ret.Get(0).(transaction.Core)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint, transaction.Cart) error); ok {
+		r1 = rf(userId, uCart)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // AddSell provides a mock function with given fields: userId, uCart
 func (_m *TransactionData) AddSell(userId uint, uCart transaction.Cart) (transaction.Core, error) {
 	ret := _m.Called(userId, uCart)
