@@ -55,9 +55,10 @@ func (tq *transactionQuery) CreateTransaction(userId uint, uCart transaction.Car
 	}
 }
 
-func (tq *transactionQuery) CreateNumberInvoice(transInput Transaction) string {
+// INV/tanggaltransaksi/(buy/sell)/idtransaction
+func (tq *transactionQuery) CreateNumberInvoice(transInput Transaction, productStatus string) string {
 	cnvID := strconv.Itoa(int(transInput.ID))
-	invNo := fmt.Sprintf("INV/" + transInput.CreatedAt.Format("20060102") + "/" + cnvID)
+	invNo := fmt.Sprintf("INV/" + transInput.CreatedAt.Format("20060102") + "/" + productStatus + "/" + cnvID)
 	return invNo
 }
 
@@ -78,7 +79,7 @@ func (tq *transactionQuery) CreateTransProds(transInput Transaction, uCart trans
 
 func (tq *transactionQuery) AddSell(userId uint, uCart transaction.Cart) (transaction.Core, error) {
 	tx := tq.db.Begin()
-
+	productStatus := "sell"
 	//menghitung total price
 	totalPrice := tq.TotalPrice(uCart)
 
@@ -86,7 +87,7 @@ func (tq *transactionQuery) AddSell(userId uint, uCart transaction.Cart) (transa
 	totalBill, disc := tq.Discount(uCart, totalPrice)
 
 	//mmebuat transaksi
-	transInput := tq.CreateTransaction(userId, uCart, "sell", totalPrice, disc, totalBill)
+	transInput := tq.CreateTransaction(userId, uCart, productStatus, totalPrice, disc, totalBill)
 
 	//input transaksi ke tabel
 	if err := tx.Create(&transInput).Error; err != nil {
@@ -96,7 +97,7 @@ func (tq *transactionQuery) AddSell(userId uint, uCart transaction.Cart) (transa
 	}
 
 	//membuat nomor invoice
-	invNo := tq.CreateNumberInvoice(transInput)
+	invNo := tq.CreateNumberInvoice(transInput, productStatus)
 
 	//save no invoice ke tabel
 	transInput.InvoiceNumber = invNo
@@ -140,7 +141,7 @@ func (tq *transactionQuery) AddSell(userId uint, uCart transaction.Cart) (transa
 
 func (tq *transactionQuery) AddBuy(userId uint, uCart transaction.Cart) (transaction.Core, error) {
 	tx := tq.db.Begin()
-
+	productStatus := "buy"
 	//menghitung total price
 	totalPrice := tq.TotalPrice(uCart)
 
@@ -148,7 +149,7 @@ func (tq *transactionQuery) AddBuy(userId uint, uCart transaction.Cart) (transac
 	totalBill, disc := tq.Discount(uCart, totalPrice)
 
 	//mmebuat transaksi
-	transInput := tq.CreateTransaction(userId, uCart, "buy", totalPrice, disc, totalBill)
+	transInput := tq.CreateTransaction(userId, uCart, productStatus, totalPrice, disc, totalBill)
 
 	//input transaksi ke tabel
 	if err := tx.Create(&transInput).Error; err != nil {
@@ -158,7 +159,7 @@ func (tq *transactionQuery) AddBuy(userId uint, uCart transaction.Cart) (transac
 	}
 
 	//membuat nomor invoice
-	invNo := tq.CreateNumberInvoice(transInput)
+	invNo := tq.CreateNumberInvoice(transInput, productStatus)
 
 	//save no invoice ke tabel
 	transInput.InvoiceNumber = invNo
@@ -177,7 +178,7 @@ func (tq *transactionQuery) AddBuy(userId uint, uCart transaction.Cart) (transac
 	req := &snap.Request{
 		TransactionDetails: midtrans.TransactionDetails{
 			OrderID:  transInput.InvoiceNumber,
-			GrossAmt: int64(totalPrice),
+			GrossAmt: int64(totalBill),
 		},
 	}
 	snapResp, err := s.CreateTransaction(req)
@@ -194,5 +195,5 @@ func (tq *transactionQuery) AddBuy(userId uint, uCart transaction.Cart) (transac
 	// commit tx transaksi
 	tx.Commit()
 
-	return transaction.Core{}, nil
+	return DataToCoreT(transInput), nil
 }
