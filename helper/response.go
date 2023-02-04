@@ -51,7 +51,7 @@ func PrintErrorResponse(msg string) (int, interface{}) {
 	} else if strings.Contains(msg, "token error") && strings.Contains(msg, "customer") {
 		log.Println("error running register service: extract token error")
 		code = http.StatusBadRequest
-		resp["message"] = "extract token error, not allowed to access customer"
+		resp["message"] = "extract token error/not allowed to access customer"
 	} else {
 		log.Println("error running register service")
 		code = http.StatusInternalServerError
