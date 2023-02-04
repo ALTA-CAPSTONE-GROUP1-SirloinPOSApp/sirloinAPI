@@ -292,3 +292,75 @@ func TestUpdate(t *testing.T) {
 		assert.Equal(t, res.Name, "")
 	})
 }
+
+func TestGetUserCustomers(t *testing.T) {
+
+	data := mocks.NewCustomerData(t)
+	expectedData := []customer.Core{{
+		Email:       "mfauzanptra@gmail.com",
+		Name:        "Muhamad Fauzan Putra",
+		PhoneNumber: "085659171799",
+		Address:     "Jln. Lembayung No 24, Bantul, Yogyakarta",
+	}, {
+		Email:       "arimrizal94@gmail.com",
+		Name:        "Ari Muhammad Rizal",
+		PhoneNumber: "081230255973",
+		Address:     "Kab. Kediri, Jawa Timur",
+	}}
+	userId := 2
+
+	t.Run("success get all customers", func(t *testing.T) {
+		data.On("GetUserCustomers", uint(userId)).Return(expectedData, nil).Once()
+		srv := New(data)
+		_, token := helper.GenerateJWT(2)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		res, err := srv.GetUserCustomers(pToken)
+		assert.Nil(t, err)
+		assert.Equal(t, len(res), len(expectedData))
+		data.AssertExpectations(t)
+	})
+
+	t.Run("server problem", func(t *testing.T) {
+		data.On("GetUserCustomers", uint(userId)).Return([]customer.Core{}, errors.New("server problem")).Once()
+		srv := New(data)
+
+		_, token := helper.GenerateJWT(userId)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		res, err := srv.GetUserCustomers(pToken)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "server")
+		assert.Equal(t, 0, len(res))
+		data.AssertExpectations(t)
+	})
+
+	t.Run("data not found", func(t *testing.T) {
+		data.On("GetUserCustomers", uint(userId)).Return([]customer.Core{}, errors.New("data not found")).Once()
+
+		srv := New(data)
+
+		_, token := helper.GenerateJWT(userId)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		res, err := srv.GetUserCustomers(pToken)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "not found")
+		assert.Equal(t, 0, len(res))
+		data.AssertExpectations(t)
+	})
+
+	t.Run("jwt not valid", func(t *testing.T) {
+		srv := New(data)
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		res, err := srv.GetUserCustomers(pToken)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "token error")
+		assert.Equal(t, 0, len(res))
+	})
+}

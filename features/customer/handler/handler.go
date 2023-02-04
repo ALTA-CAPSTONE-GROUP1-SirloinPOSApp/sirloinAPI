@@ -56,7 +56,7 @@ func (cc *customerControl) Update() echo.HandlerFunc {
 			updatedData.Email == "" &&
 			updatedData.Address == "" &&
 			updatedData.PhoneNumber == "" {
-			return c.JSON(http.StatusBadRequest, "wrong input, no input field is filled")
+			return c.JSON(http.StatusBadRequest, "wrong input format/no input field is filled")
 		}
 
 		// res, err := cc.srv.Update(token, uint(cCusId), *ToCore(input))
