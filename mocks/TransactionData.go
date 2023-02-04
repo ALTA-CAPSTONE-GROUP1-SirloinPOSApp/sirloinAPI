@@ -55,6 +55,50 @@ func (_m *TransactionData) AddSell(userId uint, uCart transaction.Cart) (transac
 	return r0, r1
 }
 
+// GetAdminTransactionDetails provides a mock function with given fields: transactionId
+func (_m *TransactionData) GetAdminTransactionDetails(transactionId uint) (transaction.AdmTransactionResDet, error) {
+	ret := _m.Called(transactionId)
+
+	var r0 transaction.AdmTransactionResDet
+	if rf, ok := ret.Get(0).(func(uint) transaction.AdmTransactionResDet); ok {
+		r0 = rf(transactionId)
+	} else {
+		r0 = ret.Get(0).(transaction.AdmTransactionResDet)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(uint) error); ok {
+		r1 = rf(transactionId)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetAdminTransactionHistory provides a mock function with given fields: status, from, to
+func (_m *TransactionData) GetAdminTransactionHistory(status string, from string, to string) ([]transaction.AdmTransactionRes, error) {
+	ret := _m.Called(status, from, to)
+
+	var r0 []transaction.AdmTransactionRes
+	if rf, ok := ret.Get(0).(func(string, string, string) []transaction.AdmTransactionRes); ok {
+		r0 = rf(status, from, to)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]transaction.AdmTransactionRes)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string, string, string) error); ok {
+		r1 = rf(status, from, to)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetTransactionDetails provides a mock function with given fields: transactionId
 func (_m *TransactionData) GetTransactionDetails(transactionId uint) (transaction.TransactionRes, error) {
 	ret := _m.Called(transactionId)
