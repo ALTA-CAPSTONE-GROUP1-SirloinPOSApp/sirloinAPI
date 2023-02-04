@@ -106,7 +106,7 @@ func (uuc *userUseCase) Update(userToken interface{}, updateData user.Core) (use
 		updateData.Password = hashed
 	}
 	if updateData.BusinessName != "" {
-		err := helper.Validasi(helper.ToValidate("bn", updateData))
+		err := helper.Validasi(helper.ToValidate("as", updateData))
 		if err != nil {
 			return user.Core{}, err
 		}

@@ -12,10 +12,13 @@ type Core struct {
 
 type CustomerHandler interface {
 	Add() echo.HandlerFunc
+	Update() echo.HandlerFunc
 }
 type CustomerService interface {
 	Add(userToken interface{}, newCustomer Core) (Core, error)
+	Update(userToken interface{}, customerId uint, updateData Core) (Core, error)
 }
 type CustomerData interface {
 	Add(userId uint, newCustomer Core) (Core, error)
+	Update(userId, customerId uint, updateData Core) (Core, error)
 }
