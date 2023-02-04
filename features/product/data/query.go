@@ -25,13 +25,13 @@ func (pq *productQuery) Add(userId uint, newProduct product.Core, productImage *
 	cnvP.UserId = userId
 
 	existed := 0
-	pq.db.Raw("SELECT COUNT(*) FROM products p WHERE p.product_name = ?", cnvP.ProductName).Scan(&existed)
+	pq.db.Raw("SELECT COUNT(*) FROM products p WHERE p.product_name = ? AND user_id = ?", cnvP.ProductName, userId).Scan(&existed)
 	if existed >= 1 {
 		log.Println("duplicated product")
 		return product.Core{}, errors.New("duplicated product")
 	}
 	existed = 0
-	pq.db.Raw("SELECT COUNT(*) FROM products p WHERE p.upc = ?", cnvP.Upc).Scan(&existed)
+	pq.db.Raw("SELECT COUNT(*) FROM products p WHERE p.upc = ? AND user_id = ?", cnvP.Upc, userId).Scan(&existed)
 	if existed >= 1 {
 		log.Println("duplicated product")
 		return product.Core{}, errors.New("duplicated product")

@@ -33,6 +33,18 @@ func (pc *productControl) Add() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("wrong input"))
 		}
 
+		if input.Upc == "" {
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("upc shouldn't be empty"))
+		} else if input.ProductName == "" {
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("product_name shouldn't be empty"))
+		} else if input.Category == "" {
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("category shouldn't be empty"))
+		} else if input.Price == 0.0 {
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("price shouldn't be empty"))
+		} else if input.Stock == 0 {
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("stock shouldn't be empty"))
+		}
+
 		file, err := c.FormFile("product_image")
 		if file != nil && err == nil {
 			productImage = file
