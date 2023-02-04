@@ -274,4 +274,69 @@ func TestGetTransactionHistory(t *testing.T) {
 		assert.ErrorContains(t, err, "user not found")
 		assert.Equal(t, 0, len(res))
 	})
+
+}
+
+func TestGetTransactionDetails(t *testing.T) {
+	data := mocks.NewTransactionData(t)
+	transactionId := 1
+	expectedData := transaction.TransactionRes{
+		ID:                1,
+		CustomerId:        1,
+		CustomerName:      "customer1",
+		TotalPrice:        550000,
+		Discount:          0.1,
+		TotalBill:         495000,
+		CreatedAt:         ToTime("2023-01-26T02:11:48"),
+		TransactionStatus: "success",
+		InvoiceUrl:        "https://mediasosial.s3.ap-southeast-1.amazonaws.com/invoice/InvoiceSimple-PDF-Template.pdf",
+		TransactionProductRes: []transaction.TransactionProductRes{
+			{
+				ProductId: 1,
+				Quantity:  15,
+				Price:     5000,
+			},
+			{
+				ProductId: 2,
+				Quantity:  10,
+				Price:     20000,
+			},
+			{
+				ProductId: 7,
+				Quantity:  20,
+				Price:     12000,
+			},
+		},
+	}
+
+	t.Run("success get transaction history", func(t *testing.T) {
+		data.On("GetTransactionDetails", uint(transactionId)).Return(expectedData, nil).Once()
+		srv := New(data)
+
+		res, err := srv.GetTransactionDetails(uint(transactionId))
+		assert.Nil(t, err)
+		assert.Equal(t, expectedData.ID, res.ID)
+		data.AssertExpectations(t)
+	})
+
+	t.Run("server problem", func(t *testing.T) {
+		data.On("GetTransactionDetails", uint(transactionId)).Return(transaction.TransactionRes{}, errors.New("server problem")).Once()
+		srv := New(data)
+
+		res, err := srv.GetTransactionDetails(uint(transactionId))
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "server")
+		assert.Equal(t, res.TransactionStatus, "")
+		data.AssertExpectations(t)
+	})
+	t.Run("data not found", func(t *testing.T) {
+		data.On("GetTransactionDetails", uint(transactionId)).Return(transaction.TransactionRes{}, errors.New("data not found")).Once()
+		srv := New(data)
+
+		res, err := srv.GetTransactionDetails(uint(transactionId))
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "not found")
+		assert.Equal(t, res.TransactionStatus, "")
+		data.AssertExpectations(t)
+	})
 }
