@@ -48,6 +48,10 @@ func PrintErrorResponse(msg string) (int, interface{}) {
 		log.Println("error running register service: Email must be email format")
 		code = http.StatusBadRequest
 		resp["message"] = "incorrect e-mail format"
+	} else if strings.Contains(msg, "token error") && strings.Contains(msg, "customer") {
+		log.Println("error running register service: extract token error")
+		code = http.StatusBadRequest
+		resp["message"] = "extract token error, not allowed to access customer"
 	} else {
 		log.Println("error running register service")
 		code = http.StatusInternalServerError
