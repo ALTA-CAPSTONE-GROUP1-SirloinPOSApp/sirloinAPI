@@ -6,7 +6,6 @@ import (
 	"mime/multipart"
 	"path/filepath"
 	_config "sirloinapi/config"
-	"strconv"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -98,11 +97,13 @@ func UploadProductPhotoS3(file multipart.FileHeader, productId int) (string, err
 	defer src.Close()
 	ext := filepath.Ext(file.Filename)
 
-	cnv := strconv.Itoa(productId)
+	// cnv := strconv.Itoa(productId)
 	res, err := uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(_config.AWS_BUCKET),
-		Key:    aws.String("files/products/" + cnv + "/product_photo_" + fmt.Sprint(productId) + ext),
-		Body:   src,
+		Bucket:      aws.String(_config.AWS_BUCKET),
+		Key:         aws.String("files/products/product_photo_" + fmt.Sprint(productId) + ext),
+		Body:        src,
+		ContentType: aws.String("image"),
+		ACL:         aws.String("public-read"),
 	})
 	if err != nil {
 		return "", errors.New("problem with upload post photo")
