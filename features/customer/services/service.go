@@ -24,9 +24,9 @@ func New(cd customer.CustomerData) customer.CustomerService {
 
 func (cuc *customerUseCase) Add(userToken interface{}, newCustomer customer.Core) (customer.Core, error) {
 	userId := helper.ExtractToken(userToken)
-	if userId <= 0 {
-		log.Println("extract token error")
-		return customer.Core{}, errors.New("extract token error")
+	if userId <= 1 {
+		log.Println("extract token error, not allowed to access customer")
+		return customer.Core{}, errors.New("extract token error, not allowed to access customer")
 	}
 	err := helper.Validasi(helper.ToValidate("customer", newCustomer))
 	if err != nil {
@@ -52,9 +52,9 @@ func (cuc *customerUseCase) Add(userToken interface{}, newCustomer customer.Core
 
 func (cuc *customerUseCase) Update(userToken interface{}, customerId uint, updateData customer.Core) (customer.Core, error) {
 	userId := helper.ExtractToken(userToken)
-	if userId <= 0 {
-		log.Println("extract token error")
-		return customer.Core{}, errors.New("extract token error")
+	if userId <= 1 {
+		log.Println("extract token error, not allowed to access customer")
+		return customer.Core{}, errors.New("extract token error, not allowed to access customer")
 	}
 	if updateData.Name != "" {
 		err := helper.Validasi(helper.ToValidate("as", updateData))
@@ -96,9 +96,9 @@ func (cuc *customerUseCase) Update(userToken interface{}, customerId uint, updat
 
 func (cuc *customerUseCase) GetUserCustomers(token interface{}) ([]customer.Core, error) {
 	userId := helper.ExtractToken(token)
-	if userId <= 0 {
-		log.Println("extract token error")
-		return []customer.Core{}, errors.New("extract token error")
+	if userId <= 1 {
+		log.Println("extract token error, not allowed to access customer")
+		return []customer.Core{}, errors.New("extract token error, not allowed to access customer")
 	}
 	res, err := cuc.qry.GetUserCustomers(uint(userId))
 	if err != nil {
@@ -115,9 +115,9 @@ func (cuc *customerUseCase) GetUserCustomers(token interface{}) ([]customer.Core
 
 func (cuc *customerUseCase) GetCustomerById(token interface{}, customerId uint) (customer.Core, error) {
 	userId := helper.ExtractToken(token)
-	if userId <= 0 {
-		log.Println("extract token error")
-		return customer.Core{}, errors.New("extract token error")
+	if userId <= 1 {
+		log.Println("extract token error, not allowed to access customer")
+		return customer.Core{}, errors.New("extract token error, not allowed to access customer")
 	}
 	res, err := cuc.qry.GetCustomerById(uint(userId), customerId)
 	if err != nil {

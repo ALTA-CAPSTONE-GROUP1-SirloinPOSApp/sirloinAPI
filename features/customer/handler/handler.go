@@ -52,6 +52,12 @@ func (cc *customerControl) Update() echo.HandlerFunc {
 		if err := c.Bind(&updatedData); err != nil {
 			return c.JSON(http.StatusBadRequest, "wrong input format")
 		}
+		if updatedData.Name == "" &&
+			updatedData.Email == "" &&
+			updatedData.Address == "" &&
+			updatedData.PhoneNumber == "" {
+			return c.JSON(http.StatusBadRequest, "wrong input, no input field is filled")
+		}
 
 		// res, err := cc.srv.Update(token, uint(cCusId), *ToCore(input))
 		_, err := cc.srv.Update(token, uint(cCusId), *ToCore(updatedData))
