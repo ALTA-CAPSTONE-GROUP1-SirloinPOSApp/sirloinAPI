@@ -1,7 +1,6 @@
 package helper
 
 import (
-	"errors"
 	"fmt"
 	"mime/multipart"
 	"path/filepath"
@@ -105,7 +104,7 @@ func UploadProductPhotoS3(file multipart.FileHeader, productId int) (string, err
 		Body:   src,
 	})
 	if err != nil {
-		return "", errors.New("problem with upload post photo")
+		return "", err
 	}
 
 	return res.Location, nil
