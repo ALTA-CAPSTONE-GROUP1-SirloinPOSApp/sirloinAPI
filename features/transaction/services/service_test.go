@@ -340,3 +340,141 @@ func TestGetTransactionDetails(t *testing.T) {
 		data.AssertExpectations(t)
 	})
 }
+
+func TestGetAdminTransactionHistory(t *testing.T) {
+	data := mocks.NewTransactionData(t)
+	userId := 2
+
+	expectedData := []transaction.AdmTransactionRes{
+		{
+			ID:                1,
+			TenantId:          1,
+			TenantName:        "customer1",
+			TotalBill:         495000,
+			CreatedAt:         ToTime("2023-01-26T02:11:48"),
+			TransactionStatus: "success",
+			InvoiceNumber:     "INV/01",
+			InvoiceUrl:        "invoice.pdf",
+			PaymentUrl:        "url",
+		},
+		{
+			ID:                2,
+			TenantId:          2,
+			TenantName:        "customer2",
+			TotalBill:         900000,
+			CreatedAt:         ToTime("2023-01-27T02:11:48"),
+			TransactionStatus: "success",
+			InvoiceNumber:     "INV/02",
+			InvoiceUrl:        "invoice.pdf",
+			PaymentUrl:        "url",
+		},
+	}
+	from := "2022-01-01"
+	to := "2022-12-31"
+	status := "sell"
+	t.Run("success get admin transaction history", func(t *testing.T) {
+		data.On("GetAdminTransactionHistory", status, from, to).Return(expectedData, nil).Once()
+		srv := New(data)
+
+		_, token := helper.GenerateJWT(userId)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		res, err := srv.GetAdminTransactionHistory(status, from, to)
+		assert.Nil(t, err)
+		assert.Equal(t, len(res), len(expectedData))
+		data.AssertExpectations(t)
+	})
+
+	t.Run("server problem", func(t *testing.T) {
+		data.On("GetAdminTransactionHistory", status, from, to).Return([]transaction.AdmTransactionRes{}, errors.New("server problem")).Once()
+		srv := New(data)
+
+		_, token := helper.GenerateJWT(userId)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		res, err := srv.GetAdminTransactionHistory(status, from, to)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "server")
+		assert.Equal(t, 0, len(res))
+		data.AssertExpectations(t)
+	})
+
+	t.Run("data not found", func(t *testing.T) {
+		data.On("GetAdminTransactionHistory", status, from, to).Return([]transaction.AdmTransactionRes{}, errors.New("data not found")).Once()
+		srv := New(data)
+
+		_, token := helper.GenerateJWT(userId)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		res, err := srv.GetAdminTransactionHistory(status, from, to)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "not found")
+		assert.Equal(t, 0, len(res))
+		data.AssertExpectations(t)
+	})
+}
+
+func TestGetAdminTransactionDetails(t *testing.T) {
+	data := mocks.NewTransactionData(t)
+	transactionId := 1
+	expectedData := transaction.AdmTransactionResDet{
+		ID:                1,
+		TenantId:          1,
+		TenantName:        "customer1",
+		TotalBill:         495000,
+		CreatedAt:         ToTime("2023-01-26T02:11:48"),
+		TransactionStatus: "success",
+		InvoiceUrl:        "https://mediasosial.s3.ap-southeast-1.amazonaws.com/invoice/InvoiceSimple-PDF-Template.pdf",
+		TransactionProductRes: []transaction.TransactionProductRes{
+			{
+				ProductId: 1,
+				Quantity:  15,
+				Price:     5000,
+			},
+			{
+				ProductId: 2,
+				Quantity:  10,
+				Price:     20000,
+			},
+			{
+				ProductId: 7,
+				Quantity:  20,
+				Price:     12000,
+			},
+		},
+	}
+
+	t.Run("success get admin transaction detail", func(t *testing.T) {
+		data.On("GetAdminTransactionDetails", uint(transactionId)).Return(expectedData, nil).Once()
+		srv := New(data)
+
+		res, err := srv.GetAdminTransactionDetails(uint(transactionId))
+		assert.Nil(t, err)
+		assert.Equal(t, expectedData.ID, res.ID)
+		data.AssertExpectations(t)
+	})
+
+	t.Run("server problem", func(t *testing.T) {
+		data.On("GetAdminTransactionDetails", uint(transactionId)).Return(transaction.AdmTransactionResDet{}, errors.New("server problem")).Once()
+		srv := New(data)
+
+		res, err := srv.GetAdminTransactionDetails(uint(transactionId))
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "server")
+		assert.Equal(t, res.TransactionStatus, "")
+		data.AssertExpectations(t)
+	})
+	t.Run("data not found", func(t *testing.T) {
+		data.On("GetAdminTransactionDetails", uint(transactionId)).Return(transaction.AdmTransactionResDet{}, errors.New("data not found")).Once()
+		srv := New(data)
+
+		res, err := srv.GetAdminTransactionDetails(uint(transactionId))
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "not found")
+		assert.Equal(t, res.TransactionStatus, "")
+		data.AssertExpectations(t)
+	})
+}
