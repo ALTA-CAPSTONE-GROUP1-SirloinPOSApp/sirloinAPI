@@ -97,3 +97,33 @@ func (ts *transSvc) GetTransactionDetails(transactionId uint) (transaction.Trans
 
 	return res, nil
 }
+func (ts *transSvc) GetAdminTransactionHistory(status, from, to string) ([]transaction.AdmTransactionRes, error) {
+	res, err := ts.qry.GetAdminTransactionHistory(status, from, to)
+	if err != nil {
+		msg := ""
+		if strings.Contains(err.Error(), "not found") {
+			msg = "data not found"
+		} else {
+			msg = "server problem"
+		}
+		log.Println("error calling GetAdminTransactionHistory data in service: ", err.Error())
+		return []transaction.AdmTransactionRes{}, errors.New(msg)
+	}
+
+	return res, nil
+}
+func (ts *transSvc) GetAdminTransactionDetails(transactionId uint) (transaction.AdmTransactionResDet, error) {
+	res, err := ts.qry.GetAdminTransactionDetails(transactionId)
+	if err != nil {
+		msg := ""
+		if strings.Contains(err.Error(), "not found") {
+			msg = "data not found"
+		} else {
+			msg = "server problem"
+		}
+		log.Println("error calling GetTransactionDetails data in service: ", err.Error())
+		return transaction.AdmTransactionResDet{}, errors.New(msg)
+	}
+
+	return res, nil
+}

@@ -203,13 +203,13 @@ func (tq *transactionQuery) GetTransactionHistory(userId uint, status, from, to 
 
 	var err error
 	if from == "" && to == "" {
-		err = tq.db.Raw("SELECT t.id , c.id customer_id , c.name customer_name , total_price , t.created_at , transaction_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN customers c ON t.customer_id = c.id WHERE t.user_id = ? AND product_status = ?", userId, status).Scan(&trans).Error
+		err = tq.db.Raw("SELECT t.id , c.id customer_id , c.name customer_name , total_price , discount , total_bill , t.created_at , transaction_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN customers c ON t.customer_id = c.id WHERE t.user_id = ? AND product_status = ?", userId, status).Scan(&trans).Error
 	} else if to == "" {
-		err = tq.db.Raw("SELECT t.id , c.id customer_id , c.name customer_name , total_price , t.created_at , transaction_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN customers c ON t.customer_id = c.id WHERE t.user_id = ? AND product_status = ? AND t.created_at >= ?", userId, status, from).Scan(&trans).Error
+		err = tq.db.Raw("SELECT t.id , c.id customer_id , c.name customer_name , total_price , discount , total_bill , t.created_at , transaction_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN customers c ON t.customer_id = c.id WHERE t.user_id = ? AND product_status = ? AND t.created_at >= ?", userId, status, from).Scan(&trans).Error
 	} else if from == "" {
-		err = tq.db.Raw("SELECT t.id , c.id customer_id , c.name customer_name , total_price , t.created_at , transaction_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN customers c ON t.customer_id = c.id WHERE t.user_id = ? AND product_status = ? AND t.created_at <= ?", userId, status, to).Scan(&trans).Error
+		err = tq.db.Raw("SELECT t.id , c.id customer_id , c.name customer_name , total_price , discount , total_bill , t.created_at , transaction_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN customers c ON t.customer_id = c.id WHERE t.user_id = ? AND product_status = ? AND t.created_at <= ?", userId, status, to).Scan(&trans).Error
 	} else {
-		err = tq.db.Raw("SELECT t.id , c.id customer_id , c.name customer_name , total_price , t.created_at , transaction_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN customers c ON t.customer_id = c.id WHERE t.user_id = ? AND product_status = ? AND t.created_at >= ? AND t.created_at <= ?", userId, status, from, to).Scan(&trans).Error
+		err = tq.db.Raw("SELECT t.id , c.id customer_id , c.name customer_name , total_price , discount , total_bill , t.created_at , transaction_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN customers c ON t.customer_id = c.id WHERE t.user_id = ? AND product_status = ? AND t.created_at >= ? AND t.created_at <= ?", userId, status, from, to).Scan(&trans).Error
 	}
 	if err != nil {
 		log.Println("error query get transactions history: ", err)
@@ -235,6 +235,48 @@ func (tq *transactionQuery) GetTransactionDetails(transactionId uint) (transacti
 	if err != nil {
 		log.Println("error select transaction_product: ", err.Error())
 		return transaction.TransactionRes{}, err
+	}
+
+	transR.TransactionProductRes = append(transR.TransactionProductRes, tp...)
+
+	return transR, nil
+}
+func (tq *transactionQuery) GetAdminTransactionHistory(status, from, to string) ([]transaction.AdmTransactionRes, error) {
+	trans := []transaction.AdmTransactionRes{}
+
+	var err error
+	if from == "" && to == "" {
+		err = tq.db.Raw("SELECT t.id , user_id tenant_id , business_name tenant_name , total_bill , t.created_at , transaction_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN users u ON u.id = t.user_id WHERE product_status = ?", status).Scan(&trans).Error
+	} else if to == "" {
+		err = tq.db.Raw("SELECT t.id , user_id tenant_id , business_name tenant_name , total_bill , t.created_at , transaction_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN users u ON u.id = t.user_id WHERE product_status = ? AND t.created_at >= ?", status, from).Scan(&trans).Error
+	} else if from == "" {
+		err = tq.db.Raw("SELECT t.id , user_id tenant_id , business_name tenant_name , total_bill , t.created_at , transaction_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN users u ON u.id = t.user_id WHERE product_status = ? AND t.created_at <= ?", status, to).Scan(&trans).Error
+	} else {
+		err = tq.db.Raw("SELECT t.id , user_id tenant_id , business_name tenant_name , total_bill , t.created_at , transaction_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN users u ON u.id = t.user_id WHERE product_status = ? AND t.created_at >= ? AND t.created_at <= ?", status, from, to).Scan(&trans).Error
+	}
+	if err != nil {
+		log.Println("error query get transactions history: ", err)
+		return []transaction.AdmTransactionRes{}, err
+	}
+
+	return trans, nil
+}
+func (tq *transactionQuery) GetAdminTransactionDetails(transactionId uint) (transaction.AdmTransactionResDet, error) {
+	trans := transaction.AdmTransactionRes{}
+
+	err := tq.db.Raw("SELECT t.id , t.customer_id , c.name customer_name , total_price , discount , total_bill , t.created_at , transaction_status , invoice_number , invoice_url , payment_url  FROM transactions t JOIN customers c ON t.customer_id = c.id WHERE t.id = ?", transactionId).Scan(&trans).Error
+	if err != nil {
+		log.Println("error select transaction: ", err.Error())
+		return transaction.AdmTransactionResDet{}, err
+	}
+
+	transR := transaction.ToAdmResp(trans)
+	tp := []transaction.TransactionProductRes{}
+
+	err = tq.db.Raw("SELECT tp.product_id , p.product_name , tp.price , quantity , tp.total_price , p.product_image FROM transaction_products tp JOIN products p ON tp.product_id = p.id WHERE transaction_id = ?", transactionId).Scan(&tp).Error
+	if err != nil {
+		log.Println("error select transaction_product: ", err.Error())
+		return transaction.AdmTransactionResDet{}, err
 	}
 
 	transR.TransactionProductRes = append(transR.TransactionProductRes, tp...)
