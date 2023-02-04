@@ -28,6 +28,15 @@ func ToCore(data Customer) customer.Core {
 	}
 }
 
+func ToCoreArr(data []Customer) []customer.Core {
+	arrRes := []customer.Core{}
+	for _, v := range data {
+		tmp := ToCore(v)
+		arrRes = append(arrRes, tmp)
+	}
+	return arrRes
+}
+
 func CoreToData(data customer.Core) Customer {
 	return Customer{
 		Model:       gorm.Model{ID: data.ID},

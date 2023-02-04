@@ -71,7 +71,9 @@ func main() {
 
 	//customer
 	e.POST("/customers", cusHdl.Add(), echojwt.JWT([]byte(config.JWT_KEY)))
-	e.PUT("/customers", cusHdl.Add(), echojwt.JWT([]byte(config.JWT_KEY)))
+	e.GET("/customers", cusHdl.GetUserCustomers(), echojwt.JWT([]byte(config.JWT_KEY)))
+	e.GET("/customers/:customer_id", cusHdl.GetCustomerById(), echojwt.JWT([]byte(config.JWT_KEY)))
+	e.PUT("/customers/:customer_id", cusHdl.Update(), echojwt.JWT([]byte(config.JWT_KEY)))
 
 	//transaction
 	e.POST("/transactions", transHdl.AddSell(), echojwt.JWT([]byte(config.JWT_KEY)))
