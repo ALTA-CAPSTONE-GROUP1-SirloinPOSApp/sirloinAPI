@@ -96,18 +96,33 @@ func (uc *userControl) Update() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		token := c.Get("user")
 
+		type RegisterRequest struct {
+			BusinessName string `json:"business_name" form:"business_name"`
+			Email        string `json:"email" form:"email"`
+			Address      string `json:"address" form:"address"`
+			PhoneNumber  string `json:"phone_number" form:"phone_number"`
+			Password     string `json:"password" form:"password"`
+		}
 		updatedData := RegisterRequest{}
 		if err := c.Bind(&updatedData); err != nil {
 			return c.JSON(http.StatusBadRequest, "wrong input format")
 		}
+		if updatedData.BusinessName == "" &&
+			updatedData.Email == "" &&
+			updatedData.Address == "" &&
+			updatedData.PhoneNumber == "" &&
+			updatedData.Password == "" {
+			return c.JSON(http.StatusBadRequest, "wrong input, no input field is filled")
+		}
 
-		res, err := uc.srv.Update(token, *ToCore(updatedData))
+		// res, err := uc.srv.Update(token, *ToCore(updatedData))
+		_, err := uc.srv.Update(token, *ToCore(updatedData))
 		if err != nil {
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
 
 		return c.JSON(http.StatusOK, map[string]interface{}{
-			"data":    res,
+			// "data":    res,
 			"message": "success update tenant profile",
 		})
 	}
