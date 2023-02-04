@@ -26,9 +26,7 @@ func (cq *customerQry) Add(userId uint, newCustomer customer.Core) (customer.Cor
 		log.Println("error create query: ", err.Error())
 		return customer.Core{}, err
 	}
-
 	newCustomer.ID = cnv.ID
-
 	return newCustomer, nil
 }
 
@@ -45,7 +43,14 @@ func (cq *customerQry) Update(userId, customerId uint, updateData customer.Core)
 		log.Println("\tupdate customer query error: ", err.Error())
 		return customer.Core{}, errors.New("not found")
 	}
-
 	return ToCore(cnvUpd), nil
+}
 
+func (cq *customerQry) GetUserCustomers(userId uint) ([]customer.Core, error) {
+	res := []Customer{}
+	if err := cq.db.Where("user_id = ?", userId).Find(&res).Error; err != nil {
+		log.Println("\terror query get all customers: ", err.Error())
+		return []customer.Core{}, errors.New("not found")
+	}
+	return ToCoreArr(res), nil
 }
