@@ -54,3 +54,12 @@ func (cq *customerQry) GetUserCustomers(userId uint) ([]customer.Core, error) {
 	}
 	return ToCoreArr(res), nil
 }
+
+func (cq *customerQry) GetCustomerById(userId, customerId uint) (customer.Core, error) {
+	res := Customer{}
+	if err := cq.db.Where("id = ? AND user_id = ?", customerId, userId).First(&res).Error; err != nil {
+		log.Println("\terror query get user customer:", err.Error())
+		return customer.Core{}, errors.New("not found")
+	}
+	return ToCore(res), nil
+}

@@ -80,3 +80,20 @@ func (cc *customerControl) GetUserCustomers() echo.HandlerFunc {
 		})
 	}
 }
+
+func (cc *customerControl) GetCustomerById() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		token := c.Get("user")
+		customerId := c.Param("customer_id")
+		cCusId, _ := strconv.Atoi(customerId)
+
+		res, err := cc.srv.GetCustomerById(token, uint(cCusId))
+		if err != nil {
+			return c.JSON(helper.PrintErrorResponse(err.Error()))
+		}
+		return c.JSON(http.StatusCreated, map[string]interface{}{
+			"data":    ToResponse(res),
+			"message": "success get customer by id",
+		})
+	}
+}

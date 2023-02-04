@@ -112,3 +112,22 @@ func (cuc *customerUseCase) GetUserCustomers(token interface{}) ([]customer.Core
 	}
 	return res, nil
 }
+
+func (cuc *customerUseCase) GetCustomerById(token interface{}, customerId uint) (customer.Core, error) {
+	userId := helper.ExtractToken(token)
+	if userId <= 0 {
+		log.Println("extract token error")
+		return customer.Core{}, errors.New("extract token error")
+	}
+	res, err := cuc.qry.GetCustomerById(uint(userId), customerId)
+	if err != nil {
+		msg := ""
+		if strings.Contains(err.Error(), "not found") {
+			msg = "data not found"
+		} else {
+			msg = "server problem"
+		}
+		return customer.Core{}, errors.New(msg)
+	}
+	return res, nil
+}
