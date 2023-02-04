@@ -19,6 +19,31 @@ type TransactionRes struct {
 	TransactionProductRes []TransactionProductRes
 }
 
+type AdmTransactionRes struct {
+	ID                uint      `json:"id"`
+	TenantId          uint      `json:"tenant_id"`
+	TenantName        string    `json:"tenant_name"`
+	TotalBill         float64   `json:"total_bill"`
+	CreatedAt         time.Time `json:"created_at"`
+	TransactionStatus string    `json:"transaction_status"`
+	InvoiceNumber     string    `json:"invoice_number"`
+	InvoiceUrl        string    `json:"invoice_url"`
+	PaymentUrl        string    `json:"payment_url"`
+}
+
+type AdmTransactionResDet struct {
+	ID                    uint      `json:"id"`
+	TenantId              uint      `json:"tenant_id"`
+	TenantName            string    `json:"tenant_name"`
+	TotalBill             float64   `json:"total_bill"`
+	CreatedAt             time.Time `json:"created_at"`
+	TransactionStatus     string    `json:"transaction_status"`
+	InvoiceNumber         string    `json:"invoice_number"`
+	InvoiceUrl            string    `json:"invoice_url"`
+	PaymentUrl            string    `json:"payment_url"`
+	TransactionProductRes []TransactionProductRes
+}
+
 type TransactionProductRes struct {
 	ProductId     uint    `json:"product_id"`
 	ProductName   string  `json:"product_name"`
@@ -35,6 +60,20 @@ func CoreToResp(data Core) TransactionRes {
 		CustomerName:      data.CustomerName,
 		TotalPrice:        data.TotalPrice,
 		Discount:          data.Discount,
+		TotalBill:         data.TotalBill,
+		CreatedAt:         data.CreatedAt,
+		TransactionStatus: data.TransactionStatus,
+		InvoiceNumber:     data.InvoiceNumber,
+		InvoiceUrl:        data.InvoiceUrl,
+		PaymentUrl:        data.PaymentUrl,
+	}
+}
+
+func ToAdmResp(data AdmTransactionRes) AdmTransactionResDet {
+	return AdmTransactionResDet{
+		ID:                data.ID,
+		TenantId:          data.TenantId,
+		TenantName:        data.TenantName,
 		TotalBill:         data.TotalBill,
 		CreatedAt:         data.CreatedAt,
 		TransactionStatus: data.TransactionStatus,
