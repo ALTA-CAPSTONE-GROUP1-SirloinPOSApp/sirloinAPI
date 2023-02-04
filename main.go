@@ -5,6 +5,7 @@ import (
 	"sirloinapi/config"
 	"sirloinapi/migration"
 
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
@@ -56,26 +57,27 @@ func main() {
 	//user
 	e.POST("/register", userHdl.Register())
 	e.POST("/login", userHdl.Login())
-	e.GET("/users", userHdl.Profile(), middleware.JWT([]byte(config.JWT_KEY)))
-	e.PUT("/users", userHdl.Update(), middleware.JWT([]byte(config.JWT_KEY)))
-	e.DELETE("/users", userHdl.Delete(), middleware.JWT([]byte(config.JWT_KEY)))
+	e.GET("/users", userHdl.Profile(), echojwt.JWT([]byte(config.JWT_KEY)))
+	e.PUT("/users", userHdl.Update(), echojwt.JWT([]byte(config.JWT_KEY)))
+	e.DELETE("/users", userHdl.Delete(), echojwt.JWT([]byte(config.JWT_KEY)))
 
 	//product
-	e.POST("/products", prodHdl.Add(), middleware.JWT([]byte(config.JWT_KEY)))
-	e.GET("/products", prodHdl.GetUserProducts(), middleware.JWT([]byte(config.JWT_KEY)))
-	e.PUT("/products/:product_id", prodHdl.Update(), middleware.JWT([]byte(config.JWT_KEY)))
-	e.DELETE("/products/:product_id", prodHdl.Delete(), middleware.JWT([]byte(config.JWT_KEY)))
-	e.GET("/products/:product_id", prodHdl.GetProductById(), middleware.JWT([]byte(config.JWT_KEY)))
-	e.GET("/products/admin", prodHdl.GetAdminProducts(), middleware.JWT([]byte(config.JWT_KEY)))
+	e.POST("/products", prodHdl.Add(), echojwt.JWT([]byte(config.JWT_KEY)))
+	e.GET("/products", prodHdl.GetUserProducts(), echojwt.JWT([]byte(config.JWT_KEY)))
+	e.PUT("/products/:product_id", prodHdl.Update(), echojwt.JWT([]byte(config.JWT_KEY)))
+	e.DELETE("/products/:product_id", prodHdl.Delete(), echojwt.JWT([]byte(config.JWT_KEY)))
+	e.GET("/products/:product_id", prodHdl.GetProductById(), echojwt.JWT([]byte(config.JWT_KEY)))
+	e.GET("/products/admin", prodHdl.GetAdminProducts(), echojwt.JWT([]byte(config.JWT_KEY)))
 
 	//customer
-	e.POST("/customers", cusHdl.Add(), middleware.JWT([]byte(config.JWT_KEY)))
+	e.POST("/customers", cusHdl.Add(), echojwt.JWT([]byte(config.JWT_KEY)))
+	e.PUT("/customers", cusHdl.Add(), echojwt.JWT([]byte(config.JWT_KEY)))
 
 	//transaction
-	e.POST("/transactions", transHdl.AddSell(), middleware.JWT([]byte(config.JWT_KEY)))
-	e.POST("/transactions/buy", transHdl.AddBuy(), middleware.JWT([]byte(config.JWT_KEY)))
-	e.GET("/transactions", transHdl.GetTransactionHistory(), middleware.JWT([]byte(config.JWT_KEY)))
-	e.GET("/transactions/:transaction_id", transHdl.GetTransactionDetails(), middleware.JWT([]byte(config.JWT_KEY)))
+	e.POST("/transactions", transHdl.AddSell(), echojwt.JWT([]byte(config.JWT_KEY)))
+	e.POST("/transactions/buy", transHdl.AddBuy(), echojwt.JWT([]byte(config.JWT_KEY)))
+	e.GET("/transactions", transHdl.GetTransactionHistory(), echojwt.JWT([]byte(config.JWT_KEY)))
+	e.GET("/transactions/:transaction_id", transHdl.GetTransactionDetails(), echojwt.JWT([]byte(config.JWT_KEY)))
 
 	if err := e.Start(":8000"); err != nil {
 		log.Println(err.Error())
