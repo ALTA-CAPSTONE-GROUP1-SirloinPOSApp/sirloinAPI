@@ -105,7 +105,7 @@ func (uc *userControl) Update() echo.HandlerFunc {
 			updatedData.Address == "" &&
 			updatedData.PhoneNumber == "" &&
 			updatedData.Password == "" {
-			return c.JSON(http.StatusBadRequest, "wrong input, no input field is filled")
+			return c.JSON(http.StatusBadRequest, "wrong input format/no input field is filled")
 		}
 
 		// res, err := uc.srv.Update(token, *ToCore(updatedData))
