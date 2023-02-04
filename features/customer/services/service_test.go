@@ -364,3 +364,67 @@ func TestGetUserCustomers(t *testing.T) {
 		assert.Equal(t, 0, len(res))
 	})
 }
+
+func TestGetCustomerById(t *testing.T) {
+	data := mocks.NewCustomerData(t)
+	expectedData := customer.Core{
+		Email:       "mfauzanptra@gmail.com",
+		Name:        "Muhamad Fauzan Putra",
+		PhoneNumber: "085659171799",
+		Address:     "Jln. Lembayung No 24, Bantul, Yogyakarta",
+	}
+	userId := 2
+	customerId := 1
+	t.Run("success get customer by id", func(t *testing.T) {
+		data.On("GetCustomerById", uint(userId), uint(customerId)).Return(expectedData, nil).Once()
+		srv := New(data)
+		_, token := helper.GenerateJWT(2)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		res, err := srv.GetCustomerById(pToken, uint(customerId))
+		assert.Nil(t, err)
+		assert.Equal(t, expectedData.Name, res.Name)
+		data.AssertExpectations(t)
+	})
+	t.Run("server problem", func(t *testing.T) {
+		data.On("GetCustomerById", uint(userId), uint(customerId)).Return(customer.Core{}, errors.New("server problem")).Once()
+		srv := New(data)
+
+		_, token := helper.GenerateJWT(userId)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		res, err := srv.GetCustomerById(pToken, uint(customerId))
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "server")
+		assert.Equal(t, res.Name, "")
+		data.AssertExpectations(t)
+	})
+
+	t.Run("data not found", func(t *testing.T) {
+		data.On("GetCustomerById", uint(userId), uint(customerId)).Return(customer.Core{}, errors.New("data not found")).Once()
+
+		srv := New(data)
+
+		_, token := helper.GenerateJWT(userId)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		res, err := srv.GetCustomerById(pToken, uint(customerId))
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "not found")
+		assert.Equal(t, res.Name, "")
+		data.AssertExpectations(t)
+	})
+	t.Run("jwt not valid", func(t *testing.T) {
+		srv := New(data)
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		res, err := srv.GetCustomerById(pToken, uint(customerId))
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "token error")
+		assert.Equal(t, res.Name, "")
+	})
+}
