@@ -123,3 +123,46 @@ func (th *TransactionHandle) GetTransactionDetails() echo.HandlerFunc {
 		})
 	}
 }
+func (th *TransactionHandle) GetAdminTransactionHistory() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		from := c.QueryParam("from")
+		to := c.QueryParam("to")
+
+		res, err := th.srv.GetAdminTransactionHistory("buy", from, to)
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("wrong input (data not found)"))
+			} else {
+				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
+			}
+		}
+
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"data":    res,
+			"message": "success get admin transaction history",
+		})
+	}
+}
+func (th *TransactionHandle) GetAdminTransactionDetails() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		transactionId := c.Param("transaction_id")
+		trId, err := strconv.Atoi(transactionId)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("wrong input (data not found)"))
+		}
+
+		res, err := th.srv.GetAdminTransactionDetails(uint(trId))
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("wrong input (data not found)"))
+			} else {
+				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
+			}
+		}
+
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"data":    res,
+			"message": "success get admin transaction history",
+		})
+	}
+}

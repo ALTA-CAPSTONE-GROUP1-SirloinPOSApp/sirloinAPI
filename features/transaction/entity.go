@@ -27,6 +27,8 @@ type TransactionHandler interface {
 	AddBuy() echo.HandlerFunc
 	GetTransactionHistory() echo.HandlerFunc
 	GetTransactionDetails() echo.HandlerFunc
+	GetAdminTransactionHistory() echo.HandlerFunc
+	GetAdminTransactionDetails() echo.HandlerFunc
 	// NotificationTransactionStatus() echo.HandlerFunc
 	// UpdateStatus() echo.HandlerFunc
 }
@@ -36,6 +38,9 @@ type TransactionService interface {
 	AddBuy(token interface{}, uCart Cart) (Core, error)
 	GetTransactionHistory(token interface{}, status, from, to string) ([]Core, error)
 	GetTransactionDetails(transactionId uint) (TransactionRes, error)
+	GetAdminTransactionHistory(status, from, to string) ([]AdmTransactionRes, error)
+	GetAdminTransactionDetails(transactionId uint) (AdmTransactionResDet, error)
+
 	// NotificationTransactionStatus(transactionId string) error
 	// UpdateStatus(orderid uint, status string) error
 }
@@ -45,6 +50,9 @@ type TransactionData interface {
 	AddBuy(userId uint, uCart Cart) (Core, error)
 	GetTransactionHistory(userId uint, status, from, to string) ([]Core, error)
 	GetTransactionDetails(transactionId uint) (TransactionRes, error)
+	GetAdminTransactionHistory(status, from, to string) ([]AdmTransactionRes, error)
+	GetAdminTransactionDetails(transactionId uint) (AdmTransactionResDet, error)
+
 	// NotificationTransactionStatus(transactionId, transStatus string) error
 	// UpdateStatus(orderid uint, status string) error
 }
