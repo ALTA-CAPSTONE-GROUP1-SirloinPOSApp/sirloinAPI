@@ -94,6 +94,7 @@ type TransactionInv struct {
 	InvoiceNumber   string    `json:"invoice_number"`
 	TransactionDate time.Time `json:"created_at"`
 	SellerName      string    `json:"seller_name"`
+	SellerEmail     string    `json:"seller_email"`
 	SellerPhone     string    `json:"seller_phone"`
 	SellerAddress   string    `json:"seller_address"`
 	CustomerName    string    `json:"customer_name"`
@@ -110,6 +111,7 @@ type TransactionDetInv struct {
 	InvoiceNumber   string    `json:"invoice_number"`
 	TransactionDate time.Time `json:"created_at"`
 	SellerName      string    `json:"seller_name"`
+	SellerEmail     string    `json:"seller_email"`
 	SellerPhone     string    `json:"seller_phone"`
 	SellerAddress   string    `json:"seller_address"`
 	CustomerName    string    `json:"customer_name"`
@@ -128,6 +130,7 @@ func InvToDetail(t TransactionInv) TransactionDetInv {
 		InvoiceNumber:   t.InvoiceNumber,
 		TransactionDate: t.TransactionDate,
 		SellerName:      t.SellerName,
+		SellerEmail:     t.SellerEmail,
 		SellerPhone:     t.SellerPhone,
 		SellerAddress:   t.SellerAddress,
 		CustomerName:    t.CustomerName,
