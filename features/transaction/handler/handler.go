@@ -215,7 +215,7 @@ func (th *TransactionHandle) UpdateStatus() echo.HandlerFunc {
 			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("wrong input"))
 		}
 
-		oid := c.Param("order_id")
+		oid := c.Param("transaction_id")
 		orderId, err := strconv.Atoi(oid)
 		if err != nil {
 			log.Println("error read parameter: ", err.Error())
@@ -232,7 +232,7 @@ func (th *TransactionHandle) UpdateStatus() echo.HandlerFunc {
 		}
 
 		return c.JSON(http.StatusOK, map[string]interface{}{
-			"message": "success delete order",
+			"message": "success update order",
 		})
 	}
 }

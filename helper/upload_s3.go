@@ -3,6 +3,7 @@ package helper
 import (
 	"fmt"
 	"mime/multipart"
+	"os"
 	"path/filepath"
 	_config "sirloinapi/config"
 	"strings"
@@ -33,7 +34,7 @@ func UploadImageToS3(fileName string, fileData multipart.File) (string, error) {
 	return result.Location, nil
 }
 
-func UploadPdfToS3(fileName string, fileData multipart.File) (string, error) {
+func UploadPdfToS3(fileName string, fileData *os.File) (string, error) {
 	// The session the S3 Uploader will use
 	sess := _config.GetSession()
 

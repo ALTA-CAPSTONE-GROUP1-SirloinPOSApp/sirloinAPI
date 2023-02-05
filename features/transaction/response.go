@@ -82,3 +82,61 @@ func ToAdmResp(data AdmTransactionRes) AdmTransactionResDet {
 		PaymentUrl:        data.PaymentUrl,
 	}
 }
+
+type ItemsInv struct {
+	ItemName   string  `json:"item_name"`
+	Quantity   int     `json:"quantity"`
+	Price      float64 `json:"price"`
+	TotalPrice float64 `json:"total_price"`
+}
+
+type TransactionInv struct {
+	InvoiceNumber   string    `json:"invoice_number"`
+	TransactionDate time.Time `json:"created_at"`
+	SellerName      string    `json:"seller_name"`
+	SellerPhone     string    `json:"seller_phone"`
+	SellerAddress   string    `json:"seller_address"`
+	CustomerName    string    `json:"customer_name"`
+	CustomerEmail   string    `json:"customer_email"`
+	CustomerPhone   string    `json:"customer_phone"`
+	CustomerAddress string    `json:"customer_address"`
+	SubTotal        float64   `json:"sub_total"`
+	Discount        float64   `json:"discount"`
+	DiscountAmount  float64   `json:"discount_amount"`
+	TotalPrice      float64   `json:"total_price"`
+}
+
+type TransactionDetInv struct {
+	InvoiceNumber   string    `json:"invoice_number"`
+	TransactionDate time.Time `json:"created_at"`
+	SellerName      string    `json:"seller_name"`
+	SellerPhone     string    `json:"seller_phone"`
+	SellerAddress   string    `json:"seller_address"`
+	CustomerName    string    `json:"customer_name"`
+	CustomerEmail   string    `json:"customer_email"`
+	CustomerPhone   string    `json:"customer_phone"`
+	CustomerAddress string    `json:"customer_address"`
+	SubTotal        float64   `json:"sub_total"`
+	Discount        float64   `json:"discount"`
+	DiscountAmount  float64   `json:"discount_amount"`
+	TotalPrice      float64   `json:"total_price"`
+	Items           []ItemsInv
+}
+
+func InvToDetail(t TransactionInv) TransactionDetInv {
+	return TransactionDetInv{
+		InvoiceNumber:   t.InvoiceNumber,
+		TransactionDate: t.TransactionDate,
+		SellerName:      t.SellerName,
+		SellerPhone:     t.SellerPhone,
+		SellerAddress:   t.SellerAddress,
+		CustomerName:    t.CustomerName,
+		CustomerEmail:   t.CustomerEmail,
+		CustomerPhone:   t.CustomerPhone,
+		CustomerAddress: t.CustomerAddress,
+		SubTotal:        t.SubTotal,
+		Discount:        t.Discount,
+		DiscountAmount:  t.DiscountAmount,
+		TotalPrice:      t.TotalPrice,
+	}
+}

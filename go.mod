@@ -6,6 +6,7 @@ require github.com/aws/aws-sdk-go v1.44.191
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.11.2 // indirect
@@ -38,6 +39,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/joho/godotenv v1.4.0
+	github.com/jung-kurt/gofpdf v1.16.2
 	github.com/midtrans/midtrans-go v1.3.6
 	golang.org/x/crypto v0.5.0
 	gorm.io/driver/mysql v1.4.5

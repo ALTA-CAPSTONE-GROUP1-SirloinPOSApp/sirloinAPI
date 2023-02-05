@@ -4,12 +4,16 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"sirloinapi/config"
 	product "sirloinapi/features/product/data"
 	"sirloinapi/features/transaction"
+	"sirloinapi/helper"
 	"strconv"
 	"time"
 
+	"github.com/dustin/go-humanize"
+	"github.com/jung-kurt/gofpdf"
 	"github.com/midtrans/midtrans-go"
 	"github.com/midtrans/midtrans-go/coreapi"
 	"github.com/midtrans/midtrans-go/snap"
@@ -205,13 +209,13 @@ func (tq *transactionQuery) GetTransactionHistory(userId uint, status, from, to 
 
 	var err error
 	if from == "" && to == "" {
-		err = tq.db.Raw("SELECT t.id , c.id customer_id , c.name customer_name , total_price , discount , total_bill , t.created_at , transaction_status , product_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN customers c ON t.customer_id = c.id WHERE t.user_id = ? AND product_status = ?", userId, status).Scan(&trans).Error
+		err = tq.db.Raw("SELECT t.id , c.id customer_id , c.name customer_name , total_price , discount , total_bill , t.created_at , transaction_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN customers c ON t.customer_id = c.id WHERE t.user_id = ? AND product_status = ?", userId, status).Scan(&trans).Error
 	} else if to == "" {
-		err = tq.db.Raw("SELECT t.id , c.id customer_id , c.name customer_name , total_price , discount , total_bill , t.created_at , transaction_status , product_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN customers c ON t.customer_id = c.id WHERE t.user_id = ? AND product_status = ? AND t.created_at >= ?", userId, status, from).Scan(&trans).Error
+		err = tq.db.Raw("SELECT t.id , c.id customer_id , c.name customer_name , total_price , discount , total_bill , t.created_at , transaction_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN customers c ON t.customer_id = c.id WHERE t.user_id = ? AND product_status = ? AND t.created_at >= ?", userId, status, from).Scan(&trans).Error
 	} else if from == "" {
-		err = tq.db.Raw("SELECT t.id , c.id customer_id , c.name customer_name , total_price , discount , total_bill , t.created_at , transaction_status , product_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN customers c ON t.customer_id = c.id WHERE t.user_id = ? AND product_status = ? AND t.created_at <= ?", userId, status, to).Scan(&trans).Error
+		err = tq.db.Raw("SELECT t.id , c.id customer_id , c.name customer_name , total_price , discount , total_bill , t.created_at , transaction_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN customers c ON t.customer_id = c.id WHERE t.user_id = ? AND product_status = ? AND t.created_at <= ?", userId, status, to).Scan(&trans).Error
 	} else {
-		err = tq.db.Raw("SELECT t.id , c.id customer_id , c.name customer_name , total_price , discount , total_bill , t.created_at , transaction_status , product_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN customers c ON t.customer_id = c.id WHERE t.user_id = ? AND product_status = ? AND t.created_at >= ? AND t.created_at <= ?", userId, status, from, to).Scan(&trans).Error
+		err = tq.db.Raw("SELECT t.id , c.id customer_id , c.name customer_name , total_price , discount , total_bill , t.created_at , transaction_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN customers c ON t.customer_id = c.id WHERE t.user_id = ? AND product_status = ? AND t.created_at >= ? AND t.created_at <= ?", userId, status, from, to).Scan(&trans).Error
 	}
 	if err != nil {
 		log.Println("error query get transactions history: ", err)
@@ -331,17 +335,36 @@ func (tq *transactionQuery) NotificationTransactionStatus(invNo, transStatus str
 			prod := product.Product{}
 			tq.db.First(&prod, item.ProductId)
 			prod.Stock -= item.Quantity
+			prod.ItemsSold += item.Quantity
 			tq.db.Save(&prod)
 		}
 
 		if trans.ProductStatus == "sell" {
 			if trans.CustomerId != uint(0) {
 				//bikin invoice penjualan, upload ke s3 dan kirim email
+				invURL, err := tq.Invoice(trans.Discount, trans.ID, true, trans.ProductStatus)
+				if err != nil {
+					return err
+				}
+				trans.InvoiceUrl = invURL
+				tq.db.Save(&trans)
 			} else {
 				//bikin invoice penjualan dan upload ke s3
+				invURL, err := tq.Invoice(trans.Discount, trans.ID, false, trans.ProductStatus)
+				if err != nil {
+					return err
+				}
+				trans.InvoiceUrl = invURL
+				tq.db.Save(&trans)
 			}
 		} else if trans.ProductStatus == "buy" {
 			//bikin invoice pembelian
+			invURL, err := tq.Invoice(trans.Discount, trans.ID, false, trans.ProductStatus)
+			if err != nil {
+				return err
+			}
+			trans.InvoiceUrl = invURL
+			tq.db.Save(&trans)
 		}
 	}
 
@@ -368,23 +391,172 @@ func (tq *transactionQuery) UpdateStatus(transId uint, status string) error {
 				prod := product.Product{}
 				tq.db.First(&prod, item.ProductId)
 				prod.Stock -= item.Quantity
+				prod.ItemsSold += item.Quantity
 				tq.db.Save(&prod)
 			}
 
 			if input.ProductStatus == "sell" {
 				if input.CustomerId != uint(0) {
 					//bikin invoice penjualan, upload ke s3 dan kirim email
+					invURL, err := tq.Invoice(input.Discount, input.ID, true, input.ProductStatus)
+					if err != nil {
+						return err
+					}
+					input.InvoiceUrl = invURL
+					tq.db.Save(&input)
 				} else {
 					//bikin invoice penjualan dan upload ke s3
+					invURL, err := tq.Invoice(input.Discount, input.ID, false, input.ProductStatus)
+					if err != nil {
+						return err
+					}
+					input.InvoiceUrl = invURL
+					tq.db.Save(&input)
 				}
 			} else if input.ProductStatus == "buy" {
 				//bikin invoice pembelian
+				invURL, err := tq.Invoice(input.Discount, input.ID, false, input.ProductStatus)
+				if err != nil {
+					return err
+				}
+				input.InvoiceUrl = invURL
+				tq.db.Save(&input)
 			}
 		}
 	}
 	return nil
 }
 
-// func (tq *transactionQuery) InvoiceSell(transId uint) multipart.File {
+func (tq *transactionQuery) Invoice(discount float64, transId uint, member bool, status string) (string, error) {
+	tx := tq.db.Begin()
 
-// }
+	transInv := transaction.TransactionInv{}
+
+	err := tx.Raw("SELECT invoice_number , t.created_at transaction_date , u.business_name seller_name , u.phone_number seller_phone , u.address seller_address , c.name customer_name , c.email customer_email , c.phone_number customer_phone , c.address customer_address , t.total_price sub_total , discount , total_bill total_price FROM transactions t JOIN users u ON t.user_id = u.id JOIN customers c ON t.customer_id = c.id WHERE t.id = ?", transId).Scan(&transInv).Error
+	if err != nil {
+		tx.Rollback()
+		log.Println("error select transaction invoice: ", err.Error())
+		return "", err
+	}
+
+	tInv := transaction.InvToDetail(transInv)
+
+	itms := []transaction.ItemsInv{}
+
+	err = tq.db.Raw("SELECT p.product_name item_name , quantity , p.price , total_price FROM transaction_products tp JOIN products p ON tp.product_id = p.id WHERE tp.transaction_id = ?", transId).Scan(&itms).Error
+	if err != nil {
+		tx.Rollback()
+		log.Println("error select transaction item invoice: ", err.Error())
+		return "", err
+	}
+
+	tInv.Items = append(tInv.Items, itms...)
+
+	tInv.DiscountAmount = tInv.SubTotal * discount
+
+	//create new PDF
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+	// Add the header information
+	pdf.SetFont("Arial", "B", 16)
+	pdf.CellFormat(190, 10, "INVOICE", "0", 1, "C", false, 0, "")
+	pdf.Ln(10)
+	pdf.SetFont("Arial", "", 10)
+	pdf.CellFormat(100, 5, "", "0", 0, "C", false, 0, "")
+	pdf.CellFormat(40, 5, "No. Invoice", "0", 0, "L", false, 0, "")
+	pdf.CellFormat(50, 5, fmt.Sprint(tInv.InvoiceNumber), "0", 1, "C", false, 0, "")
+	pdf.CellFormat(100, 5, "", "0", 0, "C", false, 0, "")
+	pdf.CellFormat(40, 5, "Tanggal Transaksi:", "0", 0, "L", false, 0, "")
+	pdf.CellFormat(50, 5, fmt.Sprint(tInv.TransactionDate.Format("2006-01-02")), "0", 1, "C", false, 0, "")
+
+	if status == "sell" {
+		// Add the seller information
+		pdf.Ln(5)
+		pdf.SetFont("Arial", "B", 10)
+		pdf.CellFormat(190, 5, "Diterbitkan oleh:", "0", 1, "L", false, 0, "")
+		pdf.SetFont("Arial", "", 10)
+		pdf.CellFormat(190, 5, fmt.Sprint("Nama: \t"+tInv.SellerName), "0", 1, "L", false, 0, "")
+		pdf.CellFormat(190, 5, fmt.Sprint("Telepon: \t"+tInv.SellerPhone), "0", 1, "L", false, 0, "")
+		pdf.CellFormat(190, 5, fmt.Sprint("Alamat: \t"+tInv.SellerAddress), "0", 1, "L", false, 0, "")
+	} else if status == "buy" {
+		// Add the seller information
+		pdf.Ln(5)
+		pdf.SetFont("Arial", "B", 10)
+		pdf.CellFormat(190, 5, "Kepada:", "0", 1, "L", false, 0, "")
+		pdf.SetFont("Arial", "", 10)
+		pdf.CellFormat(190, 5, fmt.Sprint("Nama: \t"+tInv.SellerName), "0", 1, "L", false, 0, "")
+		pdf.CellFormat(190, 5, fmt.Sprint("Telepon: \t"+tInv.SellerPhone), "0", 1, "L", false, 0, "")
+		pdf.CellFormat(190, 5, fmt.Sprint("Alamat: \t"+tInv.SellerAddress), "0", 1, "L", false, 0, "")
+	} else {
+		log.Println("status empty string")
+		return "", errors.New("bad request")
+	}
+
+	if member {
+		// Add the customer information
+		pdf.Ln(5)
+		pdf.SetFont("Arial", "B", 10)
+		pdf.CellFormat(190, 5, "Kepada:", "0", 1, "L", false, 0, "")
+		pdf.SetFont("Arial", "", 10)
+		pdf.CellFormat(190, 5, fmt.Sprint("Nama: \t"+tInv.CustomerName), "0", 1, "L", false, 0, "")
+		pdf.CellFormat(190, 5, fmt.Sprint("Email: \t"+tInv.CustomerEmail), "0", 1, "L", false, 0, "")
+		pdf.CellFormat(190, 5, fmt.Sprint("Telepon: \t"+tInv.CustomerPhone), "0", 1, "L", false, 0, "")
+		pdf.CellFormat(190, 5, fmt.Sprint("Alamat: \t"+tInv.CustomerAddress), "0", 1, "L", false, 0, "")
+	}
+
+	// Add the item table
+	pdf.Ln(5)
+	pdf.SetFont("Arial", "B", 10)
+	pdf.CellFormat(85, 5, "Nama Item", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(20, 5, "Jumlah", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(40, 5, "Harga", "1", 0, "C", false, 0, "")
+	pdf.CellFormat(40, 5, "Total Harga", "1", 1, "C", false, 0, "")
+
+	pdf.SetFont("Arial", "", 10)
+	for _, item := range tInv.Items {
+		pdf.CellFormat(85, 5, item.ItemName, "1", 0, "L", false, 0, "")
+		pdf.CellFormat(20, 5, fmt.Sprintf("%d", item.Quantity), "1", 0, "C", false, 0, "")
+		pdf.CellFormat(40, 5, fmt.Sprintf("Rp. %s", humanize.Commaf(item.Price)+",00"), "1", 0, "C", false, 0, "")
+		pdf.CellFormat(40, 5, fmt.Sprintf("Rp. %s", humanize.Commaf(item.TotalPrice)+",00"), "1", 1, "C", false, 0, "")
+	}
+
+	// Add the subtotal, discount, and total price
+	pdf.Ln(5)
+	pdf.SetFont("Arial", "B", 10)
+	pdf.CellFormat(100, 5, "", "0", 0, "C", false, 0, "")
+	pdf.CellFormat(40, 5, "Subtotal:", "0", 0, "L", false, 0, "")
+	pdf.CellFormat(50, 5, fmt.Sprintf("Rp. %s", humanize.Commaf(tInv.SubTotal))+",00", "0", 1, "C", false, 0, "")
+	pdf.CellFormat(100, 5, "", "0", 0, "C", false, 0, "")
+	pdf.CellFormat(40, 5, "Diskon:", "0", 0, "L", false, 0, "")
+	pdf.CellFormat(50, 5, fmt.Sprintf("Rp. %s (%d%%)", humanize.Commaf(tInv.DiscountAmount)+",00", int(tInv.Discount*100)), "0", 1, "C", false, 0, "")
+	pdf.CellFormat(100, 5, "", "0", 0, "C", false, 0, "")
+	pdf.CellFormat(40, 5, "Total Pembayaran:", "0", 0, "L", false, 0, "")
+	pdf.CellFormat(50, 5, fmt.Sprintf("Rp. %s", humanize.Commaf(tInv.TotalPrice)+",00"), "0", 1, "C", false, 0, "")
+
+	// Save the PDF file
+	pdf.OutputFileAndClose(fmt.Sprint(tInv.InvoiceNumber) + ".pdf")
+
+	//read pdf
+	file, err := os.Open(fmt.Sprint(tInv.InvoiceNumber) + ".pdf")
+	if err != nil {
+		log.Println("error open file: ", err)
+		log.Fatal(err)
+		return "", err
+	}
+
+	//upload pdf to s3
+	res, err := helper.UploadPdfToS3(fmt.Sprint("/files/invoice/", tInv.InvoiceNumber, ".pdf"), file)
+	if err != nil {
+		log.Println("error upload pdf to s3: ", err.Error())
+		return "", err
+	}
+
+	//delete pdf file on local
+	err = os.Remove(fmt.Sprint(tInv.InvoiceNumber) + ".pdf")
+	if err != nil {
+		log.Println("error delete file: ", err.Error())
+		return "", err
+	}
+	tx.Commit()
+	return res, nil
+}
