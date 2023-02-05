@@ -1,9 +1,11 @@
 package data
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"sirloinapi/config"
+	product "sirloinapi/features/product/data"
 	"sirloinapi/features/transaction"
 	"strconv"
 	"time"
@@ -282,4 +284,91 @@ func (tq *transactionQuery) GetAdminTransactionDetails(transactionId uint) (tran
 	transR.TransactionProductRes = append(transR.TransactionProductRes, tp...)
 
 	return transR, nil
+}
+func (tq *transactionQuery) NotificationTransactionStatus(invNo, transStatus string) error {
+	trans := Transaction{}
+
+	tq.db.First(&trans, "invoice_number = ?", invNo)
+
+	// 5. Do set transaction status based on response from check transaction status
+	if transStatus == "capture" {
+		if transStatus == "challenge" {
+			// TODO set transaction status on your database to 'challenge'
+			// e.g: 'Payment status challenged. Please take action on your Merchant Administration Portal
+			trans.TransactionStatus = "challenge"
+		} else if transStatus == "accept" {
+			// TODO set transaction status on your database to 'success'
+			trans.TransactionStatus = "success"
+		}
+	} else if transStatus == "settlement" {
+		// TODO set transaction status on your databaase to 'success'
+		trans.TransactionStatus = "success"
+	} else if transStatus == "cancel" || transStatus == "expire" {
+		// TODO set transaction status on your databaase to 'failure'
+		trans.TransactionStatus = "failure"
+	} else if transStatus == "pending" {
+		// TODO set transaction status on your databaase to 'pending' / waiting payment
+		trans.TransactionStatus = "waiting payment"
+	} else {
+		trans.TransactionStatus = transStatus
+	}
+
+	aff := tq.db.Save(&trans)
+	if aff.RowsAffected <= 0 {
+		log.Println("error update transaction status, no rows affected")
+		return errors.New("error update transaction status")
+	}
+
+	//update stock product
+	if trans.TransactionStatus == "success" {
+		transProds := []TransactionProduct{}
+		tq.db.Find(&transProds, "transaction_id", trans.ID)
+		for _, item := range transProds {
+			prod := product.Product{}
+			tq.db.First(&prod, item.ProductId)
+			prod.Stock -= item.Quantity
+			tq.db.Save(&prod)
+		}
+
+		if trans.CustomerId != uint(0) {
+			//bikin invoice, upload ke s3 dan kirim email
+		} else {
+			//bikin invoice dan upload ke s3
+		}
+	}
+
+	return nil
+}
+func (tq *transactionQuery) UpdateStatus(transId uint, status string) error {
+	input := Transaction{}
+	err := tq.db.Where("id = ?", transId).First(&input).Error
+	if err != nil {
+		log.Println("error select transaction: ", err.Error())
+		return err
+	}
+	input.TransactionStatus = status
+	err = tq.db.Save(&input).Error
+	if err != nil {
+		log.Println("error save transaction status: ", err.Error())
+		return err
+	} else {
+		//update stock product
+		if input.TransactionStatus == "success" {
+			transProds := []TransactionProduct{}
+			tq.db.Find(&transProds, "transaction_id", input.ID)
+			for _, item := range transProds {
+				prod := product.Product{}
+				tq.db.First(&prod, item.ProductId)
+				prod.Stock -= item.Quantity
+				tq.db.Save(&prod)
+			}
+
+			if input.CustomerId != uint(0) {
+				//bikin invoice, upload ke s3 dan kirim email
+			} else {
+				//bikin invoice dan upload ke s3
+			}
+		}
+	}
+	return nil
 }

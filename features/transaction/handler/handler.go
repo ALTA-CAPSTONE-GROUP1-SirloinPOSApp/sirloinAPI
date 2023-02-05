@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"sirloinapi/features/transaction"
@@ -163,6 +164,67 @@ func (th *TransactionHandle) GetAdminTransactionDetails() echo.HandlerFunc {
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"data":    res,
 			"message": "success get admin transaction history",
+		})
+	}
+}
+func (th *TransactionHandle) NotificationTransactionStatus() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// 1. Initialize empty map
+		var notificationPayload map[string]interface{}
+
+		// 2. Parse JSON request body and use it to set json to payload
+		err := json.NewDecoder(c.Request().Body).Decode(&notificationPayload)
+		if err != nil {
+			// do something on error when decode
+			return c.JSON(http.StatusBadRequest, err)
+		}
+
+		// 3. Get order-id from payload
+		transactionId, exists := notificationPayload["order_id"].(string)
+		if !exists {
+			// do something when key `order_id` not found
+			return c.JSON(http.StatusBadRequest, err)
+		}
+
+		err = th.srv.NotificationTransactionStatus(transactionId)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
+		return c.JSON(c.Response().Write([]byte("ok")))
+	}
+}
+
+func (th *TransactionHandle) UpdateStatus() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		type StatusReq struct {
+			TransactionStatus string `json:"transaction_status"`
+		}
+		status := StatusReq{}
+		err := c.Bind(&status)
+		if err != nil {
+			log.Println("bind order status error: ", err.Error())
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("wrong input"))
+		}
+
+		oid := c.Param("order_id")
+		orderId, err := strconv.Atoi(oid)
+		if err != nil {
+			log.Println("error read parameter: ", err.Error())
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("fail to read parameter"))
+		}
+
+		err = th.srv.UpdateStatus(uint(orderId), status.TransactionStatus)
+		if err != nil {
+			if strings.Contains(err.Error(), "bad request") {
+				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("wrong input (bad request)"))
+			} else {
+				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
+			}
+		}
+
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"message": "success delete order",
 		})
 	}
 }

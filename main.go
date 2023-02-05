@@ -84,6 +84,9 @@ func main() {
 	e.GET("/transactions/admin", transHdl.GetAdminTransactionHistory(), echojwt.JWT([]byte(config.JWT_KEY)))
 	e.GET("/transactions/:transaction_id/admin", transHdl.GetAdminTransactionDetails(), echojwt.JWT([]byte(config.JWT_KEY)))
 
+	e.PUT("/transactions/:transaction_id", transHdl.UpdateStatus(), echojwt.JWT([]byte(config.JWT_KEY)))
+	e.POST("/paymentnotification", transHdl.NotificationTransactionStatus())
+
 	if err := e.Start(":8000"); err != nil {
 		log.Println(err.Error())
 	}
