@@ -432,15 +432,27 @@ func (tq *transactionQuery) Invoice(discount float64, transId uint, member bool,
 
 	transInv := transaction.TransactionInv{}
 
-	err := tx.Raw("SELECT invoice_number , t.created_at , u.business_name tenant_name , u.phone_number tenant_phone , u.address tenant_address , c.name customer_name , c.email customer_email , c phone_number customer_phone , c.address customer_address , t.total_price sub_total , discount , total_bill total_price , p.product_name item_name , quantity , tp.price , tp total_price FROM transactions t JOIN users u ON t.user_id = u.id JOIN customers c ON t.customer_id = c.id JOIN transaction_products tp ON t.id = tp.transaction_id JOIN products p ON p id = tp.product_id WHERE t.id = ?", transId).Scan(&transInv).Error
+	err := tx.Raw("SELECT invoice_number , t.created_at , u.business_name tenant_name , u.phone_number tenant_phone , u.address tenant_address , c.name customer_name , c.email customer_email , c.phone_number customer_phone , c.address customer_address , t.total_price sub_total , discount , total_bill total_price FROM transactions t JOIN users u ON t.user_id = u.id JOIN customers c ON t.customer_id = c.id WHERE t.id = ?", transId).Scan(&transInv).Error
 	if err != nil {
 		tx.Rollback()
 		log.Println("error select transaction invoice: ", err.Error())
 		return "", err
 	}
 
-	tx.Commit()
-	transInv.DiscountAmount = transInv.SubTotal * discount
+	tInv := transaction.InvToDetail(transInv)
+
+	itms := []transaction.ItemsInv{}
+
+	err = tq.db.Raw("SELECT p.product_name , quantity , p.price , total_price FROM transaction_products tp JOIN products p ON tp.product_id = p.id WHERE tp.transaction_id = ?", transId).Scan(&itms).Error
+	if err != nil {
+		tx.Rollback()
+		log.Println("error select transaction item invoice: ", err.Error())
+		return "", err
+	}
+
+	tInv.Items = append(tInv.Items, itms...)
+
+	tInv.DiscountAmount = tInv.SubTotal * discount
 
 	//create new PDF
 	pdf := gofpdf.New("P", "mm", "A4", "")
@@ -452,10 +464,10 @@ func (tq *transactionQuery) Invoice(discount float64, transId uint, member bool,
 	pdf.SetFont("Arial", "", 10)
 	pdf.CellFormat(100, 5, "", "0", 0, "C", false, 0, "")
 	pdf.CellFormat(40, 5, "No. Invoice", "0", 0, "L", false, 0, "")
-	pdf.CellFormat(50, 5, fmt.Sprint(transInv.InvoiceNumber), "0", 1, "C", false, 0, "")
+	pdf.CellFormat(50, 5, fmt.Sprint(tInv.InvoiceNumber), "0", 1, "C", false, 0, "")
 	pdf.CellFormat(100, 5, "", "0", 0, "C", false, 0, "")
 	pdf.CellFormat(40, 5, "Tanggal Transaksi:", "0", 0, "L", false, 0, "")
-	pdf.CellFormat(50, 5, fmt.Sprint(transInv.TransactionDate.Format("2006-01-02")), "0", 1, "C", false, 0, "")
+	pdf.CellFormat(50, 5, fmt.Sprint(tInv.TransactionDate.Format("2006-01-02")), "0", 1, "C", false, 0, "")
 
 	if status == "sell" {
 		// Add the seller information
@@ -463,18 +475,18 @@ func (tq *transactionQuery) Invoice(discount float64, transId uint, member bool,
 		pdf.SetFont("Arial", "B", 10)
 		pdf.CellFormat(190, 5, "Diterbitkan oleh:", "0", 1, "L", false, 0, "")
 		pdf.SetFont("Arial", "", 10)
-		pdf.CellFormat(190, 5, fmt.Sprint("Nama: \t"+transInv.SellerName), "0", 1, "L", false, 0, "")
-		pdf.CellFormat(190, 5, fmt.Sprint("Telepon: \t"+transInv.SellerPhone), "0", 1, "L", false, 0, "")
-		pdf.CellFormat(190, 5, fmt.Sprint("Alamat: \t"+transInv.SellerAddress), "0", 1, "L", false, 0, "")
+		pdf.CellFormat(190, 5, fmt.Sprint("Nama: \t"+tInv.SellerName), "0", 1, "L", false, 0, "")
+		pdf.CellFormat(190, 5, fmt.Sprint("Telepon: \t"+tInv.SellerPhone), "0", 1, "L", false, 0, "")
+		pdf.CellFormat(190, 5, fmt.Sprint("Alamat: \t"+tInv.SellerAddress), "0", 1, "L", false, 0, "")
 	} else if status == "buy" {
 		// Add the seller information
 		pdf.Ln(5)
 		pdf.SetFont("Arial", "B", 10)
 		pdf.CellFormat(190, 5, "Kepada:", "0", 1, "L", false, 0, "")
 		pdf.SetFont("Arial", "", 10)
-		pdf.CellFormat(190, 5, fmt.Sprint("Nama: \t"+transInv.SellerName), "0", 1, "L", false, 0, "")
-		pdf.CellFormat(190, 5, fmt.Sprint("Telepon: \t"+transInv.SellerPhone), "0", 1, "L", false, 0, "")
-		pdf.CellFormat(190, 5, fmt.Sprint("Alamat: \t"+transInv.SellerAddress), "0", 1, "L", false, 0, "")
+		pdf.CellFormat(190, 5, fmt.Sprint("Nama: \t"+tInv.SellerName), "0", 1, "L", false, 0, "")
+		pdf.CellFormat(190, 5, fmt.Sprint("Telepon: \t"+tInv.SellerPhone), "0", 1, "L", false, 0, "")
+		pdf.CellFormat(190, 5, fmt.Sprint("Alamat: \t"+tInv.SellerAddress), "0", 1, "L", false, 0, "")
 	} else {
 		log.Println("status empty string")
 		return "", errors.New("bad request")
@@ -486,10 +498,10 @@ func (tq *transactionQuery) Invoice(discount float64, transId uint, member bool,
 		pdf.SetFont("Arial", "B", 10)
 		pdf.CellFormat(190, 5, "Kepada:", "0", 1, "L", false, 0, "")
 		pdf.SetFont("Arial", "", 10)
-		pdf.CellFormat(190, 5, fmt.Sprint("Nama: \t"+transInv.CustomerName), "0", 1, "L", false, 0, "")
-		pdf.CellFormat(190, 5, fmt.Sprint("Email: \t"+transInv.CustomerEmail), "0", 1, "L", false, 0, "")
-		pdf.CellFormat(190, 5, fmt.Sprint("Telepon: \t"+transInv.CustomerPhone), "0", 1, "L", false, 0, "")
-		pdf.CellFormat(190, 5, fmt.Sprint("Alamat: \t"+transInv.CustomerAddress), "0", 1, "L", false, 0, "")
+		pdf.CellFormat(190, 5, fmt.Sprint("Nama: \t"+tInv.CustomerName), "0", 1, "L", false, 0, "")
+		pdf.CellFormat(190, 5, fmt.Sprint("Email: \t"+tInv.CustomerEmail), "0", 1, "L", false, 0, "")
+		pdf.CellFormat(190, 5, fmt.Sprint("Telepon: \t"+tInv.CustomerPhone), "0", 1, "L", false, 0, "")
+		pdf.CellFormat(190, 5, fmt.Sprint("Alamat: \t"+tInv.CustomerAddress), "0", 1, "L", false, 0, "")
 	}
 
 	// Add the item table
@@ -501,7 +513,7 @@ func (tq *transactionQuery) Invoice(discount float64, transId uint, member bool,
 	pdf.CellFormat(40, 5, "Total Harga", "1", 1, "C", false, 0, "")
 
 	pdf.SetFont("Arial", "", 10)
-	for _, item := range transInv.Items {
+	for _, item := range tInv.Items {
 		pdf.CellFormat(85, 5, item.ItemName, "1", 0, "L", false, 0, "")
 		pdf.CellFormat(20, 5, fmt.Sprintf("%d", item.Quantity), "1", 0, "C", false, 0, "")
 		pdf.CellFormat(40, 5, fmt.Sprintf("Rp. %s", humanize.Commaf(item.Price)+",00"), "1", 0, "C", false, 0, "")
@@ -513,19 +525,19 @@ func (tq *transactionQuery) Invoice(discount float64, transId uint, member bool,
 	pdf.SetFont("Arial", "B", 10)
 	pdf.CellFormat(100, 5, "", "0", 0, "C", false, 0, "")
 	pdf.CellFormat(40, 5, "Subtotal:", "0", 0, "L", false, 0, "")
-	pdf.CellFormat(50, 5, fmt.Sprintf("Rp. %s", humanize.Commaf(transInv.SubTotal))+",00", "0", 1, "C", false, 0, "")
+	pdf.CellFormat(50, 5, fmt.Sprintf("Rp. %s", humanize.Commaf(tInv.SubTotal))+",00", "0", 1, "C", false, 0, "")
 	pdf.CellFormat(100, 5, "", "0", 0, "C", false, 0, "")
 	pdf.CellFormat(40, 5, "Diskon:", "0", 0, "L", false, 0, "")
-	pdf.CellFormat(50, 5, fmt.Sprintf("Rp. %s (%d%%)", humanize.Commaf(transInv.DiscountAmount)+",00", int(transInv.Discount*100)), "0", 1, "C", false, 0, "")
+	pdf.CellFormat(50, 5, fmt.Sprintf("Rp. %s (%d%%)", humanize.Commaf(tInv.DiscountAmount)+",00", int(tInv.Discount*100)), "0", 1, "C", false, 0, "")
 	pdf.CellFormat(100, 5, "", "0", 0, "C", false, 0, "")
 	pdf.CellFormat(40, 5, "Total Pembayaran:", "0", 0, "L", false, 0, "")
-	pdf.CellFormat(50, 5, fmt.Sprintf("Rp. %s", humanize.Commaf(transInv.TotalPrice)+",00"), "0", 1, "C", false, 0, "")
+	pdf.CellFormat(50, 5, fmt.Sprintf("Rp. %s", humanize.Commaf(tInv.TotalPrice)+",00"), "0", 1, "C", false, 0, "")
 
 	// Save the PDF file
-	pdf.OutputFileAndClose(fmt.Sprint(transInv.InvoiceNumber) + ".pdf")
+	pdf.OutputFileAndClose(fmt.Sprint(tInv.InvoiceNumber) + ".pdf")
 
 	//read pdf
-	file, err := os.Open(fmt.Sprint(transInv.InvoiceNumber) + ".pdf")
+	file, err := os.Open(fmt.Sprint(tInv.InvoiceNumber) + ".pdf")
 	if err != nil {
 		log.Println("error open file: ", err)
 		log.Fatal(err)
@@ -533,18 +545,18 @@ func (tq *transactionQuery) Invoice(discount float64, transId uint, member bool,
 	}
 
 	//upload pdf to s3
-	res, err := helper.UploadPdfToS3(fmt.Sprint("/files/invoice/", transInv.InvoiceNumber, ".pdf"), file)
+	res, err := helper.UploadPdfToS3(fmt.Sprint("/files/invoice/", tInv.InvoiceNumber, ".pdf"), file)
 	if err != nil {
 		log.Println("error upload pdf to s3: ", err.Error())
 		return "", err
 	}
 
 	//delete pdf file on local
-	err = os.Remove(fmt.Sprint(transInv.InvoiceNumber) + ".pdf")
+	err = os.Remove(fmt.Sprint(tInv.InvoiceNumber) + ".pdf")
 	if err != nil {
 		log.Println("error delete file: ", err.Error())
 		return "", err
 	}
-
+	tx.Commit()
 	return res, nil
 }
