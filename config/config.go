@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 
@@ -130,6 +131,10 @@ func ReadEnv() *AppConfig {
 		S3_KEY = app.S3KEY
 		S3_SECRET = app.S3SECRET
 		AWS_BUCKET = app.AWSBUCKET
+		log.Println("AWS_REGION", AWS_REGION)
+		log.Println("S3_KEY", S3_KEY)
+		log.Println("S3_SECRET", S3_SECRET)
+		log.Println("AWS_BUCKET", AWS_BUCKET)
 	}
 
 	return &app
