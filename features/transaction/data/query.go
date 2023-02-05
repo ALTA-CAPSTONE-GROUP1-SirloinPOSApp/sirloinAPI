@@ -10,6 +10,7 @@ import (
 	"sirloinapi/features/transaction"
 	"sirloinapi/helper"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/dustin/go-humanize"
@@ -206,8 +207,11 @@ func (tq *transactionQuery) AddBuy(userId uint, uCart transaction.Cart) (transac
 
 func (tq *transactionQuery) GetTransactionHistory(userId uint, status, from, to string) ([]transaction.Core, error) {
 	trans := []transaction.Core{}
+	// Ganti karakter penghubung "/" menjadi "-"
+	newDateString := strings.Replace(to, "/", "-", -1)
+
 	// Parsing string menjadi time.Time
-	t, _ := time.Parse("2006-01-02", to)
+	t, _ := time.Parse("2006-01-02", newDateString)
 	fmt.Println("Current time:", t)
 
 	// Tambahkan 1 hari
@@ -256,8 +260,11 @@ func (tq *transactionQuery) GetTransactionDetails(transactionId uint) (transacti
 }
 func (tq *transactionQuery) GetAdminTransactionHistory(status, from, to string) ([]transaction.AdmTransactionRes, error) {
 	trans := []transaction.AdmTransactionRes{}
+	// Ganti karakter penghubung "/" menjadi "-"
+	newDateString := strings.Replace(to, "/", "-", -1)
+
 	// Parsing string menjadi time.Time
-	t, _ := time.Parse("2006-01-02", to)
+	t, _ := time.Parse("2006-01-02", newDateString)
 	fmt.Println("Current time:", t)
 
 	// Tambahkan 1 hari
