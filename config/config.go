@@ -65,7 +65,7 @@ func ReadEnv() *AppConfig {
 
 	// midtrans
 	if val, found := os.LookupEnv("MIDTRANSSERVERKEY"); found {
-		app.keyid = val
+		app.midtransserverkey = val
 		isRead = false
 		MIDTRANSSERVERKEY = val
 	}
