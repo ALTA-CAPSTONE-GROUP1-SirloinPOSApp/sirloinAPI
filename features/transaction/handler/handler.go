@@ -87,6 +87,7 @@ func (th *TransactionHandle) GetTransactionHistory() echo.HandlerFunc {
 		status := c.QueryParam("status")
 
 		res, err := th.srv.GetTransactionHistory(token, status, from, to)
+		log.Println(err)
 		if err != nil {
 			if strings.Contains(err.Error(), "not found") {
 				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("wrong input (data not found)"))
@@ -95,6 +96,13 @@ func (th *TransactionHandle) GetTransactionHistory() echo.HandlerFunc {
 			}
 		}
 
+		if len(res) != 0 {
+			return c.JSON(http.StatusOK, map[string]interface{}{
+				"data":    res,
+				"pdf_url": res[0].PdfUrl,
+				"message": "success get transaction history",
+			})
+		}
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"data":    res,
 			"message": "success get transaction history",

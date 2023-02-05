@@ -20,6 +20,7 @@ type Core struct {
 	InvoiceNumber     string    `json:"invoice_number"`
 	InvoiceUrl        string    `json:"invoice_url"`
 	PaymentUrl        string    `json:"payment_url"`
+	PdfUrl            string
 }
 
 type TransactionHandler interface {
