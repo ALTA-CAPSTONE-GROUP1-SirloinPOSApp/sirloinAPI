@@ -88,7 +88,6 @@ func (ts *transSvc) GetTransactionHistory(token interface{}, status, from, to st
 		return []transaction.Core{}, err
 	}
 	file, err := os.Open(pathname + filename + "laporan.pdf")
-	// file, err := os.Open("reports/" + filename + "laporan.pdf")
 	if err != nil {
 		return []transaction.Core{}, errors.New("file cannot be opened")
 	}

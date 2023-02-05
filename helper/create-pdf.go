@@ -66,7 +66,6 @@ func GeneratePDF(reports []transaction.Core, filename string) error {
 		pdf.Ln(8)
 	}
 	if err := pdf.OutputFileAndClose(filename + "laporan.pdf"); err != nil {
-		println(err)
 		return err
 	}
 
