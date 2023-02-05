@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"sirloinapi/features/transaction"
@@ -164,5 +165,32 @@ func (th *TransactionHandle) GetAdminTransactionDetails() echo.HandlerFunc {
 			"data":    res,
 			"message": "success get admin transaction history",
 		})
+	}
+}
+func (th *TransactionHandle) NotificationTransactionStatus() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// 1. Initialize empty map
+		var notificationPayload map[string]interface{}
+
+		// 2. Parse JSON request body and use it to set json to payload
+		err := json.NewDecoder(c.Request().Body).Decode(&notificationPayload)
+		if err != nil {
+			// do something on error when decode
+			return c.JSON(http.StatusBadRequest, err)
+		}
+
+		// 3. Get order-id from payload
+		transactionId, exists := notificationPayload["order_id"].(string)
+		if !exists {
+			// do something when key `order_id` not found
+			return c.JSON(http.StatusBadRequest, err)
+		}
+
+		err = th.srv.NotificationTransactionStatus(transactionId)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, err)
+		}
+
+		return c.JSON(c.Response().Write([]byte("ok")))
 	}
 }

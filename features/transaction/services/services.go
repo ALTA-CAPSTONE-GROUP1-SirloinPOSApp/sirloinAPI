@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"log"
+	"sirloinapi/config"
 	"sirloinapi/features/transaction"
 	"sirloinapi/helper"
 	"strings"
@@ -126,4 +127,20 @@ func (ts *transSvc) GetAdminTransactionDetails(transactionId uint) (transaction.
 	}
 
 	return res, nil
+}
+func (ts *transSvc) NotificationTransactionStatus(invNo string) error {
+	c := config.MidtransCoreAPIClient()
+
+	// 4. Check transaction to Midtrans with param invoice number
+	transactionStatusResp, e := c.CheckTransaction(invNo)
+	if e != nil {
+		return errors.New("error check transaction status")
+	}
+
+	err := ts.qry.NotificationTransactionStatus(invNo, transactionStatusResp.TransactionStatus)
+	if err != nil {
+		return errors.New("error calling NotificationTransactionStatus data in service")
+	}
+
+	return nil
 }
