@@ -432,7 +432,7 @@ func (tq *transactionQuery) Invoice(discount float64, transId uint, member bool,
 
 	transInv := transaction.TransactionInv{}
 
-	err := tx.Raw("SELECT invoice_number , t.created_at transaction_date , u.business_name seller_name , u.phone_number seller_phone , u.address seller_address , c.name customer_name , c.email customer_email , c.phone_number customer_phone , c.address customer_address , t.total_price sub_total , discount , total_bill total_price FROM transactions t JOIN users u ON t.user_id = u.id JOIN customers c ON t.customer_id = c.id WHERE t.id = ?", transId).Scan(&transInv).Error
+	err := tx.Raw("SELECT invoice_number , t.created_at transaction_date , u.business_name seller_name , u.email seller_email , u.phone_number seller_phone , u.address seller_address , c.name customer_name , c.email customer_email , c.phone_number customer_phone , c.address customer_address , t.total_price sub_total , discount , total_bill total_price FROM transactions t JOIN users u ON t.user_id = u.id JOIN customers c ON t.customer_id = c.id WHERE t.id = ?", transId).Scan(&transInv).Error
 	if err != nil {
 		tx.Rollback()
 		log.Println("error select transaction invoice: ", err.Error())
@@ -535,6 +535,23 @@ func (tq *transactionQuery) Invoice(discount float64, transId uint, member bool,
 
 	// Save the PDF file
 	pdf.OutputFileAndClose(fmt.Sprint(tInv.InvoiceNumber) + ".pdf")
+
+	//send buying invoice email to tenant or to registered customer
+	if status == "sell" && member {
+		body := "Dear " + tInv.CustomerName + ",\n Berikut adalah invoice untuk transaksi dengan nomor: " + transInv.InvoiceNumber + "\n\nPesan ini dibuat secara otomatis, mohon untuk tidak membalas email ini. \n\nTerima Kasih"
+		err := helper.SendEmail(tInv.CustomerEmail, "INVOICE", body, fmt.Sprint(tInv.InvoiceNumber)+".pdf")
+		if err != nil {
+			log.Println("error sending email to customer: ", err.Error())
+			return "", err
+		}
+	} else if status == "buy" {
+		body := "Dear " + tInv.SellerName + ",\n Berikut adalah invoice untuk transaksi dengan nomor: " + transInv.InvoiceNumber + "\n\nPesan ini dibuat secara otomatis, mohon untuk tidak membalas email ini. \n\nTerima Kasih"
+		err := helper.SendEmail(tInv.SellerEmail, "INVOICE", body, fmt.Sprint(tInv.InvoiceNumber)+".pdf")
+		if err != nil {
+			log.Println("error sending email to tenant: ", err.Error())
+			return "", err
+		}
+	}
 
 	//read pdf
 	file, err := os.Open(fmt.Sprint(tInv.InvoiceNumber) + ".pdf")
