@@ -143,6 +143,20 @@ func (_m *TransactionService) GetTransactionHistory(token interface{}, status st
 	return r0, r1
 }
 
+// NotificationTransactionStatus provides a mock function with given fields: invoiceNo
+func (_m *TransactionService) NotificationTransactionStatus(invoiceNo string) error {
+	ret := _m.Called(invoiceNo)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(invoiceNo)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 type mockConstructorTestingTNewTransactionService interface {
 	mock.TestingT
 	Cleanup(func())

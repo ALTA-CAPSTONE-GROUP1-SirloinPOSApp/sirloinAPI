@@ -143,6 +143,20 @@ func (_m *TransactionData) GetTransactionHistory(userId uint, status string, fro
 	return r0, r1
 }
 
+// NotificationTransactionStatus provides a mock function with given fields: invoiceNo, transStatus
+func (_m *TransactionData) NotificationTransactionStatus(invoiceNo string, transStatus string) error {
+	ret := _m.Called(invoiceNo, transStatus)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, string) error); ok {
+		r0 = rf(invoiceNo, transStatus)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 type mockConstructorTestingTNewTransactionData interface {
 	mock.TestingT
 	Cleanup(func())
