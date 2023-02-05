@@ -24,14 +24,14 @@ var (
 )
 
 type AppConfig struct {
-	DBUser            string
-	DBPass            string
-	DBHost            string
-	DBPort            int
-	DBName            string
-	jwtKey            string
-	keyid             string
-	accesskey         string
+	DBUser string
+	DBPass string
+	DBHost string
+	DBPort int
+	DBName string
+	jwtKey string
+	keyid  string
+	// accesskey         string
 	midtransserverkey string
 	AWSREGION         string
 	S3KEY             string
