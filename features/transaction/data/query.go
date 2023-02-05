@@ -288,7 +288,11 @@ func (tq *transactionQuery) GetAdminTransactionDetails(transactionId uint) (tran
 func (tq *transactionQuery) NotificationTransactionStatus(invNo, transStatus string) error {
 	trans := Transaction{}
 
-	tq.db.First(&trans, "invoice_number = ?", invNo)
+	err := tq.db.First(&trans, "invoice_number = ?", invNo).Error
+	if err != nil {
+		log.Println("error select transaction: ", err.Error())
+		return err
+	}
 
 	// 5. Do set transaction status based on response from check transaction status
 	if transStatus == "capture" {
@@ -330,10 +334,14 @@ func (tq *transactionQuery) NotificationTransactionStatus(invNo, transStatus str
 			tq.db.Save(&prod)
 		}
 
-		if trans.CustomerId != uint(0) {
-			//bikin invoice, upload ke s3 dan kirim email
-		} else {
-			//bikin invoice dan upload ke s3
+		if trans.ProductStatus == "sell" {
+			if trans.CustomerId != uint(0) {
+				//bikin invoice penjualan, upload ke s3 dan kirim email
+			} else {
+				//bikin invoice penjualan dan upload ke s3
+			}
+		} else if trans.ProductStatus == "buy" {
+			//bikin invoice pembelian
 		}
 	}
 
@@ -363,12 +371,20 @@ func (tq *transactionQuery) UpdateStatus(transId uint, status string) error {
 				tq.db.Save(&prod)
 			}
 
-			if input.CustomerId != uint(0) {
-				//bikin invoice, upload ke s3 dan kirim email
-			} else {
-				//bikin invoice dan upload ke s3
+			if input.ProductStatus == "sell" {
+				if input.CustomerId != uint(0) {
+					//bikin invoice penjualan, upload ke s3 dan kirim email
+				} else {
+					//bikin invoice penjualan dan upload ke s3
+				}
+			} else if input.ProductStatus == "buy" {
+				//bikin invoice pembelian
 			}
 		}
 	}
 	return nil
 }
+
+// func (tq *transactionQuery) InvoiceSell(transId uint) multipart.File {
+
+// }
