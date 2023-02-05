@@ -93,9 +93,9 @@ type ItemsInv struct {
 type TransactionInv struct {
 	InvoiceNumber   string    `json:"invoice_number"`
 	TransactionDate time.Time `json:"created_at"`
-	SellerName      string    `json:"tenant_name"`
-	SellerPhone     string    `json:"tenant_phone"`
-	SellerAddress   string    `json:"tenant_address"`
+	SellerName      string    `json:"seller_name"`
+	SellerPhone     string    `json:"seller_phone"`
+	SellerAddress   string    `json:"seller_address"`
 	CustomerName    string    `json:"customer_name"`
 	CustomerEmail   string    `json:"customer_email"`
 	CustomerPhone   string    `json:"customer_phone"`
@@ -109,9 +109,9 @@ type TransactionInv struct {
 type TransactionDetInv struct {
 	InvoiceNumber   string    `json:"invoice_number"`
 	TransactionDate time.Time `json:"created_at"`
-	SellerName      string    `json:"tenant_name"`
-	SellerPhone     string    `json:"tenant_phone"`
-	SellerAddress   string    `json:"tenant_address"`
+	SellerName      string    `json:"seller_name"`
+	SellerPhone     string    `json:"seller_phone"`
+	SellerAddress   string    `json:"seller_address"`
 	CustomerName    string    `json:"customer_name"`
 	CustomerEmail   string    `json:"customer_email"`
 	CustomerPhone   string    `json:"customer_phone"`
