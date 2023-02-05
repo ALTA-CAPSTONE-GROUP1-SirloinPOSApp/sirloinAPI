@@ -134,11 +134,13 @@ func (ts *transSvc) NotificationTransactionStatus(invNo string) error {
 	// 4. Check transaction to Midtrans with param invoice number
 	transactionStatusResp, e := c.CheckTransaction(invNo)
 	if e != nil {
+		log.Println("error check transaction status: ", e.Error())
 		return errors.New("error check transaction status")
 	}
 
 	err := ts.qry.NotificationTransactionStatus(invNo, transactionStatusResp.TransactionStatus)
 	if err != nil {
+		log.Println("error calling NotificationTransactionStatus data in service: ", err.Error())
 		return errors.New("error calling NotificationTransactionStatus data in service")
 	}
 
