@@ -57,10 +57,10 @@ func (tq *transactionQuery) CreateTransaction(userId uint, uCart transaction.Car
 	}
 }
 
-// INV/tanggaltransaksi/(buy/sell)/idtransaction
+// INV-tanggaltransaksi-(buy/sell)-idtransaction
 func (tq *transactionQuery) CreateNumberInvoice(transInput Transaction, productStatus string) string {
 	cnvID := strconv.Itoa(int(transInput.ID))
-	invNo := fmt.Sprintf("INV/" + transInput.CreatedAt.Format("20060102") + "/" + productStatus + "/" + cnvID)
+	invNo := fmt.Sprintf("INV-" + transInput.CreatedAt.Format("20060102") + "-" + productStatus + "-" + cnvID)
 	return invNo
 }
 
