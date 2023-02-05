@@ -157,6 +157,20 @@ func (_m *TransactionService) NotificationTransactionStatus(invoiceNo string) er
 	return r0
 }
 
+// UpdateStatus provides a mock function with given fields: transactionId, status
+func (_m *TransactionService) UpdateStatus(transactionId uint, status string) error {
+	ret := _m.Called(transactionId, status)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(uint, string) error); ok {
+		r0 = rf(transactionId, status)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 type mockConstructorTestingTNewTransactionService interface {
 	mock.TestingT
 	Cleanup(func())
