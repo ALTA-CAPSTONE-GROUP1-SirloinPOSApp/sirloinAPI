@@ -96,10 +96,9 @@ func UploadProductPhotoS3(file multipart.FileHeader, productId int) (string, err
 	defer src.Close()
 	ext := filepath.Ext(file.Filename)
 
-	// cnv := strconv.Itoa(productId)
 	res, err := uploader.Upload(&s3manager.UploadInput{
 		Bucket:      aws.String(_config.AWS_BUCKET),
-		Key:         aws.String("files/products/product_photo_" + fmt.Sprint(productId) + ext),
+		Key:         aws.String("files/products/" + fmt.Sprint(productId) + "/product_photo_" + fmt.Sprint(productId) + ext),
 		Body:        src,
 		ContentType: aws.String("image"),
 		ACL:         aws.String("public-read"),
