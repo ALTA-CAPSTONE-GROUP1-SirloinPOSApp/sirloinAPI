@@ -339,3 +339,36 @@ func (tq *transactionQuery) NotificationTransactionStatus(invNo, transStatus str
 
 	return nil
 }
+func (tq *transactionQuery) UpdateStatus(transId uint, status string) error {
+	input := Transaction{}
+	err := tq.db.Where("id = ?", transId).First(&input).Error
+	if err != nil {
+		log.Println("error select transaction: ", err.Error())
+		return err
+	}
+	input.TransactionStatus = status
+	err = tq.db.Save(&input).Error
+	if err != nil {
+		log.Println("error save transaction status: ", err.Error())
+		return err
+	} else {
+		//update stock product
+		if input.TransactionStatus == "success" {
+			transProds := []TransactionProduct{}
+			tq.db.Find(&transProds, "transaction_id", input.ID)
+			for _, item := range transProds {
+				prod := product.Product{}
+				tq.db.First(&prod, item.ProductId)
+				prod.Stock -= item.Quantity
+				tq.db.Save(&prod)
+			}
+
+			if input.CustomerId != uint(0) {
+				//bikin invoice, upload ke s3 dan kirim email
+			} else {
+				//bikin invoice dan upload ke s3
+			}
+		}
+	}
+	return nil
+}

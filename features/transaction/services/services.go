@@ -144,3 +144,16 @@ func (ts *transSvc) NotificationTransactionStatus(invNo string) error {
 
 	return nil
 }
+func (ts *transSvc) UpdateStatus(transId uint, status string) error {
+	err := ts.qry.UpdateStatus(transId, status)
+	if err != nil {
+		msg := ""
+		if strings.Contains(err.Error(), "not found") {
+			msg = "bad request"
+		} else {
+			msg = "server problem"
+		}
+		return errors.New(msg)
+	}
+	return nil
+}

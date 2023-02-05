@@ -30,7 +30,7 @@ type TransactionHandler interface {
 	GetAdminTransactionHistory() echo.HandlerFunc
 	GetAdminTransactionDetails() echo.HandlerFunc
 	NotificationTransactionStatus() echo.HandlerFunc
-	// UpdateStatus() echo.HandlerFunc
+	UpdateStatus() echo.HandlerFunc
 }
 
 type TransactionService interface {
@@ -41,8 +41,7 @@ type TransactionService interface {
 	GetAdminTransactionHistory(status, from, to string) ([]AdmTransactionRes, error)
 	GetAdminTransactionDetails(transactionId uint) (AdmTransactionResDet, error)
 	NotificationTransactionStatus(invoiceNo string) error
-
-	// UpdateStatus(orderid uint, status string) error
+	UpdateStatus(transactionId uint, status string) error
 }
 
 type TransactionData interface {
@@ -53,5 +52,5 @@ type TransactionData interface {
 	GetAdminTransactionHistory(status, from, to string) ([]AdmTransactionRes, error)
 	GetAdminTransactionDetails(transactionId uint) (AdmTransactionResDet, error)
 	NotificationTransactionStatus(invoiceNo, transStatus string) error
-	// UpdateStatus(orderid uint, status string) error
+	UpdateStatus(transactionId uint, status string) error
 }
