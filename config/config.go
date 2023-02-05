@@ -19,6 +19,7 @@ var (
 	S3_KEY            string = ""
 	S3_SECRET         string = ""
 	AWS_BUCKET        string = ""
+	GMAILAPPPASSWORD  string = ""
 )
 
 type AppConfig struct {
@@ -33,6 +34,7 @@ type AppConfig struct {
 	S3KEY             string
 	S3SECRET          string
 	AWSBUCKET         string
+	GMAILAPPPASSWORD  string
 }
 
 func InitConfig() *AppConfig {
@@ -57,6 +59,12 @@ func ReadEnv() *AppConfig {
 	}
 	if val, found := os.LookupEnv("AWS_BUCKET"); found {
 		app.AWSBUCKET = val
+		isRead = false
+	}
+
+	// gmail
+	if val, found := os.LookupEnv("GMAILAPPPASSWORD"); found {
+		app.GMAILAPPPASSWORD = val
 		isRead = false
 	}
 
@@ -120,6 +128,7 @@ func ReadEnv() *AppConfig {
 		app.S3KEY = os.Getenv("S3KEY")
 		app.S3SECRET = os.Getenv("S3SECRET")
 		app.AWSBUCKET = os.Getenv("AWSBUCKET")
+		app.GMAILAPPPASSWORD = os.Getenv("GMAILAPPPASSWORD")
 
 	}
 
@@ -129,6 +138,7 @@ func ReadEnv() *AppConfig {
 	S3_KEY = app.S3KEY
 	S3_SECRET = app.S3SECRET
 	AWS_BUCKET = app.AWSBUCKET
+	GMAILAPPPASSWORD = app.GMAILAPPPASSWORD
 
 	return &app
 }
