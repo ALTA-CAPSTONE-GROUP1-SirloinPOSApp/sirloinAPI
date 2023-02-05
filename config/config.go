@@ -13,7 +13,6 @@ import (
 
 var (
 	JWT_KEY           string = ""
-	KEYID             string = ""
 	ACCESSKEY         string = ""
 	MIDTRANSSERVERKEY string = ""
 	AWS_REGION        string = ""
@@ -23,14 +22,12 @@ var (
 )
 
 type AppConfig struct {
-	DBUser string
-	DBPass string
-	DBHost string
-	DBPort int
-	DBName string
-	jwtKey string
-	keyid  string
-	// accesskey         string
+	DBUser            string
+	DBPass            string
+	DBHost            string
+	DBPort            int
+	DBName            string
+	jwtKey            string
 	midtransserverkey string
 	AWSREGION         string
 	S3KEY             string
