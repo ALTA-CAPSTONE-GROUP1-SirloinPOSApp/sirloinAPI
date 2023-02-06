@@ -248,7 +248,7 @@ func (tq *transactionQuery) AddBuy(userId uint, uCart transaction.Cart) (transac
 	return DataToCoreT(transInput), nil
 }
 
-func (tq *transactionQuery) GetTransactionHistory(userId uint, status, from, to string) ([]transaction.Core, error) {
+func (tq *transactionQuery) GetTransactionHistory(userId uint, status, from, to, sendEmail string) ([]transaction.Core, error) {
 	trans := []transaction.Core{}
 
 	// add one day for query param 'to'
@@ -288,11 +288,13 @@ func (tq *transactionQuery) GetTransactionHistory(userId uint, status, from, to 
 			trans[0].PdfUrl = pdf_url
 		}
 		defer file.Close()
-		body := "Dear " + trans[0].TenantName + ",\nBerikut adalah laporan untuk transaksi di tanggal ini: " + from + "sampai " + to + "\n\nEmail ini dibuat secara otomatis, mohon untuk tidak membalas email ini. \n\nTerima Kasih"
-		helper.SendEmail(trans[0].UserEmail, "Loparan Tenant "+trans[0].TenantName, body, pathname+filename+"laporan.pdf")
-		if err != nil {
-			log.Println("error sending email report to tenant: ", err.Error())
-			return []transaction.Core{}, err
+		if sendEmail == "true" {
+			body := "Dear " + trans[0].TenantName + ",\nBerikut adalah laporan untuk transaksi di tanggal ini: " + from + "sampai " + to + "\n\nEmail ini dibuat secara otomatis, mohon untuk tidak membalas email ini. \n\nTerima Kasih"
+			helper.SendEmail(trans[0].UserEmail, "Loparan Tenant "+trans[0].TenantName, body, pathname+filename+"laporan.pdf")
+			if err != nil {
+				log.Println("error sending email report to tenant: ", err.Error())
+				return []transaction.Core{}, err
+			}
 		}
 	}
 

@@ -61,7 +61,7 @@ func (ts *transSvc) AddBuy(token interface{}, uCart transaction.Cart) (transacti
 
 	return res, nil
 }
-func (ts *transSvc) GetTransactionHistory(token interface{}, status, from, to string) ([]transaction.Core, error) {
+func (ts *transSvc) GetTransactionHistory(token interface{}, status, from, to, sendEmail string) ([]transaction.Core, error) {
 	userId := helper.ExtractToken(token)
 	if userId <= 0 {
 		log.Println("error extract token")
