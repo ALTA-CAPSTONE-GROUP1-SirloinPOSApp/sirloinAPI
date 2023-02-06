@@ -91,14 +91,14 @@ func (ps *productSvc) Delete(token interface{}, productId uint) error {
 	}
 	return nil
 }
-func (ps *productSvc) GetUserProducts(token interface{}) ([]product.Core, error) {
+func (ps *productSvc) GetUserProducts(token interface{}, search string) ([]product.Core, error) {
 	userID := helper.ExtractToken(token)
 	if userID <= 0 {
 		log.Println("error extract token getUserProduct product service")
 		return []product.Core{}, errors.New("user not found")
 	}
 
-	res, err := ps.qry.GetUserProducts(uint(userID))
+	res, err := ps.qry.GetUserProducts(uint(userID), search)
 	if err != nil {
 		msg := ""
 		if strings.Contains(err.Error(), "not found") {

@@ -35,7 +35,7 @@ type ProductService interface {
 	Add(token interface{}, newProduct Core, productImage *multipart.FileHeader) (Core, error)
 	Update(token interface{}, productId uint, updProduct Core, productImage *multipart.FileHeader) (Core, error)
 	Delete(token interface{}, productId uint) error
-	GetUserProducts(token interface{}) ([]Core, error)
+	GetUserProducts(token interface{}, search string) ([]Core, error)
 	GetProductById(token interface{}, productId uint) (Core, error)
 	GetAdminProducts() ([]Core, error)
 }
@@ -44,7 +44,7 @@ type ProductData interface {
 	Add(userId uint, newProduct Core, productImage *multipart.FileHeader) (Core, error)
 	Update(userId, productId uint, updProduct Core, productImage *multipart.FileHeader) (Core, error)
 	Delete(userId, productId uint) error
-	GetUserProducts(userId uint) ([]Core, error)
+	GetUserProducts(userId uint, search string) ([]Core, error)
 	GetProductById(userid, productId uint) (Core, error)
 	GetAdminProducts() ([]Core, error)
 }
