@@ -9,6 +9,7 @@ import (
 type Core struct {
 	ID                uint      `json:"id"`
 	UserId            uint      `json:"user_id"`
+	TenantName        string    `json:"tenant_name"`
 	CustomerId        uint      `json:"customer_id"`
 	CustomerName      string    `json:"customer_name"`
 	TotalPrice        float64   `json:"total_price"`

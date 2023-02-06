@@ -81,10 +81,11 @@ func (ts *transSvc) GetTransactionHistory(token interface{}, status, from, to st
 		log.Println("error calling gettransactionhistory data in service: ", err.Error())
 		return []transaction.Core{}, errors.New(msg)
 	}
-	pathname := "features/transaction/services/reports/"
+
 	if len(res) != 0 {
+		pathname := "features/transaction/services/reports/"
 		filename := fmt.Sprint(res[0].UserId)
-		if err := helper.GeneratePDF(res, pathname+filename); err != nil {
+		if err := helper.GeneratePDFReport(res, pathname+filename); err != nil {
 			log.Println("generate sales report pdf error: ", err)
 			return []transaction.Core{}, err
 		}
