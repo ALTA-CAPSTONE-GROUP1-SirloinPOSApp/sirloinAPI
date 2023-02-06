@@ -4,6 +4,19 @@ import (
 	"time"
 )
 
+type TransactionResponse struct {
+	ID                uint      `json:"id"`
+	CustomerId        uint      `json:"customer_id"`
+	CustomerName      string    `json:"customer_name"`
+	TotalPrice        float64   `json:"total_price"`
+	Discount          float64   `json:"discount"`
+	TotalBill         float64   `json:"total_bill"`
+	CreatedAt         time.Time `json:"created_at"`
+	TransactionStatus string    `json:"transaction_Status"`
+	InvoiceNumber     string    `json:"invoice_number"`
+	InvoiceUrl        string    `json:"invoice_url"`
+	PaymentUrl        string    `json:"payment_url"`
+}
 type TransactionRes struct {
 	ID                    uint      `json:"id"`
 	CustomerId            uint      `json:"customer_id"`
@@ -142,4 +155,28 @@ func InvToDetail(t TransactionInv) TransactionDetInv {
 		DiscountAmount:  t.DiscountAmount,
 		TotalPrice:      t.TotalPrice,
 	}
+}
+
+func ToResponse(data Core) TransactionResponse {
+	return TransactionResponse{
+		ID:                data.ID,
+		CustomerId:        data.CustomerId,
+		CustomerName:      data.CustomerName,
+		TotalPrice:        data.TotalPrice,
+		Discount:          data.Discount,
+		TotalBill:         data.TotalBill,
+		CreatedAt:         data.CreatedAt,
+		TransactionStatus: data.TransactionStatus,
+		InvoiceNumber:     data.InvoiceNumber,
+		InvoiceUrl:        data.InvoiceUrl,
+		PaymentUrl:        data.PaymentUrl,
+	}
+}
+func ToResponseArr(data []Core) []TransactionResponse {
+	arrRes := []TransactionResponse{}
+	for _, v := range data {
+		tmp := ToResponse(v)
+		arrRes = append(arrRes, tmp)
+	}
+	return arrRes
 }
