@@ -97,9 +97,15 @@ func (pq *productQuery) Delete(userId, productId uint) error {
 
 	return nil
 }
-func (pq *productQuery) GetUserProducts(userId uint) ([]product.Core, error) {
+func (pq *productQuery) GetUserProducts(userId uint, search string) ([]product.Core, error) {
 	userProd := []product.Core{}
-	err := pq.db.Raw("SELECT p.id , upc , category , product_name , minimum_stock , stock , buying_price , price , product_image , supplier , items_sold FROM products p JOIN users u ON u.id = p.user_id WHERE p.deleted_at IS NULL AND user_id = ?", userId).Scan(&userProd).Error
+	var err error
+
+	if search == "" {
+		err = pq.db.Raw("SELECT p.id , upc , category , product_name , minimum_stock , stock , buying_price , price , product_image , supplier , items_sold FROM products p JOIN users u ON u.id = p.user_id WHERE p.deleted_at IS NULL AND user_id = ?", userId).Scan(&userProd).Error
+	} else {
+		err = pq.db.Raw("SELECT p.id , upc , category , product_name , minimum_stock , stock , buying_price , price , product_image , supplier , items_sold FROM products p JOIN users u ON u.id = p.user_id WHERE p.deleted_at IS NULL AND user_id = ? AND product_name LIKE ?", userId, "%"+search+"%").Scan(&userProd).Error
+	}
 	if err != nil {
 		log.Println("\terror query get user product: ", err.Error())
 		return []product.Core{}, err
@@ -117,9 +123,14 @@ func (pq *productQuery) GetProductById(userId, productId uint) (product.Core, er
 
 	return prod, nil
 }
-func (pq *productQuery) GetAdminProducts() ([]product.Core, error) {
+func (pq *productQuery) GetAdminProducts(search string) ([]product.Core, error) {
 	userProd := []product.Core{}
-	err := pq.db.Raw("SELECT p.id , upc , category , product_name , minimum_stock , stock , buying_price , price , product_image , supplier , items_sold FROM products p JOIN users u ON u.id = p.user_id WHERE p.deleted_at IS NULL AND user_id = 1").Scan(&userProd).Error
+	var err error
+	if search == "" {
+		err = pq.db.Raw("SELECT p.id , upc , category , product_name , minimum_stock , stock , buying_price , price , product_image , supplier , items_sold FROM products p JOIN users u ON u.id = p.user_id WHERE p.deleted_at IS NULL AND user_id = 1").Scan(&userProd).Error
+	} else {
+		err = pq.db.Raw("SELECT p.id , upc , category , product_name , minimum_stock , stock , buying_price , price , product_image , supplier , items_sold FROM products p JOIN users u ON u.id = p.user_id WHERE p.deleted_at IS NULL AND user_id = 1 AND product_name LIKE ?", "%"+search+"%").Scan(&userProd).Error
+	}
 	if err != nil {
 		log.Println("\terror query get user product: ", err.Error())
 		return []product.Core{}, err

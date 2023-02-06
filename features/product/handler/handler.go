@@ -138,8 +138,9 @@ func (pc *productControl) Delete() echo.HandlerFunc {
 func (pc *productControl) GetUserProducts() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		token := c.Get("user")
+		search := c.QueryParam("search")
 
-		res, err := pc.srv.GetUserProducts(token)
+		res, err := pc.srv.GetUserProducts(token, search)
 		if err != nil {
 			log.Println("error running GetAllProducts service: ", err.Error())
 			if strings.Contains(err.Error(), "not found") {
@@ -185,7 +186,8 @@ func (pc *productControl) GetProductById() echo.HandlerFunc {
 }
 func (pc *productControl) GetAdminProducts() echo.HandlerFunc {
 	return func(c echo.Context) error {
-		res, err := pc.srv.GetAdminProducts()
+		search := c.QueryParam("search")
+		res, err := pc.srv.GetAdminProducts(search)
 		if err != nil {
 			log.Println("error running GetAllProducts service: ", err.Error())
 			if strings.Contains(err.Error(), "not found") {

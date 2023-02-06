@@ -50,13 +50,13 @@ func (_m *ProductData) Delete(userId uint, productId uint) error {
 	return r0
 }
 
-// GetAdminProducts provides a mock function with given fields:
-func (_m *ProductData) GetAdminProducts() ([]product.Core, error) {
-	ret := _m.Called()
+// GetAdminProducts provides a mock function with given fields: search
+func (_m *ProductData) GetAdminProducts(search string) ([]product.Core, error) {
+	ret := _m.Called(search)
 
 	var r0 []product.Core
-	if rf, ok := ret.Get(0).(func() []product.Core); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(string) []product.Core); ok {
+		r0 = rf(search)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]product.Core)
@@ -64,8 +64,8 @@ func (_m *ProductData) GetAdminProducts() ([]product.Core, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(search)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -94,13 +94,13 @@ func (_m *ProductData) GetProductById(userid uint, productId uint) (product.Core
 	return r0, r1
 }
 
-// GetUserProducts provides a mock function with given fields: userId
-func (_m *ProductData) GetUserProducts(userId uint) ([]product.Core, error) {
-	ret := _m.Called(userId)
+// GetUserProducts provides a mock function with given fields: userId, search
+func (_m *ProductData) GetUserProducts(userId uint, search string) ([]product.Core, error) {
+	ret := _m.Called(userId, search)
 
 	var r0 []product.Core
-	if rf, ok := ret.Get(0).(func(uint) []product.Core); ok {
-		r0 = rf(userId)
+	if rf, ok := ret.Get(0).(func(uint, string) []product.Core); ok {
+		r0 = rf(userId, search)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]product.Core)
@@ -108,8 +108,8 @@ func (_m *ProductData) GetUserProducts(userId uint) ([]product.Core, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(uint) error); ok {
-		r1 = rf(userId)
+	if rf, ok := ret.Get(1).(func(uint, string) error); ok {
+		r1 = rf(userId, search)
 	} else {
 		r1 = ret.Error(1)
 	}

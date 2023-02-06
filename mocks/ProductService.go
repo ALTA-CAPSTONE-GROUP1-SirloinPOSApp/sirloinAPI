@@ -50,13 +50,13 @@ func (_m *ProductService) Delete(token interface{}, productId uint) error {
 	return r0
 }
 
-// GetAdminProducts provides a mock function with given fields:
-func (_m *ProductService) GetAdminProducts() ([]product.Core, error) {
-	ret := _m.Called()
+// GetAdminProducts provides a mock function with given fields: search
+func (_m *ProductService) GetAdminProducts(search string) ([]product.Core, error) {
+	ret := _m.Called(search)
 
 	var r0 []product.Core
-	if rf, ok := ret.Get(0).(func() []product.Core); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(string) []product.Core); ok {
+		r0 = rf(search)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]product.Core)
@@ -64,8 +64,8 @@ func (_m *ProductService) GetAdminProducts() ([]product.Core, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(search)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -94,13 +94,13 @@ func (_m *ProductService) GetProductById(token interface{}, productId uint) (pro
 	return r0, r1
 }
 
-// GetUserProducts provides a mock function with given fields: token
-func (_m *ProductService) GetUserProducts(token interface{}) ([]product.Core, error) {
-	ret := _m.Called(token)
+// GetUserProducts provides a mock function with given fields: token, search
+func (_m *ProductService) GetUserProducts(token interface{}, search string) ([]product.Core, error) {
+	ret := _m.Called(token, search)
 
 	var r0 []product.Core
-	if rf, ok := ret.Get(0).(func(interface{}) []product.Core); ok {
-		r0 = rf(token)
+	if rf, ok := ret.Get(0).(func(interface{}, string) []product.Core); ok {
+		r0 = rf(token, search)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]product.Core)
@@ -108,8 +108,8 @@ func (_m *ProductService) GetUserProducts(token interface{}) ([]product.Core, er
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(interface{}) error); ok {
-		r1 = rf(token)
+	if rf, ok := ret.Get(1).(func(interface{}, string) error); ok {
+		r1 = rf(token, search)
 	} else {
 		r1 = ret.Error(1)
 	}
