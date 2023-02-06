@@ -586,14 +586,14 @@ func (tq *transactionQuery) Invoice(discount float64, transId uint, member bool,
 	//send buying invoice email to tenant or to registered customer
 	if status == "sell" && member {
 		body := "Dear " + tInv.CustomerName + ",\nBerikut adalah invoice untuk transaksi dengan nomor: " + transInv.InvoiceNumber + "\n\nEmail ini dibuat secara otomatis, mohon untuk tidak membalas email ini. \n\nTerima Kasih"
-		err := helper.SendEmail(tInv.CustomerEmail, "INVOICE", body, fmt.Sprint(tInv.InvoiceNumber)+".pdf")
+		err := helper.SendEmail(tInv.CustomerEmail, "INVOICE "+fmt.Sprint(tInv.InvoiceNumber), body, fmt.Sprint(tInv.InvoiceNumber)+".pdf")
 		if err != nil {
 			log.Println("error sending email to customer: ", err.Error())
 			return "", err
 		}
 	} else if status == "buy" {
-		body := "Dear " + tInv.SellerName + ",\n Berikut adalah invoice untuk transaksi dengan nomor: " + transInv.InvoiceNumber + "\n\nPesan ini dibuat secara otomatis, mohon untuk tidak membalas email ini. \n\nTerima Kasih"
-		err := helper.SendEmail(tInv.SellerEmail, "INVOICE", body, fmt.Sprint(tInv.InvoiceNumber)+".pdf")
+		body := "Dear " + tInv.SellerName + ",\nBerikut adalah invoice untuk transaksi dengan nomor: " + transInv.InvoiceNumber + "\n\nEmail ini dibuat secara otomatis, mohon untuk tidak membalas email ini. \n\nTerima Kasih"
+		err := helper.SendEmail(tInv.SellerEmail, "INVOICE "+fmt.Sprint(tInv.InvoiceNumber), body, fmt.Sprint(tInv.InvoiceNumber)+".pdf")
 		if err != nil {
 			log.Println("error sending email to tenant: ", err.Error())
 			return "", err

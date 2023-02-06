@@ -58,9 +58,12 @@ func (pc *productControl) Add() echo.HandlerFunc {
 			if strings.Contains(err.Error(), "duplicated") {
 				log.Println("\terror running add product service: ", err.Error())
 				return c.JSON(http.StatusConflict, helper.ErrorResponse("duplicated product"))
-			} else {
+			} else if strings.Contains(err.Error(), "server") {
 				log.Println("\terror running add product service: ", err.Error())
 				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
+			} else {
+				log.Println("\terror running add product service: ", err.Error())
+				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("bad request: UPC, stock, minimum_stock, buying_price, price should only numeric and product_name, category should only alpha space, "))
 			}
 		}
 
