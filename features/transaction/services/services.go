@@ -129,6 +129,7 @@ func (ts *transSvc) GetAdminTransactionDetails(transactionId uint) (transaction.
 	return res, nil
 }
 func (ts *transSvc) NotificationTransactionStatus(invNo string) error {
+	log.Println("Cek invNo", invNo)
 	c := config.MidtransCoreAPIClient()
 
 	// 4. Check transaction to Midtrans with param invoice number
@@ -143,7 +144,7 @@ func (ts *transSvc) NotificationTransactionStatus(invNo string) error {
 		log.Println("error calling NotificationTransactionStatus data in service: ", err.Error())
 		return errors.New("error calling NotificationTransactionStatus data in service")
 	}
-
+	log.Println("akhir", invNo)
 	return nil
 }
 func (ts *transSvc) UpdateStatus(transId uint, status string) error {
