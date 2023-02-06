@@ -284,16 +284,16 @@ func TestGetAllProducts(t *testing.T) {
 			Category:     "food",
 		},
 	}
-
+	search := ""
 	t.Run("success get all user products", func(t *testing.T) {
-		repo.On("GetUserProducts", uint(1)).Return(resdata, nil).Once()
+		repo.On("GetUserProducts", uint(1), search).Return(resdata, nil).Once()
 		srv := New(repo)
 
 		_, token := helper.GenerateJWT(1)
 		pToken := token.(*jwt.Token)
 		pToken.Valid = true
 
-		res, err := srv.GetUserProducts(pToken)
+		res, err := srv.GetUserProducts(pToken, search)
 		assert.Nil(t, err)
 		assert.Equal(t, len(res), len(resdata))
 		repo.AssertExpectations(t)
@@ -304,13 +304,13 @@ func TestGetAllProducts(t *testing.T) {
 
 		_, token := helper.GenerateJWT(0)
 
-		_, err := srv.GetUserProducts(token)
+		_, err := srv.GetUserProducts(token, search)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "not found")
 	})
 
 	t.Run("data not found", func(t *testing.T) {
-		repo.On("GetUserProducts", uint(1)).Return([]product.Core{}, errors.New("data not found")).Once()
+		repo.On("GetUserProducts", uint(1), search).Return([]product.Core{}, errors.New("data not found")).Once()
 
 		_, token := helper.GenerateJWT(1)
 		pToken := token.(*jwt.Token)
@@ -318,7 +318,7 @@ func TestGetAllProducts(t *testing.T) {
 
 		srv := New(repo)
 
-		res, err := srv.GetUserProducts(pToken)
+		res, err := srv.GetUserProducts(pToken, search)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "not found")
 		assert.Equal(t, 0, len(res))
@@ -326,7 +326,7 @@ func TestGetAllProducts(t *testing.T) {
 	})
 
 	t.Run("server problem", func(t *testing.T) {
-		repo.On("GetUserProducts", uint(1)).Return([]product.Core{}, errors.New("server problem")).Once()
+		repo.On("GetUserProducts", uint(1), search).Return([]product.Core{}, errors.New("server problem")).Once()
 
 		_, token := helper.GenerateJWT(1)
 		pToken := token.(*jwt.Token)
@@ -334,7 +334,7 @@ func TestGetAllProducts(t *testing.T) {
 
 		srv := New(repo)
 
-		res, err := srv.GetUserProducts(pToken)
+		res, err := srv.GetUserProducts(pToken, search)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "server")
 		assert.Equal(t, 0, len(res))
@@ -430,23 +430,23 @@ func TestGetAdminProducts(t *testing.T) {
 			Category:     "food",
 		},
 	}
-
+	search := ""
 	t.Run("success get all admin products", func(t *testing.T) {
-		repo.On("GetAdminProducts").Return(resdata, nil).Once()
+		repo.On("GetAdminProducts", search).Return(resdata, nil).Once()
 		srv := New(repo)
 
-		res, err := srv.GetAdminProducts()
+		res, err := srv.GetAdminProducts(search)
 		assert.Nil(t, err)
 		assert.Equal(t, len(res), len(resdata))
 		repo.AssertExpectations(t)
 	})
 
 	t.Run("data not found", func(t *testing.T) {
-		repo.On("GetAdminProducts").Return([]product.Core{}, errors.New("data not found")).Once()
+		repo.On("GetAdminProducts", search).Return([]product.Core{}, errors.New("data not found")).Once()
 
 		srv := New(repo)
 
-		res, err := srv.GetAdminProducts()
+		res, err := srv.GetAdminProducts(search)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "not found")
 		assert.Equal(t, 0, len(res))
@@ -454,11 +454,11 @@ func TestGetAdminProducts(t *testing.T) {
 	})
 
 	t.Run("server problem", func(t *testing.T) {
-		repo.On("GetAdminProducts").Return([]product.Core{}, errors.New("server problem")).Once()
+		repo.On("GetAdminProducts", search).Return([]product.Core{}, errors.New("server problem")).Once()
 
 		srv := New(repo)
 
-		res, err := srv.GetAdminProducts()
+		res, err := srv.GetAdminProducts(search)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "server")
 		assert.Equal(t, 0, len(res))
