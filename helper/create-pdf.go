@@ -31,7 +31,7 @@ func GeneratePDFReport(reports []transaction.Core, filename string) error {
 	pdf := gofpdf.New("P", "mm", "A4", "")
 	pdf.AddPage()
 	pdf.SetFont("Arial", "B", 14)
-	pdf.Cell(40, 10, "Laporan "+judul)
+	pdf.Cell(40, 10, fmt.Sprintf("Laporan %s Tenant %s", judul, reports[0].TenantName))
 	pdf.Ln(10)
 	pdf.SetFont("Arial", "", 12)
 	pdf.Cell(40, 10, fmt.Sprintf("Detail %s:", judul))
