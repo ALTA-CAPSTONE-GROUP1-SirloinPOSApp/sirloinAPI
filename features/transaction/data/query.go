@@ -10,6 +10,7 @@ import (
 	"sirloinapi/features/transaction"
 	"sirloinapi/helper"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/dustin/go-humanize"
@@ -30,10 +31,25 @@ func New(db *gorm.DB) transaction.TransactionData {
 	}
 }
 
+func (tq *transactionQuery) CheckAllowedProd(uid uint, uCart transaction.Cart) bool {
+	check := true
+	for _, val := range uCart.Items {
+		p := product.Product{}
+		tq.db.First(&p, val.ProductId)
+		if p.UserId != uid {
+			check = false
+		}
+	}
+	return check
+}
+
 func (tq *transactionQuery) TotalPrice(uCart transaction.Cart) float64 {
 	totalPrice := 0.0
 	for _, val := range uCart.Items {
-		totalPrice += float64(val.Quantity) * val.Price
+		p := product.Product{}
+		tq.db.First(&p, val.ProductId)
+		// totalPrice += float64(val.Quantity) * val.Price
+		totalPrice += float64(val.Quantity) * p.Price
 	}
 	return totalPrice
 }
@@ -64,7 +80,7 @@ func (tq *transactionQuery) CreateTransaction(userId uint, uCart transaction.Car
 // INV-tanggaltransaksi-(buy/sell)-idtransaction
 func (tq *transactionQuery) CreateNumberInvoice(transInput Transaction, productStatus string) string {
 	cnvID := strconv.Itoa(int(transInput.ID))
-	invNo := fmt.Sprintf("INV-" + transInput.CreatedAt.Format("20060102") + "-" + productStatus + "-" + cnvID)
+	invNo := fmt.Sprintf("INV-" + transInput.CreatedAt.Format("20060102") + "-" + strings.ToUpper(productStatus) + "-" + cnvID)
 	return invNo
 }
 
@@ -84,8 +100,16 @@ func (tq *transactionQuery) CreateTransProds(transInput Transaction, uCart trans
 }
 
 func (tq *transactionQuery) AddSell(userId uint, uCart transaction.Cart) (transaction.Core, error) {
+	//check if the product really the seller product
+	check := tq.CheckAllowedProd(userId, uCart)
+	if !check {
+		log.Println("unauthorized: request body contain product that's not belong to the user")
+		return transaction.Core{}, errors.New("unauthorized: request body contain product that's not belong to the user")
+	}
+
 	tx := tq.db.Begin()
 	productStatus := "sell"
+
 	//menghitung total price
 	totalPrice := tq.TotalPrice(uCart)
 
@@ -146,6 +170,12 @@ func (tq *transactionQuery) AddSell(userId uint, uCart transaction.Cart) (transa
 }
 
 func (tq *transactionQuery) AddBuy(userId uint, uCart transaction.Cart) (transaction.Core, error) {
+	check := tq.CheckAllowedProd(uint(1), uCart)
+	if !check {
+		log.Println("unauthorized: request body contain product that's not belong to super admin")
+		return transaction.Core{}, errors.New("unauthorized: request body contain product that's not belong to super admin")
+	}
+
 	tx := tq.db.Begin()
 	productStatus := "buy"
 	//menghitung total price
@@ -538,7 +568,7 @@ func (tq *transactionQuery) Invoice(discount float64, transId uint, member bool,
 
 	//send buying invoice email to tenant or to registered customer
 	if status == "sell" && member {
-		body := "Dear " + tInv.CustomerName + ",\n Berikut adalah invoice untuk transaksi dengan nomor: " + transInv.InvoiceNumber + "\n\nPesan ini dibuat secara otomatis, mohon untuk tidak membalas email ini. \n\nTerima Kasih"
+		body := "Dear " + tInv.CustomerName + ",\nBerikut adalah invoice untuk transaksi dengan nomor: " + transInv.InvoiceNumber + "\n\nEmail ini dibuat secara otomatis, mohon untuk tidak membalas email ini. \n\nTerima Kasih"
 		err := helper.SendEmail(tInv.CustomerEmail, "INVOICE", body, fmt.Sprint(tInv.InvoiceNumber)+".pdf")
 		if err != nil {
 			log.Println("error sending email to customer: ", err.Error())
