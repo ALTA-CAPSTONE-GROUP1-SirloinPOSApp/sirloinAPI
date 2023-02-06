@@ -82,6 +82,8 @@ func (ts *transSvc) GetTransactionHistory(token interface{}, status, from, to st
 		return []transaction.Core{}, errors.New(msg)
 	}
 
+	log.Println(res[0].UserEmail)
+
 	if len(res) != 0 {
 		pathname := "features/transaction/services/reports/"
 		filename := fmt.Sprint(res[0].UserId)
