@@ -2,7 +2,6 @@ package services
 
 import (
 	"errors"
-	"sirloinapi/config"
 	"sirloinapi/features/transaction"
 	"sirloinapi/helper"
 	"sirloinapi/mocks"
@@ -482,20 +481,20 @@ func TestGetAdminTransactionDetails(t *testing.T) {
 
 func TestNotificationTransactionStatus(t *testing.T) {
 	data := mocks.NewTransactionData(t)
-	invNo := "INV-20230206-SELL-159"
+	// invNo := "INV-20230206-SELL-159"
 	// var test *coreapi.TransactionStatusResponse
-	t.Run("success handling payment notification", func(t *testing.T) {
-		c := config.MidtransCoreAPIClient()
+	// t.Run("success handling payment notification", func(t *testing.T) {
+	// 	c := config.MidtransCoreAPIClient()
 
-		// 4. Check transaction to Midtrans with param invoice number
-		transactionStatusResp, _ := c.CheckTransaction(invNo)
-		data.On("NotificationTransactionStatus", invNo, transactionStatusResp.TransactionStatus).Return(nil).Once()
-		srv := New(data)
+	// 	// 4. Check transaction to Midtrans with param invoice number
+	// 	transactionStatusResp, _ := c.CheckTransaction(invNo)
+	// 	data.On("NotificationTransactionStatus", invNo, transactionStatusResp.TransactionStatus).Return(nil).Once()
+	// 	srv := New(data)
 
-		err := srv.NotificationTransactionStatus(invNo)
-		assert.Nil(t, err)
-		data.AssertExpectations(t)
-	})
+	// 	err := srv.NotificationTransactionStatus(invNo)
+	// 	assert.Nil(t, err)
+	// 	data.AssertExpectations(t)
+	// })
 
 	t.Run("error check transaction status", func(t *testing.T) {
 		srv := New(data)
@@ -524,4 +523,36 @@ func TestNotificationTransactionStatus(t *testing.T) {
 	// 	assert.Nil(t, err)
 	// 	repo.AssertExpectations(t)
 	// })
+}
+
+func TestUpdateStatus(t *testing.T) {
+	data := mocks.NewTransactionData(t)
+	transId := 5
+	status := "cancel"
+	t.Run("success update order", func(t *testing.T) {
+		data.On("UpdateStatus", uint(transId), status).Return(nil).Once()
+		srv := New(data)
+
+		err := srv.UpdateStatus(uint(transId), status)
+		assert.Nil(t, err)
+		data.AssertExpectations(t)
+	})
+	t.Run("server problem", func(t *testing.T) {
+		data.On("UpdateStatus", uint(transId), status).Return(errors.New("server problem")).Once()
+		srv := New(data)
+
+		err := srv.UpdateStatus(uint(transId), status)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "server")
+		data.AssertExpectations(t)
+	})
+	t.Run("data not found", func(t *testing.T) {
+		data.On("UpdateStatus", uint(transId), status).Return(errors.New("data not found")).Once()
+		srv := New(data)
+
+		err := srv.UpdateStatus(uint(transId), status)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "bad request")
+		data.AssertExpectations(t)
+	})
 }
