@@ -4,6 +4,7 @@ import (
 	"log"
 	"regexp"
 	"sirloinapi/features/customer"
+	"sirloinapi/features/product"
 	"sirloinapi/features/user"
 
 	"github.com/go-playground/validator/v10"
@@ -25,6 +26,16 @@ type AddCustomerValidate struct {
 	Email       string `validate:"required,email"`
 	Address     string `validate:"required"`
 	PhoneNumber string `validate:"required,numeric"`
+}
+
+type ProductValidate struct {
+	Upc          string  `validate:"required,numeric"`
+	Category     string  `validate:"required,alpha_space"`
+	ProductName  string  `validate:"required,alpha_space"`
+	Stock        int     `validate:"required,numeric"`
+	MinimumStock int     `validate:"numeric"`
+	BuyingPrice  float64 `validate:"numeric"`
+	Price        float64 `validate:"required,numeric"`
 }
 
 type PasswordValidate struct {
@@ -94,6 +105,18 @@ func ToValidate(option string, data interface{}) interface{} {
 			res.Name = v.Name
 			res.PhoneNumber = v.PhoneNumber
 			res.Address = v.Address
+		}
+		return res
+	case "product":
+		res := ProductValidate{}
+		if v, ok := data.(product.Core); ok {
+			res.Upc = v.Upc
+			res.Category = v.Category
+			res.ProductName = v.ProductName
+			res.Stock = v.Stock
+			res.MinimumStock = v.MinimumStock
+			res.BuyingPrice = v.BuyingPrice
+			res.Price = v.Price
 		}
 		return res
 	default:

@@ -24,13 +24,13 @@ func New(data product.ProductData) product.ProductService {
 }
 
 func (ps *productSvc) Add(token interface{}, newProduct product.Core, productImage *multipart.FileHeader) (product.Core, error) {
-	err := ps.vld.Struct(newProduct)
+	err := helper.Validasi(helper.ToValidate("product", newProduct))
 	if err != nil {
 		return product.Core{}, err
 	}
 	userId := helper.ExtractToken(token)
 	if userId <= 0 {
-		log.Println("\t error extract token add product")
+		log.Println("error extract token add product")
 		return product.Core{}, errors.New("user not found")
 	}
 
@@ -44,7 +44,7 @@ func (ps *productSvc) Add(token interface{}, newProduct product.Core, productIma
 		} else {
 			msg = "server problem"
 		}
-		log.Println("\terror add query in service: ", err.Error())
+		log.Println("error add query in service: ", err.Error())
 		return product.Core{}, errors.New(msg)
 	}
 
@@ -53,7 +53,7 @@ func (ps *productSvc) Add(token interface{}, newProduct product.Core, productIma
 func (ps *productSvc) Update(token interface{}, productId uint, updProduct product.Core, productImage *multipart.FileHeader) (product.Core, error) {
 	userId := helper.ExtractToken(token)
 	if userId <= 0 {
-		log.Println("\t error extract token add product")
+		log.Println("error extract token add product")
 		return product.Core{}, errors.New("user not found")
 	}
 
@@ -65,7 +65,7 @@ func (ps *productSvc) Update(token interface{}, productId uint, updProduct produ
 		} else {
 			msg = "server problem"
 		}
-		log.Println("\terror update data in service: ", err.Error())
+		log.Println("error update data in service: ", err.Error())
 		return product.Core{}, errors.New(msg)
 	}
 
@@ -74,7 +74,7 @@ func (ps *productSvc) Update(token interface{}, productId uint, updProduct produ
 func (ps *productSvc) Delete(token interface{}, productId uint) error {
 	userID := helper.ExtractToken(token)
 	if userID <= 0 {
-		log.Println("\terror extract token delete product service")
+		log.Println("error extract token delete product service")
 		return errors.New("user not found")
 	}
 
@@ -86,7 +86,7 @@ func (ps *productSvc) Delete(token interface{}, productId uint) error {
 		} else {
 			msg = "server problem"
 		}
-		log.Println("\terror calling delete data in service: ", err.Error())
+		log.Println("error calling delete data in service: ", err.Error())
 		return errors.New(msg)
 	}
 	return nil
@@ -94,7 +94,7 @@ func (ps *productSvc) Delete(token interface{}, productId uint) error {
 func (ps *productSvc) GetUserProducts(token interface{}) ([]product.Core, error) {
 	userID := helper.ExtractToken(token)
 	if userID <= 0 {
-		log.Println("\terror extract token getUserProduct product service")
+		log.Println("error extract token getUserProduct product service")
 		return []product.Core{}, errors.New("user not found")
 	}
 
@@ -113,7 +113,7 @@ func (ps *productSvc) GetUserProducts(token interface{}) ([]product.Core, error)
 func (ps *productSvc) GetProductById(token interface{}, productId uint) (product.Core, error) {
 	userId := helper.ExtractToken(token)
 	if userId <= 0 {
-		log.Println("\terror extract token delete product service")
+		log.Println("error extract token delete product service")
 		return product.Core{}, errors.New("user not found")
 	}
 
