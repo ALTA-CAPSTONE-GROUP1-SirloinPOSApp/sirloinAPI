@@ -85,8 +85,9 @@ func (th *TransactionHandle) GetTransactionHistory() echo.HandlerFunc {
 		from := c.QueryParam("from")
 		to := c.QueryParam("to")
 		status := c.QueryParam("status")
+		sendEmail := c.QueryParam("send_email")
 
-		res, err := th.srv.GetTransactionHistory(token, status, from, to)
+		res, err := th.srv.GetTransactionHistory(token, status, from, to, sendEmail)
 		log.Println(err)
 		if err != nil {
 			if strings.Contains(err.Error(), "not found") {

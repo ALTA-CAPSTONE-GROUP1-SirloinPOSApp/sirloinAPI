@@ -120,13 +120,13 @@ func (_m *TransactionService) GetTransactionDetails(transactionId uint) (transac
 	return r0, r1
 }
 
-// GetTransactionHistory provides a mock function with given fields: token, status, from, to
-func (_m *TransactionService) GetTransactionHistory(token interface{}, status string, from string, to string) ([]transaction.Core, error) {
-	ret := _m.Called(token, status, from, to)
+// GetTransactionHistory provides a mock function with given fields: token, status, from, to, sendEmail
+func (_m *TransactionService) GetTransactionHistory(token interface{}, status string, from string, to string, sendEmail string) ([]transaction.Core, error) {
+	ret := _m.Called(token, status, from, to, sendEmail)
 
 	var r0 []transaction.Core
-	if rf, ok := ret.Get(0).(func(interface{}, string, string, string) []transaction.Core); ok {
-		r0 = rf(token, status, from, to)
+	if rf, ok := ret.Get(0).(func(interface{}, string, string, string, string) []transaction.Core); ok {
+		r0 = rf(token, status, from, to, sendEmail)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]transaction.Core)
@@ -134,8 +134,8 @@ func (_m *TransactionService) GetTransactionHistory(token interface{}, status st
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(interface{}, string, string, string) error); ok {
-		r1 = rf(token, status, from, to)
+	if rf, ok := ret.Get(1).(func(interface{}, string, string, string, string) error); ok {
+		r1 = rf(token, status, from, to, sendEmail)
 	} else {
 		r1 = ret.Error(1)
 	}

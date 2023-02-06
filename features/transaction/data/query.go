@@ -248,7 +248,7 @@ func (tq *transactionQuery) AddBuy(userId uint, uCart transaction.Cart) (transac
 	return DataToCoreT(transInput), nil
 }
 
-func (tq *transactionQuery) GetTransactionHistory(userId uint, status, from, to string) ([]transaction.Core, error) {
+func (tq *transactionQuery) GetTransactionHistory(userId uint, status, from, to, sendEmail string) ([]transaction.Core, error) {
 	trans := []transaction.Core{}
 
 	// add one day for query param 'to'
@@ -266,6 +266,36 @@ func (tq *transactionQuery) GetTransactionHistory(userId uint, status, from, to 
 	if err != nil {
 		log.Println("error query get transactions history: ", err)
 		return []transaction.Core{}, err
+	}
+
+	if len(trans) != 0 {
+		pathname := "features/transaction/services/reports/"
+		filename := fmt.Sprint(trans[0].UserId)
+		if err := helper.GeneratePDFReport(trans, pathname+filename); err != nil {
+			log.Println("generate sales report pdf error: ", err)
+			return []transaction.Core{}, err
+		}
+		file, err := os.Open(pathname + filename + "laporan.pdf")
+		if err != nil {
+			return []transaction.Core{}, errors.New("file cannot be opened")
+		}
+
+		pdf_url, err := helper.UploadPdfToS3("files/transaction/report/"+filename+"laporan.pdf", file)
+		if err != nil {
+			log.Println(errors.New("upload to s3 bucket failed"))
+		}
+		if len(pdf_url) > 0 {
+			trans[0].PdfUrl = pdf_url
+		}
+		defer file.Close()
+		if sendEmail == "true" {
+			body := "Dear " + trans[0].TenantName + ",\nBerikut adalah laporan untuk transaksi di tanggal ini: " + from + "sampai " + to + "\n\nEmail ini dibuat secara otomatis, mohon untuk tidak membalas email ini. \n\nTerima Kasih"
+			helper.SendEmail(trans[0].UserEmail, "Loparan Tenant "+trans[0].TenantName, body, pathname+filename+"laporan.pdf")
+			if err != nil {
+				log.Println("error sending email report to tenant: ", err.Error())
+				return []transaction.Core{}, err
+			}
+		}
 	}
 
 	return trans, nil

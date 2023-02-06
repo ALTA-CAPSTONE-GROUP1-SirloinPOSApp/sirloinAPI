@@ -39,7 +39,7 @@ type TransactionHandler interface {
 type TransactionService interface {
 	AddSell(token interface{}, uCart Cart) (Core, error)
 	AddBuy(token interface{}, uCart Cart) (Core, error)
-	GetTransactionHistory(token interface{}, status, from, to string) ([]Core, error)
+	GetTransactionHistory(token interface{}, status, from, to, sendEmail string) ([]Core, error)
 	GetTransactionDetails(transactionId uint) (TransactionRes, error)
 	GetAdminTransactionHistory(status, from, to string) ([]AdmTransactionRes, error)
 	GetAdminTransactionDetails(transactionId uint) (AdmTransactionResDet, error)
@@ -50,7 +50,7 @@ type TransactionService interface {
 type TransactionData interface {
 	AddSell(userId uint, uCart Cart) (Core, error)
 	AddBuy(userId uint, uCart Cart) (Core, error)
-	GetTransactionHistory(userId uint, status, from, to string) ([]Core, error)
+	GetTransactionHistory(userId uint, status, from, to, sendEmail string) ([]Core, error)
 	GetTransactionDetails(transactionId uint) (TransactionRes, error)
 	GetAdminTransactionHistory(status, from, to string) ([]AdmTransactionRes, error)
 	GetAdminTransactionDetails(transactionId uint) (AdmTransactionResDet, error)
