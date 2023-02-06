@@ -68,7 +68,7 @@ func (ts *transSvc) GetTransactionHistory(token interface{}, status, from, to, s
 		return []transaction.Core{}, errors.New("user not found")
 	}
 
-	res, err := ts.qry.GetTransactionHistory(uint(userId), status, from, to)
+	res, err := ts.qry.GetTransactionHistory(uint(userId), status, from, to, sendEmail)
 	if err != nil {
 		msg := ""
 		if strings.Contains(err.Error(), "not found") {
