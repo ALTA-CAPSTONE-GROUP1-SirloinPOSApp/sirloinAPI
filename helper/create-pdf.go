@@ -8,7 +8,7 @@ import (
 	"github.com/jung-kurt/gofpdf"
 )
 
-func GeneratePDF(reports []transaction.Core, filename string) error {
+func GeneratePDFReport(reports []transaction.Core, filename string) error {
 
 	allSell := true
 	allBuy := true
