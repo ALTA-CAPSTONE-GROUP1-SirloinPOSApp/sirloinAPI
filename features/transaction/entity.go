@@ -9,6 +9,7 @@ import (
 type Core struct {
 	ID                uint      `json:"id"`
 	UserId            uint      `json:"user_id"`
+	TenantName        string    `json:"tenant_name"`
 	CustomerId        uint      `json:"customer_id"`
 	CustomerName      string    `json:"customer_name"`
 	TotalPrice        float64   `json:"total_price"`
@@ -21,6 +22,7 @@ type Core struct {
 	InvoiceUrl        string    `json:"invoice_url"`
 	PaymentUrl        string    `json:"payment_url"`
 	PdfUrl            string    `json:"pdf_url"`
+	UserEmail         string    `json:"user_email"`
 }
 
 type TransactionHandler interface {

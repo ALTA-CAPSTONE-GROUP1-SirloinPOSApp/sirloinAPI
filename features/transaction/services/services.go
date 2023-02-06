@@ -81,10 +81,11 @@ func (ts *transSvc) GetTransactionHistory(token interface{}, status, from, to st
 		log.Println("error calling gettransactionhistory data in service: ", err.Error())
 		return []transaction.Core{}, errors.New(msg)
 	}
-	pathname := "features/transaction/services/reports/"
+
 	if len(res) != 0 {
+		pathname := "features/transaction/services/reports/"
 		filename := fmt.Sprint(res[0].UserId)
-		if err := helper.GeneratePDF(res, pathname+filename); err != nil {
+		if err := helper.GeneratePDFReport(res, pathname+filename); err != nil {
 			log.Println("generate sales report pdf error: ", err)
 			return []transaction.Core{}, err
 		}
@@ -101,6 +102,12 @@ func (ts *transSvc) GetTransactionHistory(token interface{}, status, from, to st
 			res[0].PdfUrl = pdf_url
 		}
 		defer file.Close()
+		body := "Berikut adalah laporan untuk transaksi di tanggal ini: " + from + "sampai " + to + "\n\nEmail ini dibuat secara otomatis, mohon untuk tidak membalas email ini. \n\nTerima Kasih"
+		helper.SendEmail(res[0].UserEmail, "Loparan Tenant "+res[0].TenantName, body, pathname+filename+"laporan.pdf")
+		if err != nil {
+			log.Println("error sending email report to tenant: ", err.Error())
+			return []transaction.Core{}, err
+		}
 	}
 
 	return res, nil

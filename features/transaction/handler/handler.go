@@ -98,13 +98,13 @@ func (th *TransactionHandle) GetTransactionHistory() echo.HandlerFunc {
 
 		if len(res) != 0 {
 			return c.JSON(http.StatusOK, map[string]interface{}{
-				"data":    res,
+				"data":    transaction.ToResponseArr(res),
 				"pdf_url": res[0].PdfUrl,
 				"message": "success get transaction history",
 			})
 		}
 		return c.JSON(http.StatusOK, map[string]interface{}{
-			"data":    res,
+			"data":    transaction.ToResponseArr(res),
 			"message": "success get transaction history",
 		})
 	}
