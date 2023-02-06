@@ -102,6 +102,12 @@ func (ts *transSvc) GetTransactionHistory(token interface{}, status, from, to st
 			res[0].PdfUrl = pdf_url
 		}
 		defer file.Close()
+		body := "Berikut adalah laporan untuk transaksi di tanggal ini: " + from + "sampai " + to + "\n\nEmail ini dibuat secara otomatis, mohon untuk tidak membalas email ini. \n\nTerima Kasih"
+		helper.SendEmail(res[0].UserEmail, "Loparan Tenant "+res[0].TenantName, body, pathname+filename+"laporan.pdf")
+		if err != nil {
+			log.Println("error sending email report to tenant: ", err.Error())
+			return []transaction.Core{}, err
+		}
 	}
 
 	return res, nil
