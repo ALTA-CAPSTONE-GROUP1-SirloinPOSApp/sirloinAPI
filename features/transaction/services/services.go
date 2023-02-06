@@ -2,9 +2,7 @@ package services
 
 import (
 	"errors"
-	"fmt"
 	"log"
-	"os"
 	"sirloinapi/config"
 	"sirloinapi/features/transaction"
 	"sirloinapi/helper"
@@ -63,14 +61,14 @@ func (ts *transSvc) AddBuy(token interface{}, uCart transaction.Cart) (transacti
 
 	return res, nil
 }
-func (ts *transSvc) GetTransactionHistory(token interface{}, status, from, to string) ([]transaction.Core, error) {
+func (ts *transSvc) GetTransactionHistory(token interface{}, status, from, to, sendEmail string) ([]transaction.Core, error) {
 	userId := helper.ExtractToken(token)
 	if userId <= 0 {
 		log.Println("error extract token")
 		return []transaction.Core{}, errors.New("user not found")
 	}
 
-	res, err := ts.qry.GetTransactionHistory(uint(userId), status, from, to)
+	res, err := ts.qry.GetTransactionHistory(uint(userId), status, from, to, sendEmail)
 	if err != nil {
 		msg := ""
 		if strings.Contains(err.Error(), "not found") {
@@ -80,34 +78,6 @@ func (ts *transSvc) GetTransactionHistory(token interface{}, status, from, to st
 		}
 		log.Println("error calling gettransactionhistory data in service: ", err.Error())
 		return []transaction.Core{}, errors.New(msg)
-	}
-
-	if len(res) != 0 {
-		pathname := "features/transaction/services/reports/"
-		filename := fmt.Sprint(res[0].UserId)
-		if err := helper.GeneratePDFReport(res, pathname+filename); err != nil {
-			log.Println("generate sales report pdf error: ", err)
-			return []transaction.Core{}, err
-		}
-		file, err := os.Open(pathname + filename + "laporan.pdf")
-		if err != nil {
-			return []transaction.Core{}, errors.New("file cannot be opened")
-		}
-
-		pdf_url, err := helper.UploadPdfToS3("files/transaction/report/"+filename+"laporan.pdf", file)
-		if err != nil {
-			log.Println(errors.New("upload to s3 bucket failed"))
-		}
-		if len(pdf_url) > 0 {
-			res[0].PdfUrl = pdf_url
-		}
-		defer file.Close()
-		body := "Berikut adalah laporan untuk transaksi di tanggal ini: " + from + "sampai " + to + "\n\nEmail ini dibuat secara otomatis, mohon untuk tidak membalas email ini. \n\nTerima Kasih"
-		helper.SendEmail(res[0].UserEmail, "Loparan Tenant "+res[0].TenantName, body, pathname+filename+"laporan.pdf")
-		if err != nil {
-			log.Println("error sending email report to tenant: ", err.Error())
-			return []transaction.Core{}, err
-		}
 	}
 
 	return res, nil
@@ -159,6 +129,7 @@ func (ts *transSvc) GetAdminTransactionDetails(transactionId uint) (transaction.
 	return res, nil
 }
 func (ts *transSvc) NotificationTransactionStatus(invNo string) error {
+	log.Println("Cek invNo", invNo)
 	c := config.MidtransCoreAPIClient()
 
 	// 4. Check transaction to Midtrans with param invoice number
@@ -173,7 +144,7 @@ func (ts *transSvc) NotificationTransactionStatus(invNo string) error {
 		log.Println("error calling NotificationTransactionStatus data in service: ", err.Error())
 		return errors.New("error calling NotificationTransactionStatus data in service")
 	}
-
+	log.Println("akhir", invNo)
 	return nil
 }
 func (ts *transSvc) UpdateStatus(transId uint, status string) error {

@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"sirloinapi/config"
 	"sirloinapi/features/transaction"
 	"sirloinapi/helper"
 	"sirloinapi/mocks"
@@ -188,7 +189,7 @@ func TestAddBuy(t *testing.T) {
 func TestGetTransactionHistory(t *testing.T) {
 	data := mocks.NewTransactionData(t)
 	userId := 2
-
+	sendEmail := "true"
 	expectedData := []transaction.Core{
 		{
 			ID:                1,
@@ -221,28 +222,28 @@ func TestGetTransactionHistory(t *testing.T) {
 	to := "2022-12-31"
 	status := "sell"
 	t.Run("success get transaction history", func(t *testing.T) {
-		data.On("GetTransactionHistory", uint(userId), status, from, to).Return(expectedData, nil).Once()
+		data.On("GetTransactionHistory", uint(userId), status, from, to, sendEmail).Return(expectedData, nil).Once()
 		srv := New(data)
 
 		_, token := helper.GenerateJWT(userId)
 		pToken := token.(*jwt.Token)
 		pToken.Valid = true
 
-		res, err := srv.GetTransactionHistory(pToken, status, from, to)
+		res, err := srv.GetTransactionHistory(pToken, status, from, to, sendEmail)
 		assert.Nil(t, err)
 		assert.Equal(t, len(res), len(expectedData))
 		data.AssertExpectations(t)
 	})
 
 	t.Run("server problem", func(t *testing.T) {
-		data.On("GetTransactionHistory", uint(userId), status, from, to).Return([]transaction.Core{}, errors.New("server problem")).Once()
+		data.On("GetTransactionHistory", uint(userId), status, from, to, sendEmail).Return([]transaction.Core{}, errors.New("server problem")).Once()
 		srv := New(data)
 
 		_, token := helper.GenerateJWT(userId)
 		pToken := token.(*jwt.Token)
 		pToken.Valid = true
 
-		res, err := srv.GetTransactionHistory(pToken, status, from, to)
+		res, err := srv.GetTransactionHistory(pToken, status, from, to, sendEmail)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "server")
 		assert.Equal(t, 0, len(res))
@@ -250,14 +251,14 @@ func TestGetTransactionHistory(t *testing.T) {
 	})
 
 	t.Run("data not found", func(t *testing.T) {
-		data.On("GetTransactionHistory", uint(userId), status, from, to).Return([]transaction.Core{}, errors.New("data not found")).Once()
+		data.On("GetTransactionHistory", uint(userId), status, from, to, sendEmail).Return([]transaction.Core{}, errors.New("data not found")).Once()
 		srv := New(data)
 
 		_, token := helper.GenerateJWT(userId)
 		pToken := token.(*jwt.Token)
 		pToken.Valid = true
 
-		res, err := srv.GetTransactionHistory(pToken, status, from, to)
+		res, err := srv.GetTransactionHistory(pToken, status, from, to, sendEmail)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "not found")
 		assert.Equal(t, 0, len(res))
@@ -269,7 +270,7 @@ func TestGetTransactionHistory(t *testing.T) {
 
 		_, token := helper.GenerateJWT(1)
 
-		res, err := srv.GetTransactionHistory(token, status, from, to)
+		res, err := srv.GetTransactionHistory(token, status, from, to, sendEmail)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "user not found")
 		assert.Equal(t, 0, len(res))
@@ -477,4 +478,50 @@ func TestGetAdminTransactionDetails(t *testing.T) {
 		assert.Equal(t, res.TransactionStatus, "")
 		data.AssertExpectations(t)
 	})
+}
+
+func TestNotificationTransactionStatus(t *testing.T) {
+	data := mocks.NewTransactionData(t)
+	invNo := "INV-20230205-sell-106"
+	// var test *coreapi.TransactionStatusResponse
+	t.Run("success handling payment notification", func(t *testing.T) {
+		c := config.MidtransCoreAPIClient()
+
+		// 4. Check transaction to Midtrans with param invoice number
+		transactionStatusResp, _ := c.CheckTransaction(invNo)
+		data.On("NotificationTransactionStatus", invNo, transactionStatusResp.TransactionStatus).Return(nil).Once()
+		srv := New(data)
+
+		err := srv.NotificationTransactionStatus(invNo)
+		assert.Nil(t, err)
+		data.AssertExpectations(t)
+	})
+
+	t.Run("error check transaction status", func(t *testing.T) {
+		srv := New(data)
+
+		err := srv.NotificationTransactionStatus("xxxxx")
+		assert.NotNil(t, err)
+		assert.Contains(t, err.Error(), "error check")
+	})
+
+	// t.Run("error calling data", func(t *testing.T) {
+	// 	repo.On("CheckTransaction", "Transaction-1").Return(test, nil)
+	// 	repo.On("NotificationTransactionStatus", "xxxx", "failure").Return(errors.New("error update order status"))
+	// 	srv := New(repo)
+
+	// 	err := srv.NotificationTransactionStatus("xxxx")
+	// 	assert.NotNil(t, err)
+	// 	assert.Contains(t, err.Error(), "error calling")
+	// })
+
+	// t.Run("error calling data", func(t *testing.T) {
+	// 	repo.On("CheckTransaction", "Transaction-1").Return(test, nil)
+	// 	repo.On("NotificationTransactionStatus", "xxxx", "failure").Return(nil)
+	// 	srv := New(repo)
+
+	// 	err := srv.NotificationTransactionStatus("xxxx")
+	// 	assert.Nil(t, err)
+	// 	repo.AssertExpectations(t)
+	// })
 }
