@@ -99,6 +99,20 @@ func (tq *transactionQuery) CreateTransProds(transInput Transaction, uCart trans
 	return transProds
 }
 
+// menambahkan 1 hari di query param to pada history laporan
+func AddOneDay(to string) string {
+	// Ganti karakter penghubung "/" menjadi "-"
+	newDateString := strings.Replace(to, "/", "-", -1)
+
+	// Parsing string menjadi time.Time
+	t, _ := time.Parse("2006-01-02", newDateString)
+	fmt.Println("Current time:", t)
+
+	// Tambahkan 1 hari
+	t = t.Add(time.Hour * 24)
+	return t.String()
+}
+
 func (tq *transactionQuery) AddSell(userId uint, uCart transaction.Cart) (transaction.Core, error) {
 	//check if the product really the seller product
 	check := tq.CheckAllowedProd(userId, uCart)
@@ -236,17 +250,9 @@ func (tq *transactionQuery) AddBuy(userId uint, uCart transaction.Cart) (transac
 
 func (tq *transactionQuery) GetTransactionHistory(userId uint, status, from, to string) ([]transaction.Core, error) {
 	trans := []transaction.Core{}
-	// Ganti karakter penghubung "/" menjadi "-"
-	newDateString := strings.Replace(to, "/", "-", -1)
 
-	// Parsing string menjadi time.Time
-	t, _ := time.Parse("2006-01-02", newDateString)
-	fmt.Println("Current time:", t)
-
-	// Tambahkan 1 hari
-	t = t.Add(time.Hour * 24)
-	to = t.String()
-	fmt.Println("Time after adding 1 day:", t)
+	// add one day for query param 'to'
+	to = AddOneDay(to)
 	var err error
 	if from == "" && to == "" {
 		err = tq.db.Raw("SELECT t.id , c.id customer_id , c.name customer_name , total_price , discount , total_bill , t.created_at , transaction_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN customers c ON t.customer_id = c.id WHERE t.user_id = ? AND product_status = ?", userId, status).Scan(&trans).Error
@@ -289,17 +295,8 @@ func (tq *transactionQuery) GetTransactionDetails(transactionId uint) (transacti
 }
 func (tq *transactionQuery) GetAdminTransactionHistory(status, from, to string) ([]transaction.AdmTransactionRes, error) {
 	trans := []transaction.AdmTransactionRes{}
-	// Ganti karakter penghubung "/" menjadi "-"
-	newDateString := strings.Replace(to, "/", "-", -1)
-
-	// Parsing string menjadi time.Time
-	t, _ := time.Parse("2006-01-02", newDateString)
-	fmt.Println("Current time:", t)
-
 	// Tambahkan 1 hari
-	t = t.Add(time.Hour * 24)
-	to = t.String()
-	fmt.Println("Time after adding 1 day:", t)
+	to = AddOneDay(to)
 	var err error
 	if from == "" && to == "" {
 		err = tq.db.Raw("SELECT t.id , user_id tenant_id , business_name tenant_name , total_bill , t.created_at , transaction_status , invoice_number , invoice_url , payment_url FROM transactions t JOIN users u ON u.id = t.user_id WHERE product_status = ?", status).Scan(&trans).Error
