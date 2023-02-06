@@ -2,9 +2,7 @@ package services
 
 import (
 	"errors"
-	"fmt"
 	"log"
-	"os"
 	"sirloinapi/config"
 	"sirloinapi/features/transaction"
 	"sirloinapi/helper"
@@ -80,34 +78,6 @@ func (ts *transSvc) GetTransactionHistory(token interface{}, status, from, to st
 		}
 		log.Println("error calling gettransactionhistory data in service: ", err.Error())
 		return []transaction.Core{}, errors.New(msg)
-	}
-
-	if len(res) != 0 {
-		pathname := "features/transaction/services/reports/"
-		filename := fmt.Sprint(res[0].UserId)
-		if err := helper.GeneratePDFReport(res, pathname+filename); err != nil {
-			log.Println("generate sales report pdf error: ", err)
-			return []transaction.Core{}, err
-		}
-		file, err := os.Open(pathname + filename + "laporan.pdf")
-		if err != nil {
-			return []transaction.Core{}, errors.New("file cannot be opened")
-		}
-
-		pdf_url, err := helper.UploadPdfToS3("files/transaction/report/"+filename+"laporan.pdf", file)
-		if err != nil {
-			log.Println(errors.New("upload to s3 bucket failed"))
-		}
-		if len(pdf_url) > 0 {
-			res[0].PdfUrl = pdf_url
-		}
-		defer file.Close()
-		body := "Berikut adalah laporan untuk transaksi di tanggal ini: " + from + "sampai " + to + "\n\nEmail ini dibuat secara otomatis, mohon untuk tidak membalas email ini. \n\nTerima Kasih"
-		helper.SendEmail(res[0].UserEmail, "Loparan Tenant "+res[0].TenantName, body, pathname+filename+"laporan.pdf")
-		if err != nil {
-			log.Println("error sending email report to tenant: ", err.Error())
-			return []transaction.Core{}, err
-		}
 	}
 
 	return res, nil
