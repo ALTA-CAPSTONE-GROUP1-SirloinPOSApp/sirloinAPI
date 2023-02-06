@@ -482,7 +482,7 @@ func TestGetAdminTransactionDetails(t *testing.T) {
 
 func TestNotificationTransactionStatus(t *testing.T) {
 	data := mocks.NewTransactionData(t)
-	invNo := "INV-20230205-sell-106"
+	invNo := "INV-20230206-SELL-159"
 	// var test *coreapi.TransactionStatusResponse
 	t.Run("success handling payment notification", func(t *testing.T) {
 		c := config.MidtransCoreAPIClient()
