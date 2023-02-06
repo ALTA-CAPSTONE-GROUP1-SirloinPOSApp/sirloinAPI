@@ -22,7 +22,6 @@ type Core struct {
 	InvoiceUrl        string    `json:"invoice_url"`
 	PaymentUrl        string    `json:"payment_url"`
 	PdfUrl            string    `json:"pdf_url"`
-	UserEmail         string    `json:"user_email"`
 }
 
 type TransactionHandler interface {
