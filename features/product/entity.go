@@ -37,7 +37,7 @@ type ProductService interface {
 	Delete(token interface{}, productId uint) error
 	GetUserProducts(token interface{}, search string) ([]Core, error)
 	GetProductById(token interface{}, productId uint) (Core, error)
-	GetAdminProducts() ([]Core, error)
+	GetAdminProducts(search string) ([]Core, error)
 }
 
 type ProductData interface {
@@ -46,5 +46,5 @@ type ProductData interface {
 	Delete(userId, productId uint) error
 	GetUserProducts(userId uint, search string) ([]Core, error)
 	GetProductById(userid, productId uint) (Core, error)
-	GetAdminProducts() ([]Core, error)
+	GetAdminProducts(search string) ([]Core, error)
 }
