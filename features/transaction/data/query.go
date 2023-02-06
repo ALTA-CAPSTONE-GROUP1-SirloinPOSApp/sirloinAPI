@@ -43,15 +43,17 @@ func (tq *transactionQuery) CheckAllowedProd(uid uint, uCart transaction.Cart) b
 	return check
 }
 
-func (tq *transactionQuery) TotalPrice(uCart transaction.Cart) float64 {
+func (tq *transactionQuery) TotalPrice(uCart transaction.Cart) (float64, transaction.Cart) {
 	totalPrice := 0.0
-	for _, val := range uCart.Items {
+	for i, val := range uCart.Items {
 		p := product.Product{}
 		tq.db.First(&p, val.ProductId)
 		// totalPrice += float64(val.Quantity) * val.Price
+		uCart.Items[i].Price = p.Price
 		totalPrice += float64(val.Quantity) * p.Price
 	}
-	return totalPrice
+
+	return totalPrice, uCart
 }
 
 func (tq *transactionQuery) Discount(uCart transaction.Cart, totalPrice float64) (float64, float64) {
@@ -125,7 +127,7 @@ func (tq *transactionQuery) AddSell(userId uint, uCart transaction.Cart) (transa
 	productStatus := "sell"
 
 	//menghitung total price
-	totalPrice := tq.TotalPrice(uCart)
+	totalPrice, uCart := tq.TotalPrice(uCart)
 
 	//diskon customer terdaftar
 	totalBill, disc := tq.Discount(uCart, totalPrice)
@@ -193,7 +195,7 @@ func (tq *transactionQuery) AddBuy(userId uint, uCart transaction.Cart) (transac
 	tx := tq.db.Begin()
 	productStatus := "buy"
 	//menghitung total price
-	totalPrice := tq.TotalPrice(uCart)
+	totalPrice, uCart := tq.TotalPrice(uCart)
 
 	//diskon customer terdaftar
 	totalBill, disc := tq.Discount(uCart, totalPrice)
