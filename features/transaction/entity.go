@@ -41,7 +41,7 @@ type TransactionService interface {
 	AddBuy(token interface{}, uCart Cart) (Core, error)
 	GetTransactionHistory(token interface{}, status, from, to, sendEmail string) ([]Core, error)
 	GetTransactionDetails(transactionId uint) (TransactionRes, error)
-	GetAdminTransactionHistory(status, from, to string) ([]AdmTransactionRes, error)
+	GetAdminTransactionHistory(status, from, to, sendEmail string) ([]AdmTransactionRes, error)
 	GetAdminTransactionDetails(transactionId uint) (AdmTransactionResDet, error)
 	NotificationTransactionStatus(invoiceNo string) error
 	UpdateStatus(transactionId uint, status string) error
@@ -52,7 +52,7 @@ type TransactionData interface {
 	AddBuy(userId uint, uCart Cart) (Core, error)
 	GetTransactionHistory(userId uint, status, from, to, sendEmail string) ([]Core, error)
 	GetTransactionDetails(transactionId uint) (TransactionRes, error)
-	GetAdminTransactionHistory(status, from, to string) ([]AdmTransactionRes, error)
+	GetAdminTransactionHistory(status, from, to, sendEmail string) ([]AdmTransactionRes, error)
 	GetAdminTransactionDetails(transactionId uint) (AdmTransactionResDet, error)
 	NotificationTransactionStatus(invoiceNo, transStatus string) error
 	UpdateStatus(transactionId uint, status string) error
