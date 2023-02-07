@@ -137,14 +137,22 @@ func (th *TransactionHandle) GetAdminTransactionHistory() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		from := c.QueryParam("from")
 		to := c.QueryParam("to")
-
-		res, err := th.srv.GetAdminTransactionHistory("buy", from, to)
+		sendEmail := c.QueryParam("send_email")
+		res, err := th.srv.GetAdminTransactionHistory("buy", from, to, sendEmail)
 		if err != nil {
 			if strings.Contains(err.Error(), "not found") {
 				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("wrong input (data not found)"))
 			} else {
 				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
 			}
+		}
+
+		if len(res) != 0 {
+			return c.JSON(http.StatusOK, map[string]interface{}{
+				"data":    transaction.ToAdmRespArr(res),
+				"pdf_url": res[0].PdfUrl,
+				"message": "success get admin transaction history",
+			})
 		}
 
 		return c.JSON(http.StatusOK, map[string]interface{}{
