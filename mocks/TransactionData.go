@@ -76,13 +76,13 @@ func (_m *TransactionData) GetAdminTransactionDetails(transactionId uint) (trans
 	return r0, r1
 }
 
-// GetAdminTransactionHistory provides a mock function with given fields: status, from, to
-func (_m *TransactionData) GetAdminTransactionHistory(status string, from string, to string) ([]transaction.AdmTransactionRes, error) {
-	ret := _m.Called(status, from, to)
+// GetAdminTransactionHistory provides a mock function with given fields: status, from, to, sendEmail
+func (_m *TransactionData) GetAdminTransactionHistory(status string, from string, to string, sendEmail string) ([]transaction.AdmTransactionRes, error) {
+	ret := _m.Called(status, from, to, sendEmail)
 
 	var r0 []transaction.AdmTransactionRes
-	if rf, ok := ret.Get(0).(func(string, string, string) []transaction.AdmTransactionRes); ok {
-		r0 = rf(status, from, to)
+	if rf, ok := ret.Get(0).(func(string, string, string, string) []transaction.AdmTransactionRes); ok {
+		r0 = rf(status, from, to, sendEmail)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]transaction.AdmTransactionRes)
@@ -90,8 +90,8 @@ func (_m *TransactionData) GetAdminTransactionHistory(status string, from string
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string, string) error); ok {
-		r1 = rf(status, from, to)
+	if rf, ok := ret.Get(1).(func(string, string, string, string) error); ok {
+		r1 = rf(status, from, to, sendEmail)
 	} else {
 		r1 = ret.Error(1)
 	}

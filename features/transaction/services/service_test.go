@@ -188,7 +188,6 @@ func TestAddBuy(t *testing.T) {
 func TestGetTransactionHistory(t *testing.T) {
 	data := mocks.NewTransactionData(t)
 	userId := 2
-	sendEmail := "true"
 	expectedData := []transaction.Core{
 		{
 			ID:                1,
@@ -220,6 +219,7 @@ func TestGetTransactionHistory(t *testing.T) {
 	from := "2022-01-01"
 	to := "2022-12-31"
 	status := "sell"
+	sendEmail := "true"
 	t.Run("success get transaction history", func(t *testing.T) {
 		data.On("GetTransactionHistory", uint(userId), status, from, to, sendEmail).Return(expectedData, nil).Once()
 		srv := New(data)
@@ -344,7 +344,6 @@ func TestGetTransactionDetails(t *testing.T) {
 func TestGetAdminTransactionHistory(t *testing.T) {
 	data := mocks.NewTransactionData(t)
 	userId := 2
-
 	expectedData := []transaction.AdmTransactionRes{
 		{
 			ID:                1,
@@ -372,29 +371,30 @@ func TestGetAdminTransactionHistory(t *testing.T) {
 	from := "2022-01-01"
 	to := "2022-12-31"
 	status := "sell"
+	sendEmail := "true"
 	t.Run("success get admin transaction history", func(t *testing.T) {
-		data.On("GetAdminTransactionHistory", status, from, to).Return(expectedData, nil).Once()
+		data.On("GetAdminTransactionHistory", status, from, to, sendEmail).Return(expectedData, nil).Once()
 		srv := New(data)
 
 		_, token := helper.GenerateJWT(userId)
 		pToken := token.(*jwt.Token)
 		pToken.Valid = true
 
-		res, err := srv.GetAdminTransactionHistory(status, from, to)
+		res, err := srv.GetAdminTransactionHistory(status, from, to, sendEmail)
 		assert.Nil(t, err)
 		assert.Equal(t, len(res), len(expectedData))
 		data.AssertExpectations(t)
 	})
 
 	t.Run("server problem", func(t *testing.T) {
-		data.On("GetAdminTransactionHistory", status, from, to).Return([]transaction.AdmTransactionRes{}, errors.New("server problem")).Once()
+		data.On("GetAdminTransactionHistory", status, from, to, sendEmail).Return([]transaction.AdmTransactionRes{}, errors.New("server problem")).Once()
 		srv := New(data)
 
 		_, token := helper.GenerateJWT(userId)
 		pToken := token.(*jwt.Token)
 		pToken.Valid = true
 
-		res, err := srv.GetAdminTransactionHistory(status, from, to)
+		res, err := srv.GetAdminTransactionHistory(status, from, to, sendEmail)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "server")
 		assert.Equal(t, 0, len(res))
@@ -402,14 +402,14 @@ func TestGetAdminTransactionHistory(t *testing.T) {
 	})
 
 	t.Run("data not found", func(t *testing.T) {
-		data.On("GetAdminTransactionHistory", status, from, to).Return([]transaction.AdmTransactionRes{}, errors.New("data not found")).Once()
+		data.On("GetAdminTransactionHistory", status, from, to, sendEmail).Return([]transaction.AdmTransactionRes{}, errors.New("data not found")).Once()
 		srv := New(data)
 
 		_, token := helper.GenerateJWT(userId)
 		pToken := token.(*jwt.Token)
 		pToken.Valid = true
 
-		res, err := srv.GetAdminTransactionHistory(status, from, to)
+		res, err := srv.GetAdminTransactionHistory(status, from, to, sendEmail)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "not found")
 		assert.Equal(t, 0, len(res))
