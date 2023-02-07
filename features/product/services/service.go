@@ -41,6 +41,8 @@ func (ps *productSvc) Add(token interface{}, newProduct product.Core, productIma
 			msg = "data not found"
 		} else if strings.Contains(err.Error(), "duplicated") {
 			msg = "duplicated"
+		} else if strings.Contains(err.Error(), "format input file") {
+			msg = err.Error()
 		} else {
 			msg = "server problem"
 		}
@@ -62,6 +64,8 @@ func (ps *productSvc) Update(token interface{}, productId uint, updProduct produ
 		msg := ""
 		if strings.Contains(err.Error(), "not found") {
 			msg = "product data not found"
+		} else if strings.Contains(err.Error(), "format input file") {
+			msg = err.Error()
 		} else {
 			msg = "server problem"
 		}
