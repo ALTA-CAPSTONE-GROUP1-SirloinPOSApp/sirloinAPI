@@ -61,6 +61,9 @@ func (pc *productControl) Add() echo.HandlerFunc {
 			} else if strings.Contains(err.Error(), "server") {
 				log.Println("\terror running add product service: ", err.Error())
 				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
+			} else if strings.Contains(err.Error(), "format") {
+				log.Println("\terror running add product service: ", err.Error())
+				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse(err.Error()))
 			} else {
 				log.Println("\terror running add product service: ", err.Error())
 				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("bad request: UPC, stock, minimum_stock, buying_price, price should only numeric and product_name, category should only alpha space, "))
@@ -98,8 +101,19 @@ func (pc *productControl) Update() echo.HandlerFunc {
 
 		res, err := pc.srv.Update(token, uint(cProdId), *ToCore(input), prodImg)
 		if err != nil {
-			log.Println("\terror running update post service")
-			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
+			if strings.Contains(err.Error(), "duplicated") {
+				log.Println("\terror running add product service: ", err.Error())
+				return c.JSON(http.StatusConflict, helper.ErrorResponse("duplicated product"))
+			} else if strings.Contains(err.Error(), "server") {
+				log.Println("\terror running add product service: ", err.Error())
+				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
+			} else if strings.Contains(err.Error(), "format") {
+				log.Println("\terror running add product service: ", err.Error())
+				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse(err.Error()))
+			} else {
+				log.Println("\terror running add product service: ", err.Error())
+				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("bad request: UPC, stock, minimum_stock, buying_price, price should only numeric and product_name, category should only alpha space, "))
+			}
 		}
 
 		return c.JSON(http.StatusCreated, map[string]interface{}{
