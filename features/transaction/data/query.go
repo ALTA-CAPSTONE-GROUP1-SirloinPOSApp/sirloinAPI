@@ -43,6 +43,18 @@ func (tq *transactionQuery) CheckAllowedProd(uid uint, uCart transaction.Cart) b
 	return check
 }
 
+func (tq *transactionQuery) CheckStockProduct(uid uint, uCart transaction.Cart) bool {
+	check := true
+	for _, val := range uCart.Items {
+		p := product.Product{}
+		tq.db.Where("stock >= ?", val.Quantity).First(&p, val.ProductId)
+		if p.UserId != uid {
+			check = false
+		}
+	}
+	return check
+}
+
 func (tq *transactionQuery) TotalPrice(uCart transaction.Cart) (float64, transaction.Cart) {
 	totalPrice := 0.0
 	for i, val := range uCart.Items {
@@ -122,6 +134,12 @@ func (tq *transactionQuery) AddSell(userId uint, uCart transaction.Cart) (transa
 		log.Println("unauthorized: request body contain product that's not belong to the user")
 		return transaction.Core{}, errors.New("unauthorized: request body contain product that's not belong to the user")
 	}
+	//check if the stock product enough
+	check = tq.CheckStockProduct(userId, uCart)
+	if !check {
+		log.Println("unauthorized: not enough stock")
+		return transaction.Core{}, errors.New("unauthorized: not enough stock")
+	}
 
 	tx := tq.db.Begin()
 	productStatus := "sell"
@@ -192,8 +210,15 @@ func (tq *transactionQuery) AddBuy(userId uint, uCart transaction.Cart) (transac
 		return transaction.Core{}, errors.New("unauthorized: request body contain product that's not belong to super admin")
 	}
 
+	check = tq.CheckStockProduct(uint(1), uCart)
+	if !check {
+		log.Println("unauthorized: not enough stock")
+		return transaction.Core{}, errors.New("unauthorized: not enough stock")
+	}
+
 	tx := tq.db.Begin()
 	productStatus := "buy"
+
 	//menghitung total price
 	totalPrice, uCart := tq.TotalPrice(uCart)
 
