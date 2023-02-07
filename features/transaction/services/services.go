@@ -98,8 +98,8 @@ func (ts *transSvc) GetTransactionDetails(transactionId uint) (transaction.Trans
 
 	return res, nil
 }
-func (ts *transSvc) GetAdminTransactionHistory(status, from, to string) ([]transaction.AdmTransactionRes, error) {
-	res, err := ts.qry.GetAdminTransactionHistory(status, from, to)
+func (ts *transSvc) GetAdminTransactionHistory(status, from, to, sendEmail string) ([]transaction.AdmTransactionRes, error) {
+	res, err := ts.qry.GetAdminTransactionHistory(status, from, to, sendEmail)
 	if err != nil {
 		msg := ""
 		if strings.Contains(err.Error(), "not found") {
