@@ -39,6 +39,8 @@ func (th *TransactionHandle) AddSell() echo.HandlerFunc {
 		if err != nil {
 			if strings.Contains(err.Error(), "bad request") || strings.Contains(err.Error(), "not found") {
 				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("wrong input (bad request), items should only belong to the user"))
+			} else if strings.Contains(err.Error(), "stok") {
+				return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 			} else {
 				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
 			}
@@ -67,6 +69,8 @@ func (th *TransactionHandle) AddBuy() echo.HandlerFunc {
 		if err != nil {
 			if strings.Contains(err.Error(), "bad request") || strings.Contains(err.Error(), "not found") {
 				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("wrong input (bad request): items should only belong to the super admin"))
+			} else if strings.Contains(err.Error(), "stok") {
+				return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 			} else {
 				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
 			}

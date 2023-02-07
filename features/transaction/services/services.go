@@ -31,6 +31,8 @@ func (ts *transSvc) AddSell(token interface{}, uCart transaction.Cart) (transact
 		msg := ""
 		if strings.Contains(err.Error(), "bad request") {
 			msg = "bad request"
+		} else if strings.Contains(err.Error(), "stock") {
+			msg = "stok produk tidak cukup"
 		} else {
 			msg = "server problem"
 		}
@@ -52,6 +54,8 @@ func (ts *transSvc) AddBuy(token interface{}, uCart transaction.Cart) (transacti
 		msg := ""
 		if strings.Contains(err.Error(), "bad request") {
 			msg = "bad request"
+		} else if strings.Contains(err.Error(), "stock") {
+			msg = "stok produk tidak cukup"
 		} else {
 			msg = "server problem"
 		}
