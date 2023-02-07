@@ -17,9 +17,9 @@ type AddProductReq struct {
 func ToCore(data interface{}) *product.Core {
 	res := product.Core{}
 
-	switch data.(type) {
+	switch docs := data.(type) {
 	case AddProductReq:
-		cnv := data.(AddProductReq)
+		cnv := docs
 		res.Upc = cnv.Upc
 		res.Category = cnv.Category
 		res.ProductName = cnv.ProductName

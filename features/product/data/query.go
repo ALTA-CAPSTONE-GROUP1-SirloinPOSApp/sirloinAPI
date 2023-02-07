@@ -2,10 +2,12 @@ package data
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"mime/multipart"
 	"sirloinapi/features/product"
 	"sirloinapi/helper"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -44,14 +46,32 @@ func (pq *productQuery) Add(userId uint, newProduct product.Core, productImage *
 	}
 
 	if productImage != nil {
-		path, err := helper.UploadProductPhotoS3(*productImage, int(cnvP.ID))
+		src, err := productImage.Open()
 		if err != nil {
-			log.Println("\terror upload product photo: ", err.Error())
-			return product.Core{}, err
+			return product.Core{}, errors.New("format input file tidak dapat dibuka")
 		}
-		qry := pq.db.First(&cnvP)
-		cnvP.ProductImage = path
-		qry.Save(&cnvP)
+		err = helper.CheckFileSize(productImage.Size)
+		if err != nil {
+			idx := strings.Index(err.Error(), ",")
+			msg := err.Error()
+			return product.Core{}, errors.New("format input file size tidak diizinkan, size melebihi" + msg[idx+1:])
+		}
+		extension, err := helper.CheckFileExtensionImage(productImage.Filename)
+		if err != nil {
+			return product.Core{}, errors.New("format input file type tidak diizinkan")
+		}
+		filename := "files/products/" + fmt.Sprint(cnvP.ID) + "/product_photo_" + fmt.Sprint(cnvP.ID) + "." + extension
+
+		path, err := helper.UploadImageToS3(filename, src)
+		if err != nil {
+			log.Println(errors.New("upload to s3 bucket failed"))
+		}
+		if len(path) > 0 {
+			qry := pq.db.First(&cnvP)
+			cnvP.ProductImage = path
+			qry.Save(&cnvP)
+		}
+		defer src.Close()
 	}
 
 	return DataToCore(cnvP), nil
@@ -61,12 +81,30 @@ func (pq *productQuery) Update(userId, productId uint, updProduct product.Core, 
 	cnvP.UserId = userId
 
 	if productImage != nil {
-		path, err := helper.UploadProductPhotoS3(*productImage, int(productId))
+		src, err := productImage.Open()
 		if err != nil {
-			log.Println("\terror upload product photo: ", err.Error())
-			return product.Core{}, err
+			return product.Core{}, errors.New("format input file tidak dapat dibuka")
 		}
-		cnvP.ProductImage = path
+		err = helper.CheckFileSize(productImage.Size)
+		if err != nil {
+			idx := strings.Index(err.Error(), ",")
+			msg := err.Error()
+			return product.Core{}, errors.New("format input file size tidak diizinkan, size melebihi" + msg[idx+1:])
+		}
+		extension, err := helper.CheckFileExtensionImage(productImage.Filename)
+		if err != nil {
+			return product.Core{}, errors.New("format input file type tidak diizinkan")
+		}
+		filename := "files/products/" + fmt.Sprint(productId) + "/product_photo_" + fmt.Sprint(productId) + "." + extension
+
+		path, err := helper.UploadImageToS3(filename, src)
+		if err != nil {
+			log.Println(errors.New("upload to s3 bucket failed"))
+		}
+		if len(path) > 0 {
+			cnvP.ProductImage = path
+		}
+		defer src.Close()
 	}
 
 	qry := pq.db.Where("id = ? AND user_id = ?", productId, userId).Updates(&cnvP)
