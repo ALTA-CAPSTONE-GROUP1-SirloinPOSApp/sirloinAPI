@@ -42,6 +42,8 @@ type AdmTransactionRes struct {
 	InvoiceNumber     string    `json:"invoice_number"`
 	InvoiceUrl        string    `json:"invoice_url"`
 	PaymentUrl        string    `json:"payment_url"`
+	PdfUrl            string    `json:"pdf_url"`
+	UserEmail         string    `json:"user_email"`
 }
 
 type AdmTransactionResDet struct {
@@ -55,6 +57,17 @@ type AdmTransactionResDet struct {
 	InvoiceUrl            string    `json:"invoice_url"`
 	PaymentUrl            string    `json:"payment_url"`
 	TransactionProductRes []TransactionProductRes
+}
+type AdmTransactionResponse struct {
+	ID                uint      `json:"id"`
+	TenantId          uint      `json:"tenant_id"`
+	TenantName        string    `json:"tenant_name"`
+	TotalBill         float64   `json:"total_bill"`
+	CreatedAt         time.Time `json:"created_at"`
+	TransactionStatus string    `json:"transaction_status"`
+	InvoiceNumber     string    `json:"invoice_number"`
+	InvoiceUrl        string    `json:"invoice_url"`
+	PaymentUrl        string    `json:"payment_url"`
 }
 
 type TransactionProductRes struct {
@@ -94,6 +107,28 @@ func ToAdmResp(data AdmTransactionRes) AdmTransactionResDet {
 		InvoiceUrl:        data.InvoiceUrl,
 		PaymentUrl:        data.PaymentUrl,
 	}
+}
+func ToAdmResponse(data AdmTransactionRes) AdmTransactionResponse {
+	return AdmTransactionResponse{
+		ID:                data.ID,
+		TenantId:          data.TenantId,
+		TenantName:        data.TenantName,
+		TotalBill:         data.TotalBill,
+		CreatedAt:         data.CreatedAt,
+		TransactionStatus: data.TransactionStatus,
+		InvoiceNumber:     data.InvoiceNumber,
+		InvoiceUrl:        data.InvoiceUrl,
+		PaymentUrl:        data.PaymentUrl,
+	}
+}
+
+func ToAdmRespArr(data []AdmTransactionRes) []AdmTransactionResponse {
+	arrRes := []AdmTransactionResponse{}
+	for _, v := range data {
+		tmp := ToAdmResponse(v)
+		arrRes = append(arrRes, tmp)
+	}
+	return arrRes
 }
 
 type ItemsInv struct {
