@@ -64,7 +64,7 @@ func (cc *customerControl) Update() echo.HandlerFunc {
 		if err != nil {
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
-		return c.JSON(http.StatusCreated, map[string]interface{}{
+		return c.JSON(http.StatusOK, map[string]interface{}{
 			// "data":    ToResponse(res),
 			"message": "success edit customer data",
 		})
@@ -80,7 +80,7 @@ func (cc *customerControl) GetUserCustomers() echo.HandlerFunc {
 		if err != nil {
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
-		return c.JSON(http.StatusCreated, map[string]interface{}{
+		return c.JSON(http.StatusOK, map[string]interface{}{
 			"data":    ToResponseArr(res),
 			"message": "success get all customers",
 		})
@@ -97,7 +97,7 @@ func (cc *customerControl) GetCustomerById() echo.HandlerFunc {
 		if err != nil {
 			return c.JSON(helper.PrintErrorResponse(err.Error()))
 		}
-		return c.JSON(http.StatusCreated, map[string]interface{}{
+		return c.JSON(http.StatusOK, map[string]interface{}{
 			"data":    ToResponse(res),
 			"message": "success get customer by id",
 		})
