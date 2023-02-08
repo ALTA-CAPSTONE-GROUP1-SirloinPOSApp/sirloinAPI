@@ -153,14 +153,14 @@ func (tq *transactionQuery) AddSell(userId uint, uCart transaction.Cart) (transa
 	//check if the product really the seller product
 	check := tq.CheckAllowedProd(userId, uCart)
 	if !check {
-		log.Println("unauthorized: request body contain product that's not belong to the user")
-		return transaction.Core{}, errors.New("unauthorized: request body contain product that's not belong to the user")
+		log.Println("bad request: request body contain product that's not belong to the user")
+		return transaction.Core{}, errors.New("bad request: request body contain product that's not belong to the user")
 	}
 	//check if the stock product enough
 	check = tq.CheckStockProduct(userId, uCart)
 	if !check {
-		log.Println("unauthorized: not enough stock")
-		return transaction.Core{}, errors.New("unauthorized: not enough stock")
+		log.Println("bad request: not enough stock")
+		return transaction.Core{}, errors.New("bad request: not enough stock")
 	}
 
 	tx := tq.db.Begin()
@@ -691,7 +691,7 @@ func (tq *transactionQuery) Invoice(discount float64, transId uint, member bool,
 		pdf.CellFormat(190, 5, fmt.Sprint("Alamat: \t"+tInv.SellerAddress), "0", 1, "L", false, 0, "")
 	} else {
 		log.Println("status empty string")
-		return "", errors.New("bad request")
+		return "", errors.New("bad request:query param status is empty string")
 	}
 
 	if member {
