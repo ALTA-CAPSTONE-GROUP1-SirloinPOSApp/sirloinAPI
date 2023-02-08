@@ -30,7 +30,7 @@ func (ts *transSvc) AddSell(token interface{}, uCart transaction.Cart) (transact
 	if err != nil {
 		msg := ""
 		if strings.Contains(err.Error(), "bad request") {
-			msg = "bad request"
+			msg = err.Error()
 		} else if strings.Contains(err.Error(), "stock") {
 			msg = "stok produk tidak cukup"
 		} else {
