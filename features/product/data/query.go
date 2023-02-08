@@ -65,6 +65,7 @@ func (pq *productQuery) Add(userId uint, newProduct product.Core, productImage *
 		path, err := helper.UploadImageToS3(filename, src)
 		if err != nil {
 			log.Println(errors.New("upload to s3 bucket failed"))
+			return product.Core{}, errors.New("upload to s3 bucket failed")
 		}
 		if len(path) > 0 {
 			qry := pq.db.First(&cnvP)
@@ -100,6 +101,7 @@ func (pq *productQuery) Update(userId, productId uint, updProduct product.Core, 
 		path, err := helper.UploadImageToS3(filename, src)
 		if err != nil {
 			log.Println(errors.New("upload to s3 bucket failed"))
+			return product.Core{}, errors.New("upload to s3 bucket failed")
 		}
 		if len(path) > 0 {
 			cnvP.ProductImage = path
