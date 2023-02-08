@@ -8,7 +8,7 @@ import (
 	"firebase.google.com/go/v4/messaging"
 )
 
-func PushNotification(msg, token string) error {
+func PushNotification(title, msg, token string) error {
 	client, ctx, err := config.InitFCMClient()
 	if err != nil {
 		log.Println("error initializing FCM client: " + err.Error())
@@ -16,6 +16,7 @@ func PushNotification(msg, token string) error {
 	// Define the message to be sent
 	message := messaging.Message{
 		Data: map[string]string{
+			"title":   title,
 			"message": msg,
 		},
 		Token: token,
