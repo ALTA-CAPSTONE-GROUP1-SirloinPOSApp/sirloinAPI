@@ -157,11 +157,11 @@ func (uc *userControl) RegisterDevice() echo.HandlerFunc {
 		err = uc.srv.RegisterDevice(token, dt.DeviceToken)
 		if err != nil {
 			if strings.Contains(err.Error(), "not found") {
-				c.JSON(http.StatusNotFound, helper.ErrorResponse("user not found"))
+				return c.JSON(http.StatusNotFound, helper.ErrorResponse("user not found"))
 			} else if strings.Contains(err.Error(), "duplicated") {
-				c.JSON(http.StatusConflict, helper.ErrorResponse("device token already registered"))
+				return c.JSON(http.StatusConflict, helper.ErrorResponse("device token already registered"))
 			} else {
-				c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
+				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
 			}
 		}
 		return c.JSON(http.StatusCreated, map[string]interface{}{
