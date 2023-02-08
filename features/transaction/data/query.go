@@ -92,13 +92,14 @@ func (tq *transactionQuery) TotalPrice(uCart transaction.Cart) (float64, transac
 
 func (tq *transactionQuery) Discount(uCart transaction.Cart, totalPrice float64) (float64, float64) {
 	disc := 0.0
+	resDisc := 0.0
 	totalBill := totalPrice
 	if uCart.CustomerId != 0 {
 		disc = 0.10
-		totalBill = totalPrice - (totalPrice * disc)
-		disc = (totalPrice * disc)
+		resDisc = (totalPrice * disc)
+		totalBill = totalPrice - resDisc
 	}
-	return totalBill, disc
+	return totalBill, resDisc
 }
 
 func (tq *transactionQuery) CreateTransaction(userId uint, uCart transaction.Cart, productStatus string, totalPrice, disc, totalBill float64) Transaction {
