@@ -527,13 +527,14 @@ func (tq *transactionQuery) NotificationTransactionStatus(invNo, transStatus str
 		lowProds, err := tq.CheckLowStockProducts(trans.UserId)
 		if err != nil {
 			log.Println("error check low stock product: ", err)
-		} else {
+		} else if len(lowProds) != 0 {
 			for _, v := range lowProds {
 				msg += "- " + v.ProductName + "\n"
 			}
 			dvc, err := tq.CheckUserDevice(trans.UserId)
 			if err != nil {
 				log.Println("error check user device: ", err)
+			} else if len(dvc) != 0 {
 				for _, v := range dvc {
 					err := helper.PushNotification("Stock produk rendah", msg, v.Token)
 					if err != nil {
@@ -605,13 +606,14 @@ func (tq *transactionQuery) UpdateStatus(transId uint, status string) error {
 			lowProds, err := tq.CheckLowStockProducts(input.UserId)
 			if err != nil {
 				log.Println("error check low stock product: ", err)
-			} else {
+			} else if len(lowProds) != 0 {
 				for _, v := range lowProds {
 					msg += "- " + v.ProductName + "\n"
 				}
 				dvc, err := tq.CheckUserDevice(input.UserId)
 				if err != nil {
 					log.Println("error check user device: ", err)
+				} else if len(dvc) != 0 {
 					for _, v := range dvc {
 						err := helper.PushNotification("Stock produk rendah", msg, v.Token)
 						if err != nil {
