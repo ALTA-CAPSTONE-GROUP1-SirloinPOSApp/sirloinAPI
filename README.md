@@ -153,9 +153,9 @@ $ git clone https://github.com/ALTA-CAPSTONE-GROUP1-SirloinPOSApp/sirloinAPI.git
 $ cd SirloinAPI
 ```
 ## Authors 👑
--  Ari Muhammad Rizal [![GitHub](https://img.shields.io/badge/ari-muhammad-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/amrizal94)
+-  [![GitHub](https://img.shields.io/badge/ari-muhammad-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/amrizal94)
 
--   Muhammad Fauzan Putra  [![GitHub](https://img.shields.io/badge/fauzan-putra-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/mfauzanptra)
+-  [![GitHub](https://img.shields.io/badge/fauzan-putra-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/mfauzanptra)
 
 
  <p align="right">(<a href="#top">back to top</a>)</p>
