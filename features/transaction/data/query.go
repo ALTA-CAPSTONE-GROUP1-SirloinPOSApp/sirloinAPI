@@ -96,6 +96,7 @@ func (tq *transactionQuery) Discount(uCart transaction.Cart, totalPrice float64)
 	if uCart.CustomerId != 0 {
 		disc = 0.10
 		totalBill = totalPrice - (totalPrice * disc)
+		disc = (totalPrice * disc)
 	}
 	return totalBill, disc
 }
