@@ -15,6 +15,12 @@ type User struct {
 	Password     string
 }
 
+type DeviceToken struct {
+	UserId uint
+	Token  string
+	User   User `gorm:"foreignkey:UserId;association_foreignkey:ID"`
+}
+
 func ToCore(data User) user.Core {
 	return user.Core{
 		ID:           data.ID,
