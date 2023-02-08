@@ -141,7 +141,7 @@ func (uc *userControl) Delete() echo.HandlerFunc {
 func (uc *userControl) RegisterDevice() echo.HandlerFunc {
 	return func(c echo.Context) error {
 		type DeviceTokenReq struct {
-			DeviceToken string `json:"device_token"`
+			DeviceToken string `json:"device_token" form:"device_token"`
 		}
 		token := c.Get("user")
 		dt := DeviceTokenReq{}
