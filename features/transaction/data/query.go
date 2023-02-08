@@ -8,6 +8,7 @@ import (
 	"sirloinapi/config"
 	product "sirloinapi/features/product/data"
 	"sirloinapi/features/transaction"
+	user "sirloinapi/features/user/data"
 	"sirloinapi/helper"
 	"strconv"
 	"strings"
@@ -29,6 +30,26 @@ func New(db *gorm.DB) transaction.TransactionData {
 	return &transactionQuery{
 		db: db,
 	}
+}
+
+func (tq *transactionQuery) CheckLowStockProducts(userId uint) ([]product.Product, error) {
+	prod := []product.Product{}
+	err := tq.db.Where("stock <= minimum_stock AND user_id = ?", userId).Scan(&prod).Error
+	if err != nil {
+		log.Println("error check low stock products: ", err.Error())
+		return []product.Product{}, err
+	}
+	return prod, nil
+}
+
+func (tq *transactionQuery) CheckUserDevice(userid uint) ([]user.DeviceToken, error) {
+	dvcTok := []user.DeviceToken{}
+	err := tq.db.Find(&dvcTok, "user_id = ?", userid).Error
+	if err != nil {
+		log.Println("error get user device: ", err.Error())
+		return []user.DeviceToken{}, err
+	}
+	return dvcTok, nil
 }
 
 func (tq *transactionQuery) CheckAllowedProd(uid uint, uCart transaction.Cart) bool {
@@ -500,6 +521,28 @@ func (tq *transactionQuery) NotificationTransactionStatus(invNo, transStatus str
 			trans.InvoiceUrl = invURL
 			tq.db.Save(&trans)
 		}
+
+		// check running low stock product and send push notification
+		msg := ""
+		lowProds, err := tq.CheckLowStockProducts(trans.UserId)
+		if err != nil {
+			log.Println("error check low stock product: ", err)
+		} else {
+			for _, v := range lowProds {
+				msg += "- " + v.ProductName + "\n"
+			}
+			dvc, err := tq.CheckUserDevice(trans.UserId)
+			if err != nil {
+				log.Println("error check user device: ", err)
+				for _, v := range dvc {
+					err := helper.PushNotification("Stock produk rendah", msg, v.Token)
+					if err != nil {
+						log.Println("error sending push notification: ", err)
+					}
+				}
+			}
+		}
+
 	}
 
 	return nil
@@ -556,6 +599,28 @@ func (tq *transactionQuery) UpdateStatus(transId uint, status string) error {
 				input.InvoiceUrl = invURL
 				tq.db.Save(&input)
 			}
+
+			// check running low stock product and send push notification
+			msg := ""
+			lowProds, err := tq.CheckLowStockProducts(input.UserId)
+			if err != nil {
+				log.Println("error check low stock product: ", err)
+			} else {
+				for _, v := range lowProds {
+					msg += "- " + v.ProductName + "\n"
+				}
+				dvc, err := tq.CheckUserDevice(input.UserId)
+				if err != nil {
+					log.Println("error check user device: ", err)
+					for _, v := range dvc {
+						err := helper.PushNotification("Stock produk rendah", msg, v.Token)
+						if err != nil {
+							log.Println("error sending push notification: ", err)
+						}
+					}
+				}
+			}
+
 		}
 	}
 	return nil
