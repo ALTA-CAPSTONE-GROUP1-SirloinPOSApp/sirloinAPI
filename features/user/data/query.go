@@ -81,6 +81,11 @@ func (uq *userQry) Delete(id uint) error {
 
 func (uq *userQry) RegisterDevice(id uint, dvcToken string) error {
 	dt := DeviceToken{UserId: id, Token: dvcToken}
+	uq.db.First(&dt, "token = ?", dvcToken)
+	if dt.Token != "" {
+		return errors.New("duplicated")
+	}
+
 	err := uq.db.Create(&dt).Error
 	if err != nil {
 		log.Println("error registering device token: ", err.Error())

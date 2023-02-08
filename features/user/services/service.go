@@ -172,6 +172,8 @@ func (uuc *userUseCase) RegisterDevice(userToken interface{}, dvcToken string) e
 		msg := ""
 		if strings.Contains(err.Error(), "not found") {
 			msg = "data not found"
+		} else if strings.Contains(err.Error(), "duplicated") {
+			msg = "duplicated"
 		} else {
 			msg = "server problem"
 		}

@@ -150,17 +150,22 @@ func (uc *userControl) RegisterDevice() echo.HandlerFunc {
 			log.Println("bind device token error: ", err.Error())
 			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("wrong input"))
 		}
+		if dt.DeviceToken == "" {
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("device token empty"))
+		}
 
 		err = uc.srv.RegisterDevice(token, dt.DeviceToken)
 		if err != nil {
 			if strings.Contains(err.Error(), "not found") {
 				c.JSON(http.StatusNotFound, helper.ErrorResponse("user not found"))
+			} else if strings.Contains(err.Error(), "duplicated") {
+				c.JSON(http.StatusConflict, helper.ErrorResponse("device token already registered"))
 			} else {
 				c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
 			}
 		}
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"message": "success delete account data",
+		return c.JSON(http.StatusCreated, map[string]interface{}{
+			"message": "success register device",
 		})
 	}
 }
