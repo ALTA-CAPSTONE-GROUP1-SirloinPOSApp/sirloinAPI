@@ -16,6 +16,7 @@ import (
 
 	"github.com/dustin/go-humanize"
 	"github.com/jung-kurt/gofpdf"
+	"github.com/labstack/gommon/color"
 	"github.com/midtrans/midtrans-go"
 	"github.com/midtrans/midtrans-go/coreapi"
 	"github.com/midtrans/midtrans-go/snap"
@@ -499,7 +500,7 @@ func (tq *transactionQuery) NotificationTransactionStatus(invNo, transStatus str
 				//bikin invoice penjualan, upload ke s3 dan kirim email
 				invURL, err := tq.Invoice(trans.Discount, trans.ID, true, trans.ProductStatus)
 				if err != nil {
-					return err
+					log.Println(color.Red("error create invoice: "), err.Error())
 				}
 				trans.InvoiceUrl = invURL
 				tq.db.Save(&trans)
@@ -507,7 +508,7 @@ func (tq *transactionQuery) NotificationTransactionStatus(invNo, transStatus str
 				//bikin invoice penjualan dan upload ke s3
 				invURL, err := tq.Invoice(trans.Discount, trans.ID, false, trans.ProductStatus)
 				if err != nil {
-					return err
+					log.Println(color.Red("error create invoice: "), err.Error())
 				}
 				trans.InvoiceUrl = invURL
 				tq.db.Save(&trans)
@@ -516,7 +517,7 @@ func (tq *transactionQuery) NotificationTransactionStatus(invNo, transStatus str
 			//bikin invoice pembelian
 			invURL, err := tq.Invoice(trans.Discount, trans.ID, false, trans.ProductStatus)
 			if err != nil {
-				return err
+				log.Println(color.Red("error create invoice: "), err.Error())
 			}
 			trans.InvoiceUrl = invURL
 			tq.db.Save(&trans)
@@ -533,12 +534,12 @@ func (tq *transactionQuery) NotificationTransactionStatus(invNo, transStatus str
 			}
 			dvc, err := tq.CheckUserDevice(trans.UserId)
 			if err != nil {
-				log.Println("error check user device: ", err)
+				log.Println(color.Red("error check user device: "), err)
 			} else if len(dvc) != 0 {
 				for _, v := range dvc {
 					err := helper.PushNotification("Stock produk rendah", msg, v.Token)
 					if err != nil {
-						log.Println("error sending push notification: ", err)
+						log.Println(color.Red("error sending push notification: "), err)
 					}
 				}
 			}
@@ -578,7 +579,7 @@ func (tq *transactionQuery) UpdateStatus(transId uint, status string) error {
 					//bikin invoice penjualan, upload ke s3 dan kirim email
 					invURL, err := tq.Invoice(input.Discount, input.ID, true, input.ProductStatus)
 					if err != nil {
-						return err
+						log.Println(color.Red("error create invoice: "), err.Error())
 					}
 					input.InvoiceUrl = invURL
 					tq.db.Save(&input)
@@ -586,7 +587,7 @@ func (tq *transactionQuery) UpdateStatus(transId uint, status string) error {
 					//bikin invoice penjualan dan upload ke s3
 					invURL, err := tq.Invoice(input.Discount, input.ID, false, input.ProductStatus)
 					if err != nil {
-						return err
+						log.Println(color.Red("error create invoice: "), err.Error())
 					}
 					input.InvoiceUrl = invURL
 					tq.db.Save(&input)
@@ -595,7 +596,7 @@ func (tq *transactionQuery) UpdateStatus(transId uint, status string) error {
 				//bikin invoice pembelian
 				invURL, err := tq.Invoice(input.Discount, input.ID, false, input.ProductStatus)
 				if err != nil {
-					return err
+					log.Println(color.Red("error create invoice: "), err.Error())
 				}
 				input.InvoiceUrl = invURL
 				tq.db.Save(&input)
@@ -605,19 +606,19 @@ func (tq *transactionQuery) UpdateStatus(transId uint, status string) error {
 			msg := ""
 			lowProds, err := tq.CheckLowStockProducts(input.UserId)
 			if err != nil {
-				log.Println("error check low stock product: ", err)
+				log.Println(color.Red("error check low stock product: "), err)
 			} else if len(lowProds) != 0 {
 				for _, v := range lowProds {
 					msg += "- " + v.ProductName + "\n"
 				}
 				dvc, err := tq.CheckUserDevice(input.UserId)
 				if err != nil {
-					log.Println("error check user device: ", err)
+					log.Println(color.Red("error check user device: "), err)
 				} else if len(dvc) != 0 {
 					for _, v := range dvc {
 						err := helper.PushNotification("Stock produk rendah", msg, v.Token)
 						if err != nil {
-							log.Println("error sending push notification: ", err)
+							log.Println(color.Red("error sending push notification: "), err)
 						}
 					}
 				}
@@ -742,15 +743,13 @@ func (tq *transactionQuery) Invoice(discount float64, transId uint, member bool,
 		body := "Dear " + tInv.CustomerName + ",\nBerikut adalah invoice untuk transaksi dengan nomor: " + transInv.InvoiceNumber + "\n\nEmail ini dibuat secara otomatis, mohon untuk tidak membalas email ini. \n\nTerima Kasih"
 		err := helper.SendEmail(tInv.CustomerEmail, "INVOICE "+fmt.Sprint(tInv.InvoiceNumber), body, fmt.Sprint(tInv.InvoiceNumber)+".pdf")
 		if err != nil {
-			log.Println("error sending email to customer: ", err.Error())
-			return "", err
+			log.Println(color.Red("error sending email to customer: "), err.Error())
 		}
 	} else if status == "buy" {
 		body := "Dear " + tInv.SellerName + ",\nBerikut adalah invoice untuk transaksi dengan nomor: " + transInv.InvoiceNumber + "\n\nEmail ini dibuat secara otomatis, mohon untuk tidak membalas email ini. \n\nTerima Kasih"
 		err := helper.SendEmail(tInv.SellerEmail, "INVOICE "+fmt.Sprint(tInv.InvoiceNumber), body, fmt.Sprint(tInv.InvoiceNumber)+".pdf")
 		if err != nil {
-			log.Println("error sending email to tenant: ", err.Error())
-			return "", err
+			log.Println(color.Red("error sending email to tenant: "), err.Error())
 		}
 	}
 
