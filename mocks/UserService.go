@@ -97,6 +97,20 @@ func (_m *UserService) Register(newUser user.Core) (user.Core, error) {
 	return r0, r1
 }
 
+// RegisterDevice provides a mock function with given fields: userToken, dvcToken
+func (_m *UserService) RegisterDevice(userToken interface{}, dvcToken string) error {
+	ret := _m.Called(userToken, dvcToken)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(interface{}, string) error); ok {
+		r0 = rf(userToken, dvcToken)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Update provides a mock function with given fields: userToken, updateData
 func (_m *UserService) Update(userToken interface{}, updateData user.Core) (user.Core, error) {
 	ret := _m.Called(userToken, updateData)
