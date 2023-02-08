@@ -107,6 +107,8 @@ func (pq *productQuery) Update(userId, productId uint, updProduct product.Core, 
 			cnvP.ProductImage = path
 		}
 		defer src.Close()
+	} else {
+		cnvP.ProductImage = ""
 	}
 
 	qry := pq.db.Where("id = ? AND user_id = ?", productId, userId).Updates(&cnvP)
