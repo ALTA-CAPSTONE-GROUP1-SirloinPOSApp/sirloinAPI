@@ -16,8 +16,12 @@ func PushNotification(title, msg, token string) error {
 	// Define the message to be sent
 	message := messaging.Message{
 		Data: map[string]string{
-			"title":   title,
-			"message": msg,
+			"title": title,
+			"body":  msg,
+		},
+		Notification: &messaging.Notification{
+			Title: title,
+			Body:  msg,
 		},
 		Token: token,
 	}
