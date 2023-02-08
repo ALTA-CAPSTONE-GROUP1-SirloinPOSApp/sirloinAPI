@@ -12,29 +12,31 @@ import (
 )
 
 var (
-	JWT_KEY           string = ""
-	ACCESSKEY         string = ""
-	MIDTRANSSERVERKEY string = ""
-	AWS_REGION        string = ""
-	S3_KEY            string = ""
-	S3_SECRET         string = ""
-	AWS_BUCKET        string = ""
-	GMAILAPPPASSWORD  string = ""
+	JWT_KEY             string = ""
+	ACCESSKEY           string = ""
+	MIDTRANSSERVERKEY   string = ""
+	AWS_REGION          string = ""
+	S3_KEY              string = ""
+	S3_SECRET           string = ""
+	AWS_BUCKET          string = ""
+	GMAILAPPPASSWORD    string = ""
+	FIREBASECREDENTIALS string = ""
 )
 
 type AppConfig struct {
-	DBUser            string
-	DBPass            string
-	DBHost            string
-	DBPort            int
-	DBName            string
-	jwtKey            string
-	midtransserverkey string
-	AWSREGION         string
-	S3KEY             string
-	S3SECRET          string
-	AWSBUCKET         string
-	GMAILAPPPASSWORD  string
+	DBUser              string
+	DBPass              string
+	DBHost              string
+	DBPort              int
+	DBName              string
+	jwtKey              string
+	midtransserverkey   string
+	AWSREGION           string
+	S3KEY               string
+	S3SECRET            string
+	AWSBUCKET           string
+	GMAILAPPPASSWORD    string
+	FIREBASECREDENTIALS string
 }
 
 func InitConfig() *AppConfig {
@@ -44,6 +46,13 @@ func InitConfig() *AppConfig {
 func ReadEnv() *AppConfig {
 	app := AppConfig{}
 	isRead := true
+
+	// firebase credentials
+	if val, found := os.LookupEnv("FIREBASECREDENTIALS"); found {
+		app.FIREBASECREDENTIALS = val
+		isRead = false
+	}
+
 	// AWS S3 Bucket
 	if val, found := os.LookupEnv("AWS_REGION"); found {
 		app.AWSREGION = val
@@ -129,7 +138,7 @@ func ReadEnv() *AppConfig {
 		app.S3SECRET = os.Getenv("S3SECRET")
 		app.AWSBUCKET = os.Getenv("AWSBUCKET")
 		app.GMAILAPPPASSWORD = os.Getenv("GMAILAPPPASSWORD")
-
+		app.FIREBASECREDENTIALS = os.Getenv("FIREBASECREDENTIALS")
 	}
 
 	JWT_KEY = app.jwtKey
@@ -139,6 +148,7 @@ func ReadEnv() *AppConfig {
 	S3_SECRET = app.S3SECRET
 	AWS_BUCKET = app.AWSBUCKET
 	GMAILAPPPASSWORD = app.GMAILAPPPASSWORD
+	FIREBASECREDENTIALS = app.FIREBASECREDENTIALS
 
 	return &app
 }

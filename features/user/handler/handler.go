@@ -137,3 +137,30 @@ func (uc *userControl) Delete() echo.HandlerFunc {
 		})
 	}
 }
+
+func (uc *userControl) RegisterDevice() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		type DeviceTokenReq struct {
+			DeviceToken string `json:"device_token"`
+		}
+		token := c.Get("user")
+		dt := DeviceTokenReq{}
+		err := c.Bind(&dt)
+		if err != nil {
+			log.Println("bind device token error: ", err.Error())
+			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("wrong input"))
+		}
+
+		err = uc.srv.RegisterDevice(token, dt.DeviceToken)
+		if err != nil {
+			if strings.Contains(err.Error(), "not found") {
+				c.JSON(http.StatusNotFound, helper.ErrorResponse("user not found"))
+			} else {
+				c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
+			}
+		}
+		return c.JSON(http.StatusOK, map[string]interface{}{
+			"message": "success delete account data",
+		})
+	}
+}

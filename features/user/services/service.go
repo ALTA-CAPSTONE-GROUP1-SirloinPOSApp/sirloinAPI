@@ -161,3 +161,21 @@ func (uuc *userUseCase) Delete(userToken interface{}) error {
 	}
 	return nil
 }
+
+func (uuc *userUseCase) RegisterDevice(userToken interface{}, dvcToken string) error {
+	userId := helper.ExtractToken(userToken)
+	if userId <= 0 {
+		return errors.New("data not found")
+	}
+	err := uuc.qry.RegisterDevice(uint(userId), dvcToken)
+	if err != nil {
+		msg := ""
+		if strings.Contains(err.Error(), "not found") {
+			msg = "data not found"
+		} else {
+			msg = "server problem"
+		}
+		return errors.New(msg)
+	}
+	return nil
+}
