@@ -131,7 +131,36 @@ paths:
                 message: "wrong email"
         500:
           $ref: '#/components/responses/500'
-      
+          
+  /register_device:
+    post:
+      tags:
+        - "Auth"
+      summary: "register device token to databse"
+      description: "register user device token to databse, to identify user device for push notification"
+      security:
+        - JWTAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                device_token:
+                  type: string
+                  example: "ofwnboiawnfwhoifhaf98ahfw89hfwa9fhbawiufbwaifbw"
+      responses:
+        201:
+          description: "success register device token"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/responseObject'
+              example:
+                message: "success created account"
+        500:
+          $ref: '#/components/responses/500'
+          
   /users:
     get:
       tags:
@@ -178,7 +207,7 @@ paths:
         - JWTAuth: []
       requestBody:
         content:
-          multipart/form-data:
+          application/json:
             schema:
               type: object
               properties:
@@ -326,9 +355,15 @@ paths:
       tags:
         - "Products"
       summary: "Get all products"
-      description: "Get all products"
+      description: "Get all products. Can be filtered by product name"
       security:
         - JWTAuth: []
+      parameters: 
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
       responses:
         200:
           description: "success get all products"
@@ -526,6 +561,12 @@ paths:
       description: "Get all Super Admin products"
       security:
         - JWTAuth: []
+      parameters: 
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
       responses:
         200:
           description: "success get all Super Admin products"
@@ -581,6 +622,11 @@ paths:
           schema:
             type: string
             format: date
+        - name: send_email
+          in: query
+          required: false
+          schema:
+            type: boolean
       security:
         - JWTAuth: []
       responses:
@@ -913,6 +959,11 @@ paths:
           schema:
             type: string
             format: date
+        - name: send_email
+          in: query
+          required: false
+          schema:
+            type: boolean
       security:
         - JWTAuth: []
       responses:
@@ -1195,6 +1246,10 @@ components:
               summary: Email must be email format
               value:
                 message: "incorrect e-mail format"
+            filled:
+              summary: no input field is filled
+              value:
+                message: "wrong input, no input field is filled"
     409uservalidasi:
       description: "email or phone number already registered"
       content:
