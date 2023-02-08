@@ -34,7 +34,7 @@ func New(db *gorm.DB) transaction.TransactionData {
 
 func (tq *transactionQuery) CheckLowStockProducts(userId uint) ([]product.Product, error) {
 	prod := []product.Product{}
-	err := tq.db.Where("stock <= minimum_stock AND user_id = ?", userId).Scan(&prod).Error
+	err := tq.db.Where("stock <= minimum_stock AND user_id = ?", userId).Find(&prod).Error
 	if err != nil {
 		log.Println("error check low stock products: ", err.Error())
 		return []product.Product{}, err
