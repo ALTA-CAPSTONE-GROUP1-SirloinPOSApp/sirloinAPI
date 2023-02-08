@@ -116,7 +116,7 @@ func (pc *productControl) Update() echo.HandlerFunc {
 			}
 		}
 
-		return c.JSON(http.StatusCreated, map[string]interface{}{
+		return c.JSON(http.StatusOK, map[string]interface{}{
 			"data":    res,
 			"message": "success update product",
 		})
