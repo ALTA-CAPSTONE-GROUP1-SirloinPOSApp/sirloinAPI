@@ -78,3 +78,14 @@ func (uq *userQry) Delete(id uint) error {
 	}
 	return nil
 }
+
+func (uq *userQry) RegisterDevice(id uint, dvcToken string) error {
+	dt := DeviceToken{UserId: id, Token: dvcToken}
+	err := uq.db.Create(&dt).Error
+	if err != nil {
+		log.Println("error registering device token: ", err.Error())
+		return errors.New("error registering device token: " + err.Error())
+	}
+
+	return nil
+}
