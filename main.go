@@ -61,6 +61,7 @@ func main() {
 	e.PUT("/users", userHdl.Update(), echojwt.JWT([]byte(config.JWT_KEY)))
 	e.DELETE("/users", userHdl.Delete(), echojwt.JWT([]byte(config.JWT_KEY)))
 	e.POST("/register_device", userHdl.RegisterDevice(), echojwt.JWT([]byte(config.JWT_KEY)))
+	e.DELETE("/register_device", userHdl.UnregDevice(), echojwt.JWT([]byte(config.JWT_KEY)))
 
 	//product
 	e.POST("/products", prodHdl.Add(), echojwt.JWT([]byte(config.JWT_KEY)))

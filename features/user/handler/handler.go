@@ -169,3 +169,16 @@ func (uc *userControl) RegisterDevice() echo.HandlerFunc {
 		})
 	}
 }
+func (uc *userControl) UnregDevice() echo.HandlerFunc {
+	return func(c echo.Context) error {
+		token := c.Get("user")
+
+		err := uc.srv.UnregDevice(token)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
+		}
+		return c.JSON(http.StatusCreated, map[string]interface{}{
+			"message": "success delete device",
+		})
+	}
+}

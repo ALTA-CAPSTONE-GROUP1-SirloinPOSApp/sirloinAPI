@@ -94,6 +94,20 @@ func TestAddSell(t *testing.T) {
 		assert.Equal(t, res.TransactionStatus, "")
 		data.AssertExpectations(t)
 	})
+
+	t.Run("not enough stock", func(t *testing.T) {
+		data.On("AddSell", uint(userId), newCart).Return(transaction.Core{}, errors.New("stock")).Once()
+		srv := New(data)
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		res, err := srv.AddSell(pToken, newCart)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "stok")
+		assert.Equal(t, res.TransactionStatus, "")
+		data.AssertExpectations(t)
+	})
 }
 
 func ToTime(t string) time.Time {
@@ -180,6 +194,20 @@ func TestAddBuy(t *testing.T) {
 		res, err := srv.AddBuy(pToken, newCart)
 		assert.NotNil(t, err)
 		assert.ErrorContains(t, err, "bad request")
+		assert.Equal(t, res.TransactionStatus, "")
+		data.AssertExpectations(t)
+	})
+
+	t.Run("not enough stock", func(t *testing.T) {
+		data.On("AddBuy", uint(userId), newCart).Return(transaction.Core{}, errors.New("stock")).Once()
+		srv := New(data)
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		res, err := srv.AddBuy(pToken, newCart)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "stok")
 		assert.Equal(t, res.TransactionStatus, "")
 		data.AssertExpectations(t)
 	})
