@@ -111,6 +111,20 @@ func (_m *UserService) RegisterDevice(userToken interface{}, dvcToken string) er
 	return r0
 }
 
+// UnregDevice provides a mock function with given fields: userToken
+func (_m *UserService) UnregDevice(userToken interface{}) error {
+	ret := _m.Called(userToken)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(interface{}) error); ok {
+		r0 = rf(userToken)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Update provides a mock function with given fields: userToken, updateData
 func (_m *UserService) Update(userToken interface{}, updateData user.Core) (user.Core, error) {
 	ret := _m.Called(userToken, updateData)
