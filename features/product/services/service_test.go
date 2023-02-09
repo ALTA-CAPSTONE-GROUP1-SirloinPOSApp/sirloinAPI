@@ -130,6 +130,20 @@ func TestAdd(t *testing.T) {
 		assert.ErrorContains(t, err, "duplicated")
 		repo.AssertExpectations(t)
 	})
+
+	t.Run("format infput file error", func(t *testing.T) {
+		repo.On("Add", uint(1), inputData, a).Return(product.Core{}, errors.New("format input file")).Once()
+		srv := New(repo)
+
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		res, err := srv.Add(pToken, inputData, a)
+		assert.NotNil(t, err)
+		assert.Equal(t, uint(0), res.ID)
+		assert.ErrorContains(t, err, "format")
+		repo.AssertExpectations(t)
+	})
 }
 
 func TestUpdate(t *testing.T) {
