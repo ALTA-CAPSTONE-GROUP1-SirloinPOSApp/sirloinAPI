@@ -96,7 +96,7 @@ func TestAddSell(t *testing.T) {
 	})
 
 	t.Run("not enough stock", func(t *testing.T) {
-		data.On("AddSell", uint(userId), newCart).Return(transaction.Core{}, errors.New("stock")).Once()
+		data.On("AddSell", uint(userId), newCart).Return(transaction.Core{}, errors.New("bad request: product stock is not enough")).Once()
 		srv := New(data)
 		_, token := helper.GenerateJWT(1)
 		pToken := token.(*jwt.Token)
@@ -104,7 +104,7 @@ func TestAddSell(t *testing.T) {
 
 		res, err := srv.AddSell(pToken, newCart)
 		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "stok")
+		assert.ErrorContains(t, err, "stock")
 		assert.Equal(t, res.TransactionStatus, "")
 		data.AssertExpectations(t)
 	})
@@ -199,7 +199,7 @@ func TestAddBuy(t *testing.T) {
 	})
 
 	t.Run("not enough stock", func(t *testing.T) {
-		data.On("AddBuy", uint(userId), newCart).Return(transaction.Core{}, errors.New("stock")).Once()
+		data.On("AddBuy", uint(userId), newCart).Return(transaction.Core{}, errors.New("bad request: product stock is not enough")).Once()
 		srv := New(data)
 		_, token := helper.GenerateJWT(1)
 		pToken := token.(*jwt.Token)
@@ -207,7 +207,7 @@ func TestAddBuy(t *testing.T) {
 
 		res, err := srv.AddBuy(pToken, newCart)
 		assert.NotNil(t, err)
-		assert.ErrorContains(t, err, "stok")
+		assert.ErrorContains(t, err, "stock")
 		assert.Equal(t, res.TransactionStatus, "")
 		data.AssertExpectations(t)
 	})
