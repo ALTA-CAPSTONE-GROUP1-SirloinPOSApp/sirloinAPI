@@ -96,10 +96,10 @@ func (uq *userQry) RegisterDevice(id uint, dvcToken string) error {
 	return nil
 }
 func (uq *userQry) UnregDevice(id uint) error {
-	dt := DeviceToken{UserId: id}
-	err := uq.db.Delete(&dt)
+	dt := DeviceToken{}
+	err := uq.db.Where("user_id = ?", id).Delete(dt).Error
 	if err != nil {
-		log.Println("error delete device token: ", err.Error)
+		log.Println("error delete device token: ", err)
 		return errors.New("error delete device token: ")
 	}
 
