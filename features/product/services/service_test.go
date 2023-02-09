@@ -215,6 +215,20 @@ func TestUpdate(t *testing.T) {
 		repo.AssertExpectations(t)
 	})
 
+	t.Run("format input file", func(t *testing.T) {
+		repo.On("Update", uint(1), productId, inputData, a).Return(product.Core{}, errors.New("format input file")).Once()
+		srv := New(repo)
+
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+		res, err := srv.Update(pToken, productId, inputData, a)
+		assert.NotNil(t, err)
+		assert.Equal(t, uint(0), res.ID)
+		assert.ErrorContains(t, err, "format")
+		repo.AssertExpectations(t)
+	})
+
 	t.Run("server problem", func(t *testing.T) {
 		repo.On("Update", uint(1), productId, inputData, a).Return(product.Core{}, errors.New("server problem")).Once()
 		srv := New(repo)
