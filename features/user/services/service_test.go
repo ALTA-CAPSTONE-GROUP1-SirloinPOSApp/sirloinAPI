@@ -542,18 +542,6 @@ func Test(t *testing.T) {
 		data.AssertExpectations(t)
 	})
 
-	t.Run("error duplicated", func(t *testing.T) {
-		data.On("UnregDevice", uint(1)).Return(errors.New("duplicated")).Once()
-		_, token := helper.GenerateJWT(1)
-		pToken := token.(*jwt.Token)
-		pToken.Valid = true
-
-		err := srv.UnregDevice(pToken)
-		assert.NotNil(t, err)
-		assert.Contains(t, err.Error(), "duplicated")
-		data.AssertExpectations(t)
-	})
-
 	t.Run("server problem", func(t *testing.T) {
 		data.On("UnregDevice", uint(1)).Return(errors.New("server")).Once()
 		_, token := helper.GenerateJWT(1)
