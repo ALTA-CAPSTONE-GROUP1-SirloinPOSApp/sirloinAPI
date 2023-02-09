@@ -65,15 +65,6 @@ func CheckFileExtensionImage(filename string) (string, error) {
 	return extension, nil
 }
 
-func CheckFileExtensionPdf(filename string) (string, error) {
-	extension := strings.ToLower(filename[strings.LastIndex(filename, ".")+1:])
-
-	if extension != "pdf" {
-		return "", fmt.Errorf("forbidden file type")
-	}
-	return extension, nil
-}
-
 func CheckFileSize(size int64) error {
 	var fileSize int64 = 1097152
 	if size == 0 {
