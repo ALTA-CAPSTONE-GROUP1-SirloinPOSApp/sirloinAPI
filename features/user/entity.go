@@ -20,6 +20,7 @@ type UserHandler interface {
 	Update() echo.HandlerFunc
 	Delete() echo.HandlerFunc
 	RegisterDevice() echo.HandlerFunc
+	UnregDevice() echo.HandlerFunc
 }
 
 type UserService interface {
@@ -29,6 +30,7 @@ type UserService interface {
 	Update(userToken interface{}, updateData Core) (Core, error)
 	Delete(userToken interface{}) error
 	RegisterDevice(userToken interface{}, dvcToken string) error
+	UnregDevice(userToken interface{}) error
 }
 
 type UserData interface {
@@ -38,4 +40,5 @@ type UserData interface {
 	Update(id uint, updateData Core) (Core, error)
 	Delete(id uint) error
 	RegisterDevice(id uint, dvcToken string) error
+	UnregDevice(id uint) error
 }

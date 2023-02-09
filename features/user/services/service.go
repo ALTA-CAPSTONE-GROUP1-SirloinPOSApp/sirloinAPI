@@ -181,3 +181,14 @@ func (uuc *userUseCase) RegisterDevice(userToken interface{}, dvcToken string) e
 	}
 	return nil
 }
+func (uuc *userUseCase) UnregDevice(userToken interface{}) error {
+	userId := helper.ExtractToken(userToken)
+	if userId <= 0 {
+		return errors.New("data not found")
+	}
+	err := uuc.qry.UnregDevice(uint(userId))
+	if err != nil {
+		return err
+	}
+	return nil
+}
