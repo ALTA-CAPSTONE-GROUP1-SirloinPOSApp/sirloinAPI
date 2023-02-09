@@ -156,13 +156,13 @@ func (tq *transactionQuery) AddSell(userId uint, uCart transaction.Cart) (transa
 	check := tq.CheckAllowedProd(userId, uCart)
 	if !check {
 		log.Println("bad request: request body contain product that's not belong to the user")
-		return transaction.Core{}, errors.New("bad request: request body contain product that's not belong to the user")
+		return transaction.Core{}, errors.New("bad request: items should only belong to the user")
 	}
 	//check if the stock product enough
 	check = tq.CheckStockProduct(userId, uCart)
 	if !check {
-		log.Println("bad request: not enough stock")
-		return transaction.Core{}, errors.New("bad request: not enough stock")
+		log.Println("bad request: product stock is not enough")
+		return transaction.Core{}, errors.New("bad request: product stock is not enough")
 	}
 
 	tx := tq.db.Begin()
@@ -230,14 +230,14 @@ func (tq *transactionQuery) AddSell(userId uint, uCart transaction.Cart) (transa
 func (tq *transactionQuery) AddBuy(userId uint, uCart transaction.Cart) (transaction.Core, error) {
 	check := tq.CheckAllowedProd(uint(1), uCart)
 	if !check {
-		log.Println("unauthorized: request body contain product that's not belong to super admin")
-		return transaction.Core{}, errors.New("unauthorized: request body contain product that's not belong to super admin")
+		log.Println("bad request: request body contain product that's not belong to super admin")
+		return transaction.Core{}, errors.New("bad request: items should only belong to the super admin")
 	}
 
 	check = tq.CheckStockProduct(uint(1), uCart)
 	if !check {
-		log.Println("unauthorized: not enough stock")
-		return transaction.Core{}, errors.New("unauthorized: not enough stock")
+		log.Println("bad request: product stock is not enough")
+		return transaction.Core{}, errors.New("bad request: product stock is not enough")
 	}
 
 	tx := tq.db.Begin()
