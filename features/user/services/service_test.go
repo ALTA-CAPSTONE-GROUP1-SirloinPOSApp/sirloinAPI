@@ -445,3 +445,124 @@ func TestDelete(t *testing.T) {
 		data.AssertExpectations(t)
 	})
 }
+
+func TestRegisterDevice(t *testing.T) {
+	data := mocks.NewUserData(t)
+	dvctoken := "udaiowbhnduiwiudhiaudwbiwafbiawfbfw"
+	srv := New(data)
+
+	t.Run("success register device", func(t *testing.T) {
+		data.On("RegisterDevice", uint(1), dvctoken).Return(nil).Once()
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		err := srv.RegisterDevice(pToken, dvctoken)
+		assert.Nil(t, err)
+		data.AssertExpectations(t)
+	})
+
+	t.Run("jwt not valid", func(t *testing.T) {
+		_, token := helper.GenerateJWT(1)
+
+		err := srv.RegisterDevice(token, dvctoken)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "not found")
+	})
+
+	t.Run("error not found", func(t *testing.T) {
+		data.On("RegisterDevice", uint(1), dvctoken).Return(errors.New("not found")).Once()
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		err := srv.RegisterDevice(pToken, dvctoken)
+		assert.NotNil(t, err)
+		assert.Contains(t, err.Error(), "found")
+		data.AssertExpectations(t)
+	})
+
+	t.Run("error duplicated", func(t *testing.T) {
+		data.On("RegisterDevice", uint(1), dvctoken).Return(errors.New("duplicated")).Once()
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		err := srv.RegisterDevice(pToken, dvctoken)
+		assert.NotNil(t, err)
+		assert.Contains(t, err.Error(), "duplicated")
+		data.AssertExpectations(t)
+	})
+
+	t.Run("server problem", func(t *testing.T) {
+		data.On("RegisterDevice", uint(1), dvctoken).Return(errors.New("server")).Once()
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		err := srv.RegisterDevice(pToken, dvctoken)
+		assert.NotNil(t, err)
+		assert.Contains(t, err.Error(), "server")
+		data.AssertExpectations(t)
+	})
+}
+
+func Test(t *testing.T) {
+	data := mocks.NewUserData(t)
+	srv := New(data)
+
+	t.Run("success unreg device", func(t *testing.T) {
+		data.On("UnregDevice", uint(1)).Return(nil).Once()
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		err := srv.UnregDevice(pToken)
+		assert.Nil(t, err)
+		data.AssertExpectations(t)
+	})
+
+	t.Run("jwt not valid", func(t *testing.T) {
+		_, token := helper.GenerateJWT(1)
+
+		err := srv.UnregDevice(token)
+		assert.NotNil(t, err)
+		assert.ErrorContains(t, err, "not found")
+	})
+
+	t.Run("error not found", func(t *testing.T) {
+		data.On("UnregDevice", uint(1)).Return(errors.New("not found")).Once()
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		err := srv.UnregDevice(pToken)
+		assert.NotNil(t, err)
+		assert.Contains(t, err.Error(), "found")
+		data.AssertExpectations(t)
+	})
+
+	t.Run("error duplicated", func(t *testing.T) {
+		data.On("UnregDevice", uint(1)).Return(errors.New("duplicated")).Once()
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		err := srv.UnregDevice(pToken)
+		assert.NotNil(t, err)
+		assert.Contains(t, err.Error(), "duplicated")
+		data.AssertExpectations(t)
+	})
+
+	t.Run("server problem", func(t *testing.T) {
+		data.On("UnregDevice", uint(1)).Return(errors.New("server")).Once()
+		_, token := helper.GenerateJWT(1)
+		pToken := token.(*jwt.Token)
+		pToken.Valid = true
+
+		err := srv.UnregDevice(pToken)
+		assert.NotNil(t, err)
+		assert.Contains(t, err.Error(), "server")
+		data.AssertExpectations(t)
+	})
+}
