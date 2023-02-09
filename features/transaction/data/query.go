@@ -144,7 +144,6 @@ func AddOneDay(to string) string {
 
 	// Parsing string menjadi time.Time
 	t, _ := time.Parse("2006-01-02", newDateString)
-	fmt.Println("Current time:", t)
 
 	// Tambahkan 1 hari
 	t = t.Add(time.Hour * 24)

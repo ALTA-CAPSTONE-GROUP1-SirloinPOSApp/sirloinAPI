@@ -90,7 +90,6 @@ func (th *TransactionHandle) GetTransactionHistory() echo.HandlerFunc {
 		sendEmail := c.QueryParam("send_email")
 
 		res, err := th.srv.GetTransactionHistory(token, status, from, to, sendEmail)
-		log.Println(err)
 		if err != nil {
 			if strings.Contains(err.Error(), "not found") {
 				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("wrong input (data not found)"))
