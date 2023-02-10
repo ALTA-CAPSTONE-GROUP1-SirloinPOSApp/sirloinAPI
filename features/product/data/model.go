@@ -11,9 +11,9 @@ type Product struct {
 	gorm.Model
 	UserId       uint
 	User         user.User
-	Upc          string `gorm:"unique"`
+	Upc          string
 	Category     string
-	ProductName  string `gorm:"unique"`
+	ProductName  string
 	Stock        int
 	MinimumStock int
 	BuyingPrice  float64

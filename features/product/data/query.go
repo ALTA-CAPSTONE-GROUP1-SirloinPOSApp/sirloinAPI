@@ -2,7 +2,6 @@ package data
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"mime/multipart"
 	"sirloinapi/features/product"
@@ -37,9 +36,37 @@ func (pq *productQuery) CheckProduct(userId uint, newProduct Product) error {
 	return nil
 }
 
+func (pq *productQuery) CheckFile(productImage *multipart.FileHeader) error {
+
+	_, err := productImage.Open()
+	if err != nil {
+		return errors.New("format input file tidak dapat dibuka")
+	}
+	err = helper.CheckFileSize(productImage.Size)
+	if err != nil {
+		idx := strings.Index(err.Error(), ",")
+		msg := err.Error()
+		return errors.New("format input file size tidak diizinkan, size melebihi" + msg[idx+1:])
+	}
+	_, err = helper.CheckFileExtensionImage(productImage.Filename)
+	if err != nil {
+		return errors.New("format input file type tidak diizinkan")
+	}
+
+	return nil
+}
+
 func (pq *productQuery) Add(userId uint, newProduct product.Core, productImage *multipart.FileHeader) (product.Core, error) {
 	cnvP := CoreToData(newProduct)
 	cnvP.UserId = userId
+
+	if productImage != nil {
+		// chech file upload
+		err := pq.CheckFile(productImage)
+		if err != nil {
+			return product.Core{}, err
+		}
+	}
 
 	// Check Product
 	if err := pq.CheckProduct(userId, cnvP); err != nil {
@@ -54,33 +81,17 @@ func (pq *productQuery) Add(userId uint, newProduct product.Core, productImage *
 	}
 
 	if productImage != nil {
-		src, err := productImage.Open()
+		path, err := helper.UploadProductPhotoS3(*productImage, int(cnvP.ID))
 		if err != nil {
-			return product.Core{}, errors.New("format input file tidak dapat dibuka")
-		}
-		err = helper.CheckFileSize(productImage.Size)
-		if err != nil {
-			idx := strings.Index(err.Error(), ",")
-			msg := err.Error()
-			return product.Core{}, errors.New("format input file size tidak diizinkan, size melebihi" + msg[idx+1:])
-		}
-		extension, err := helper.CheckFileExtensionImage(productImage.Filename)
-		if err != nil {
-			return product.Core{}, errors.New("format input file type tidak diizinkan")
-		}
-		filename := "files/products/" + fmt.Sprint(cnvP.ID) + "/product_photo_" + fmt.Sprint(cnvP.ID) + "." + extension
-
-		path, err := helper.UploadImageToS3(filename, src)
-		if err != nil {
-			log.Println(errors.New("upload to s3 bucket failed"))
-			return product.Core{}, errors.New("upload to s3 bucket failed")
+			log.Println("\terror upload product photo: ", err.Error())
+			return product.Core{}, err
 		}
 		if len(path) > 0 {
 			qry := pq.db.First(&cnvP)
 			cnvP.ProductImage = path
 			qry.Save(&cnvP)
 		}
-		defer src.Close()
+
 	}
 
 	return DataToCore(cnvP), nil
@@ -89,36 +100,25 @@ func (pq *productQuery) Update(userId, productId uint, updProduct product.Core, 
 	cnvP := CoreToData(updProduct)
 	cnvP.UserId = userId
 	// Check Product
-	if err := pq.CheckProduct(userId, cnvP); err != nil {
-		log.Println(color.Red("error: check product "), err.Error())
-		return product.Core{}, err
-	}
-	if productImage != nil {
-		src, err := productImage.Open()
-		if err != nil {
-			return product.Core{}, errors.New("format input file tidak dapat dibuka")
-		}
-		err = helper.CheckFileSize(productImage.Size)
-		if err != nil {
-			idx := strings.Index(err.Error(), ",")
-			msg := err.Error()
-			return product.Core{}, errors.New("format input file size tidak diizinkan, size melebihi" + msg[idx+1:])
-		}
-		extension, err := helper.CheckFileExtensionImage(productImage.Filename)
-		if err != nil {
-			return product.Core{}, errors.New("format input file type tidak diizinkan")
-		}
-		filename := "files/products/" + fmt.Sprint(productId) + "/product_photo_" + fmt.Sprint(productId) + "." + extension
+	// if err := pq.CheckProduct(userId, cnvP); err != nil {
+	// 	log.Println(color.Red("error: check product "), err.Error())
+	// 	return product.Core{}, err
+	// }
 
-		path, err := helper.UploadImageToS3(filename, src)
+	if productImage != nil {
+		// chech file upload
+		err := pq.CheckFile(productImage)
 		if err != nil {
-			log.Println(errors.New("upload to s3 bucket failed"))
-			return product.Core{}, errors.New("upload to s3 bucket failed")
+			return product.Core{}, err
+		}
+		path, err := helper.UploadProductPhotoS3(*productImage, int(cnvP.ID))
+		if err != nil {
+			log.Println("\terror upload product photo: ", err.Error())
+			return product.Core{}, err
 		}
 		if len(path) > 0 {
 			cnvP.ProductImage = path
 		}
-		defer src.Close()
 	} else {
 		cnvP.ProductImage = ""
 	}
