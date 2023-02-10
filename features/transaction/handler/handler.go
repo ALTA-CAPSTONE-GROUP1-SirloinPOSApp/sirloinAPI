@@ -234,8 +234,9 @@ func (th *TransactionHandle) UpdateStatus() echo.HandlerFunc {
 
 		err = th.srv.UpdateStatus(uint(orderId), status.TransactionStatus)
 		if err != nil {
-			if strings.Contains(err.Error(), "bad request") {
-				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("wrong input (bad request)"))
+			if strings.Contains(err.Error(), "bad request") || strings.Contains(err.Error(), "not found") {
+				words := strings.Split(err.Error(), ": ")
+				return c.JSON(http.StatusBadRequest, helper.ErrorResponse(words[1]))
 			} else {
 				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
 			}

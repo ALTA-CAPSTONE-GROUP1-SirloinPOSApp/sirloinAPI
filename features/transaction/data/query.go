@@ -557,35 +557,45 @@ func (tq *transactionQuery) UpdateStatus(transId uint, status string) error {
 		log.Println("error select transaction: ", err.Error())
 		return err
 	}
-	input.TransactionStatus = status
-	err = tq.db.Save(&input).Error
-	if err != nil {
-		log.Println("error save transaction status: ", err.Error())
-		return err
-	} else {
-		//update stock product
-		if input.TransactionStatus == "success" {
-			transProds := []TransactionProduct{}
-			tq.db.Find(&transProds, "transaction_id", input.ID)
-			for _, item := range transProds {
-				prod := product.Product{}
-				tq.db.First(&prod, item.ProductId)
-				prod.Stock -= item.Quantity
-				prod.ItemsSold += item.Quantity
-				tq.db.Save(&prod)
-			}
+	if input.TransactionStatus != "success" {
+		input.TransactionStatus = status
+		err = tq.db.Save(&input).Error
+		if err != nil {
+			log.Println("error save transaction status: ", err.Error())
+			return err
+		} else {
+			//update stock product
+			if input.TransactionStatus == "success" {
+				transProds := []TransactionProduct{}
+				tq.db.Find(&transProds, "transaction_id", input.ID)
+				for _, item := range transProds {
+					prod := product.Product{}
+					tq.db.First(&prod, item.ProductId)
+					prod.Stock -= item.Quantity
+					prod.ItemsSold += item.Quantity
+					tq.db.Save(&prod)
+				}
 
-			if input.ProductStatus == "sell" {
-				if input.CustomerId != uint(0) {
-					//bikin invoice penjualan, upload ke s3 dan kirim email
-					invURL, err := tq.Invoice(input.Discount, input.ID, true, input.ProductStatus)
-					if err != nil {
-						log.Println(color.Red("error create invoice: "), err.Error())
+				if input.ProductStatus == "sell" {
+					if input.CustomerId != uint(0) {
+						//bikin invoice penjualan, upload ke s3 dan kirim email
+						invURL, err := tq.Invoice(input.Discount, input.ID, true, input.ProductStatus)
+						if err != nil {
+							log.Println(color.Red("error create invoice: "), err.Error())
+						}
+						input.InvoiceUrl = invURL
+						tq.db.Save(&input)
+					} else {
+						//bikin invoice penjualan dan upload ke s3
+						invURL, err := tq.Invoice(input.Discount, input.ID, false, input.ProductStatus)
+						if err != nil {
+							log.Println(color.Red("error create invoice: "), err.Error())
+						}
+						input.InvoiceUrl = invURL
+						tq.db.Save(&input)
 					}
-					input.InvoiceUrl = invURL
-					tq.db.Save(&input)
-				} else {
-					//bikin invoice penjualan dan upload ke s3
+				} else if input.ProductStatus == "buy" {
+					//bikin invoice pembelian
 					invURL, err := tq.Invoice(input.Discount, input.ID, false, input.ProductStatus)
 					if err != nil {
 						log.Println(color.Red("error create invoice: "), err.Error())
@@ -593,39 +603,34 @@ func (tq *transactionQuery) UpdateStatus(transId uint, status string) error {
 					input.InvoiceUrl = invURL
 					tq.db.Save(&input)
 				}
-			} else if input.ProductStatus == "buy" {
-				//bikin invoice pembelian
-				invURL, err := tq.Invoice(input.Discount, input.ID, false, input.ProductStatus)
-				if err != nil {
-					log.Println(color.Red("error create invoice: "), err.Error())
-				}
-				input.InvoiceUrl = invURL
-				tq.db.Save(&input)
-			}
 
-			// check running low stock product and send push notification
-			msg := ""
-			lowProds, err := tq.CheckLowStockProducts(input.UserId)
-			if err != nil {
-				log.Println(color.Red("error check low stock product: "), err)
-			} else if len(lowProds) != 0 {
-				for _, v := range lowProds {
-					msg += "- " + v.ProductName + "\n"
-				}
-				dvc, err := tq.CheckUserDevice(input.UserId)
+				// check running low stock product and send push notification
+				msg := ""
+				lowProds, err := tq.CheckLowStockProducts(input.UserId)
 				if err != nil {
-					log.Println(color.Red("error check user device: "), err)
-				} else if len(dvc) != 0 {
-					for _, v := range dvc {
-						err := helper.PushNotification("Stock produk rendah", msg, v.Token)
-						if err != nil {
-							log.Println(color.Red("error sending push notification: "), err)
+					log.Println(color.Red("error check low stock product: "), err)
+				} else if len(lowProds) != 0 {
+					for _, v := range lowProds {
+						msg += "- " + v.ProductName + "\n"
+					}
+					dvc, err := tq.CheckUserDevice(input.UserId)
+					if err != nil {
+						log.Println(color.Red("error check user device: "), err)
+					} else if len(dvc) != 0 {
+						for _, v := range dvc {
+							err := helper.PushNotification("Stock produk rendah", msg, v.Token)
+							if err != nil {
+								log.Println(color.Red("error sending push notification: "), err)
+							}
 						}
 					}
 				}
-			}
 
+			}
 		}
+	} else {
+		log.Println(color.Red("bad request: the request requested is no longer necessary to change the product stock"))
+		return errors.New("transaction has been paid")
 	}
 	return nil
 }
