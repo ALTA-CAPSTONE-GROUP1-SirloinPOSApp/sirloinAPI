@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"sirloinapi/features/user"
 	"sirloinapi/helper"
@@ -108,7 +109,7 @@ func (uuc *userUseCase) Update(userToken interface{}, updateData user.Core) (use
 	if updateData.BusinessName != "" {
 		err := helper.Validasi(helper.ToValidate("as", updateData))
 		if err != nil {
-			return user.Core{}, err
+			return user.Core{}, fmt.Errorf("BusinessName , %v", err)
 		}
 	}
 
