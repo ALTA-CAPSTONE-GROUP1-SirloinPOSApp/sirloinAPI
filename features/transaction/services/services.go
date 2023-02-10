@@ -151,6 +151,8 @@ func (ts *transSvc) UpdateStatus(transId uint, status string) error {
 		msg := ""
 		if strings.Contains(err.Error(), "not found") {
 			msg = "bad request"
+		} else if strings.Contains(err.Error(), "bad request") {
+			msg = err.Error()
 		} else {
 			msg = "server problem"
 		}
