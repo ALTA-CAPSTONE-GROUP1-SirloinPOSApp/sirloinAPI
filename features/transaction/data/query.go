@@ -630,7 +630,7 @@ func (tq *transactionQuery) UpdateStatus(transId uint, status string) error {
 		}
 	} else {
 		log.Println(color.Red("bad request: the request requested is no longer necessary to change the product stock"))
-		return errors.New("transaction has been paid")
+		return errors.New("bad request: transaction has been paid")
 	}
 	return nil
 }
