@@ -57,7 +57,7 @@ func (pc *productControl) Add() echo.HandlerFunc {
 		if err != nil {
 			if strings.Contains(err.Error(), "duplicated") {
 				log.Println("\terror running add product service: ", err.Error())
-				return c.JSON(http.StatusConflict, helper.ErrorResponse("duplicated product"))
+				return c.JSON(http.StatusConflict, helper.ErrorResponse(err.Error()))
 			} else if strings.Contains(err.Error(), "server") {
 				log.Println("\terror running add product service: ", err.Error())
 				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))

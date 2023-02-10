@@ -9,6 +9,7 @@ import (
 	"sirloinapi/helper"
 	"strings"
 
+	"github.com/labstack/gommon/color"
 	"gorm.io/gorm"
 )
 
@@ -22,21 +23,28 @@ func New(db *gorm.DB) product.ProductData {
 	}
 }
 
+func (pq *productQuery) CheckProduct(userId uint, newProduct Product) error {
+	existed := 0
+	pq.db.Raw("SELECT COUNT(*) FROM products p WHERE p.product_name = ? AND user_id = ?", newProduct.ProductName, userId).Scan(&existed)
+	if existed >= 1 {
+		return errors.New("duplicated product on name")
+	}
+	existed = 0
+	pq.db.Raw("SELECT COUNT(*) FROM products p WHERE p.upc = ? AND user_id = ?", newProduct.Upc, userId).Scan(&existed)
+	if existed >= 1 {
+		return errors.New("duplicated product on barcode")
+	}
+	return nil
+}
+
 func (pq *productQuery) Add(userId uint, newProduct product.Core, productImage *multipart.FileHeader) (product.Core, error) {
 	cnvP := CoreToData(newProduct)
 	cnvP.UserId = userId
 
-	existed := 0
-	pq.db.Raw("SELECT COUNT(*) FROM products p WHERE p.product_name = ? AND user_id = ?", cnvP.ProductName, userId).Scan(&existed)
-	if existed >= 1 {
-		log.Println("duplicated product")
-		return product.Core{}, errors.New("duplicated product")
-	}
-	existed = 0
-	pq.db.Raw("SELECT COUNT(*) FROM products p WHERE p.upc = ? AND user_id = ?", cnvP.Upc, userId).Scan(&existed)
-	if existed >= 1 {
-		log.Println("duplicated product")
-		return product.Core{}, errors.New("duplicated product")
+	// Check Product
+	if err := pq.CheckProduct(userId, cnvP); err != nil {
+		log.Println(color.Red("error: check product "), err.Error())
+		return product.Core{}, err
 	}
 
 	err := pq.db.Create(&cnvP).Error
@@ -80,7 +88,11 @@ func (pq *productQuery) Add(userId uint, newProduct product.Core, productImage *
 func (pq *productQuery) Update(userId, productId uint, updProduct product.Core, productImage *multipart.FileHeader) (product.Core, error) {
 	cnvP := CoreToData(updProduct)
 	cnvP.UserId = userId
-
+	// Check Product
+	if err := pq.CheckProduct(userId, cnvP); err != nil {
+		log.Println(color.Red("error: check product "), err.Error())
+		return product.Core{}, err
+	}
 	if productImage != nil {
 		src, err := productImage.Open()
 		if err != nil {
