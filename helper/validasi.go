@@ -31,7 +31,7 @@ type AddCustomerValidate struct {
 type ProductValidate struct {
 	Upc          string  `validate:"required,numeric"`
 	Category     string  `validate:"required,alpha_space"`
-	ProductName  string  `validate:"required,alpha_space"`
+	ProductName  string  `validate:"required,alpha_space_numeric"`
 	Stock        int     `validate:"required,numeric"`
 	MinimumStock int     `validate:"numeric"`
 	BuyingPrice  float64 `validate:"numeric"`
@@ -129,6 +129,11 @@ func alphaSpace(fl validator.FieldLevel) bool {
 	return match
 }
 
+func alphaSpaceNumeric(fl validator.FieldLevel) bool {
+	match, _ := regexp.MatchString("^[a-zA-Z0-9\\s]+$", fl.Field().String())
+	return match
+}
+
 func securePassword(fl validator.FieldLevel) bool {
 	password := fl.Field().String()
 	if len(password) < 8 {
@@ -152,6 +157,7 @@ func securePassword(fl validator.FieldLevel) bool {
 func Validasi(data interface{}) error {
 	validate = validator.New()
 	validate.RegisterValidation("alpha_space", alphaSpace)
+	validate.RegisterValidation("alpha_space_numeric", alphaSpaceNumeric)
 	validate.RegisterValidation("secure_password", securePassword)
 	err := validate.Struct(data)
 	if err != nil {
