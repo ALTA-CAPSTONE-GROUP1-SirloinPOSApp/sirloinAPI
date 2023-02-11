@@ -32,7 +32,19 @@ func New(db *gorm.DB) transaction.TransactionData {
 		db: db,
 	}
 }
-
+func (tq *transactionQuery) TransactionPaidNotif(invNo string, userId uint) {
+	dvc, err := tq.CheckUserDevice(userId)
+	if err != nil {
+		log.Println(color.Red("error check user device: "), err)
+	} else if len(dvc) != 0 {
+		for _, v := range dvc {
+			err := helper.PushNotification("Pembayaran berhasil", fmt.Sprint("Transaksi dengan nomor ", invNo, " telah berhasil dibayar"), v.Token)
+			if err != nil {
+				log.Println(color.Red("error sending push notification: "), err)
+			}
+		}
+	}
+}
 func (tq *transactionQuery) LowStockProductNotif(userId uint) {
 	msg := ""
 	lowProds, err := tq.CheckLowStockProducts(userId)
@@ -83,7 +95,6 @@ func (tq *transactionQuery) CheckLowStockProducts(userId uint) ([]product.Produc
 	}
 	return prod, nil
 }
-
 func (tq *transactionQuery) CheckUserDevice(userid uint) ([]user.DeviceToken, error) {
 	dvcTok := []user.DeviceToken{}
 	err := tq.db.Find(&dvcTok, "user_id = ?", userid).Error
@@ -93,7 +104,6 @@ func (tq *transactionQuery) CheckUserDevice(userid uint) ([]user.DeviceToken, er
 	}
 	return dvcTok, nil
 }
-
 func (tq *transactionQuery) CheckAllowedProd(uid uint, uCart transaction.Cart) bool {
 	check := true
 	for _, val := range uCart.Items {
@@ -105,7 +115,6 @@ func (tq *transactionQuery) CheckAllowedProd(uid uint, uCart transaction.Cart) b
 	}
 	return check
 }
-
 func (tq *transactionQuery) CheckStockProduct(uid uint, uCart transaction.Cart) bool {
 	check := true
 	for _, val := range uCart.Items {
@@ -117,7 +126,6 @@ func (tq *transactionQuery) CheckStockProduct(uid uint, uCart transaction.Cart) 
 	}
 	return check
 }
-
 func (tq *transactionQuery) TotalPrice(uCart transaction.Cart) (float64, transaction.Cart) {
 	totalPrice := 0.0
 	for i, val := range uCart.Items {
@@ -130,7 +138,6 @@ func (tq *transactionQuery) TotalPrice(uCart transaction.Cart) (float64, transac
 
 	return totalPrice, uCart
 }
-
 func (tq *transactionQuery) Discount(uCart transaction.Cart, totalPrice float64) (float64, float64) {
 	disc := 0.0
 	resDisc := 0.0
@@ -142,7 +149,6 @@ func (tq *transactionQuery) Discount(uCart transaction.Cart, totalPrice float64)
 	}
 	return totalBill, resDisc
 }
-
 func (tq *transactionQuery) CreateTransaction(userId uint, uCart transaction.Cart, productStatus string, totalPrice, disc, totalBill float64) Transaction {
 	return Transaction{
 		UserId:            userId,
@@ -162,7 +168,6 @@ func (tq *transactionQuery) CreateNumberInvoice(transInput Transaction, productS
 	invNo := fmt.Sprintf("INV-" + transInput.CreatedAt.Format("20060102") + "-" + strings.ToUpper(productStatus) + "-" + cnvID)
 	return invNo
 }
-
 func (tq *transactionQuery) CreateTransProds(transInput Transaction, uCart transaction.Cart) []TransactionProduct {
 	transProds := []TransactionProduct{}
 	for _, item := range uCart.Items {
@@ -190,7 +195,6 @@ func AddOneDay(to string) string {
 	t = t.Add(time.Hour * 24)
 	return t.String()
 }
-
 func (tq *transactionQuery) AddSell(userId uint, uCart transaction.Cart) (transaction.Core, error) {
 	//check if the product really the seller product
 	check := tq.CheckAllowedProd(userId, uCart)
@@ -266,7 +270,6 @@ func (tq *transactionQuery) AddSell(userId uint, uCart transaction.Cart) (transa
 
 	return DataToCoreT(transInput), nil
 }
-
 func (tq *transactionQuery) AddBuy(userId uint, uCart transaction.Cart) (transaction.Core, error) {
 	check := tq.CheckAllowedProd(uint(1), uCart)
 	if !check {
@@ -338,7 +341,6 @@ func (tq *transactionQuery) AddBuy(userId uint, uCart transaction.Cart) (transac
 
 	return DataToCoreT(transInput), nil
 }
-
 func (tq *transactionQuery) GetTransactionHistory(userId uint, status, from, to, sendEmail string) ([]transaction.Core, error) {
 	trans := []transaction.Core{}
 
@@ -391,7 +393,6 @@ func (tq *transactionQuery) GetTransactionHistory(userId uint, status, from, to,
 
 	return trans, nil
 }
-
 func (tq *transactionQuery) GetTransactionDetails(transactionId uint) (transaction.TransactionRes, error) {
 	trans := transaction.Core{}
 
@@ -526,6 +527,11 @@ func (tq *transactionQuery) NotificationTransactionStatus(invNo, transStatus str
 			return errors.New("failed update product stock")
 		}
 
+		//send success payment to the tenant
+		if trans.UserId != uint(1) {
+			tq.TransactionPaidNotif(trans.InvoiceNumber, trans.UserId)
+		}
+
 		if trans.ProductStatus == "sell" {
 			if trans.CustomerId != uint(0) {
 				//bikin invoice penjualan, upload ke s3 dan kirim email
@@ -620,7 +626,6 @@ func (tq *transactionQuery) UpdateStatus(transId uint, status string) error {
 	}
 	return nil
 }
-
 func (tq *transactionQuery) Invoice(discount float64, transId uint, member bool, status string) (string, error) {
 	tx := tq.db.Begin()
 
