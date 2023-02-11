@@ -100,10 +100,21 @@ func (pq *productQuery) Update(userId, productId uint, updProduct product.Core, 
 	cnvP := CoreToData(updProduct)
 	cnvP.UserId = userId
 	// Check Product
-	// if err := pq.CheckProduct(userId, cnvP); err != nil {
-	// 	log.Println(color.Red("error: check product "), err.Error())
-	// 	return product.Core{}, err
-	// }
+	if err := pq.CheckProduct(userId, cnvP); err != nil {
+		log.Println(color.Red("error: check product "), err.Error())
+		return product.Core{}, err
+	}
+	res, err := pq.GetProductById(userId, productId)
+	if err != nil {
+		log.Println("\terror query get all product: ", err.Error())
+		return product.Core{}, err
+	}
+	if res.Upc == updProduct.Upc {
+		updProduct.Upc = ""
+	}
+	if res.ProductName == updProduct.ProductName {
+		updProduct.ProductName = ""
+	}
 
 	if productImage != nil {
 		// chech file upload
