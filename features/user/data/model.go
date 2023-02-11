@@ -9,9 +9,9 @@ import (
 type User struct {
 	gorm.Model
 	BusinessName string
-	Email        string `gorm:"unique"`
+	Email        string
 	Address      string
-	PhoneNumber  string `gorm:"unique"`
+	PhoneNumber  string
 	Password     string
 }
 
