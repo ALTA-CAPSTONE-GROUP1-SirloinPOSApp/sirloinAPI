@@ -43,7 +43,11 @@ func PrintErrorResponse(msg string) (int, interface{}) {
 	} else if strings.Contains(msg, "BusinessName") && strings.Contains(msg, "alpha_space") {
 		log.Println("error running register service: business names must be alpha_space")
 		code = http.StatusBadRequest
-		resp["message"] = "business names are only allowed to contain letters and spaces"
+		resp["message"] = "customer names are only allowed to contain letters and spaces"
+	} else if strings.Contains(msg, "AddCustomerValidate.Name") && strings.Contains(msg, "alpha_space") {
+		log.Println("error running add customer service: business names must be alpha_space")
+		code = http.StatusBadRequest
+		resp["message"] = "customer names are only allowed to contain letters and spaces"
 	} else if strings.Contains(msg, "Email") && strings.Contains(msg, "email") {
 		log.Println("error running register service: Email must be email format")
 		code = http.StatusBadRequest
