@@ -1,7 +1,6 @@
 package helper
 
 import (
-	"fmt"
 	"log"
 	"sirloinapi/config"
 
@@ -28,9 +27,10 @@ func PushNotification(title, msg, token string) error {
 
 	// Send the message to the device
 	response, err := client.Send(ctx, &message)
-	log.Println(response)
+	// log.Println(response)
 	if err != nil {
-		fmt.Printf("error sending message: %v\n", err)
+		log.Printf("error sending message: %v\n", err)
+		log.Println("response: ", response)
 		return err
 	}
 
