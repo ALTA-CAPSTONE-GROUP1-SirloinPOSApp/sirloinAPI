@@ -105,11 +105,11 @@ func (pq *productQuery) Update(userId, productId uint, updProduct product.Core, 
 		log.Println("\tget product by id query error: data not found")
 		return product.Core{}, errors.New("not found")
 	}
-	if res.Upc == updProduct.Upc {
-		updProduct.Upc = ""
+	if res.Upc == cnvP.Upc {
+		cnvP.Upc = ""
 	}
-	if res.ProductName == updProduct.ProductName {
-		updProduct.ProductName = ""
+	if res.ProductName == cnvP.ProductName {
+		cnvP.ProductName = ""
 	}
 
 	if err := pq.CheckProduct(userId, cnvP); err != nil {
