@@ -123,7 +123,7 @@ func (pq *productQuery) Update(userId, productId uint, updProduct product.Core, 
 		if err != nil {
 			return product.Core{}, err
 		}
-		path, err := helper.UploadProductPhotoS3(*productImage, int(cnvP.ID))
+		path, err := helper.UploadProductPhotoS3(*productImage, int(productId))
 		if err != nil {
 			log.Println("\terror upload product photo: ", err.Error())
 			return product.Core{}, err
