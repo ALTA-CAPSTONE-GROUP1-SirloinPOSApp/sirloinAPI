@@ -33,6 +33,25 @@ func New(db *gorm.DB) transaction.TransactionData {
 	}
 }
 
+func (tq *transactionQuery) UpdateProductStock(transId uint) error {
+	transProds := []TransactionProduct{}
+	tx := tq.db.Begin()
+	tx.Find(&transProds, "transaction_id", transId)
+	for _, item := range transProds {
+		prod := product.Product{}
+		tx.First(&prod, item.ProductId)
+		prod.Stock -= item.Quantity
+		prod.ItemsSold += item.Quantity
+		tx.Save(&prod)
+	}
+	err := tx.Error
+	if err != nil {
+		tx.Rollback()
+		log.Println("error update stock: ", err.Error())
+		return err
+	}
+	return nil
+}
 func (tq *transactionQuery) CheckLowStockProducts(userId uint) ([]product.Product, error) {
 	prod := []product.Product{}
 	err := tq.db.Where("stock <= minimum_stock AND user_id = ?", userId).Find(&prod).Error
