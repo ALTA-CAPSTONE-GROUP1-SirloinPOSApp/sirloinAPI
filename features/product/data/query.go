@@ -100,10 +100,22 @@ func (pq *productQuery) Update(userId, productId uint, updProduct product.Core, 
 	cnvP := CoreToData(updProduct)
 	cnvP.UserId = userId
 	// Check Product
-	// if err := pq.CheckProduct(userId, cnvP); err != nil {
-	// 	log.Println(color.Red("error: check product "), err.Error())
-	// 	return product.Core{}, err
-	// }
+	res, err := pq.GetProductById(userId, productId)
+	if err != nil {
+		log.Println("\tget product by id query error: data not found")
+		return product.Core{}, errors.New("not found")
+	}
+	if res.Upc == cnvP.Upc {
+		cnvP.Upc = ""
+	}
+	if res.ProductName == cnvP.ProductName {
+		cnvP.ProductName = ""
+	}
+
+	if err := pq.CheckProduct(userId, cnvP); err != nil {
+		log.Println(color.Red("error: check product "), err.Error())
+		return product.Core{}, err
+	}
 
 	if productImage != nil {
 		// chech file upload
@@ -111,7 +123,7 @@ func (pq *productQuery) Update(userId, productId uint, updProduct product.Core, 
 		if err != nil {
 			return product.Core{}, err
 		}
-		path, err := helper.UploadProductPhotoS3(*productImage, int(cnvP.ID))
+		path, err := helper.UploadProductPhotoS3(*productImage, int(productId))
 		if err != nil {
 			log.Println("\terror upload product photo: ", err.Error())
 			return product.Core{}, err
@@ -171,8 +183,8 @@ func (pq *productQuery) GetProductById(userId, productId uint) (product.Core, er
 	prod := product.Core{}
 	err := pq.db.Raw("SELECT p.id , upc , category , product_name , minimum_stock , stock , buying_price , price , product_image , supplier , items_sold FROM products p JOIN users u ON u.id = p.user_id WHERE p.deleted_at IS NULL AND p.id = ? AND u.id = ?", productId, userId).Scan(&prod).Error
 	if err != nil {
-		log.Println("\terror query get all product: ", err.Error())
-		return product.Core{}, err
+		log.Println("\tget product by id query error: data not found")
+		return product.Core{}, errors.New("not found")
 	}
 
 	return prod, nil
