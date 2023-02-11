@@ -34,10 +34,10 @@ func (uuc *userUseCase) Register(newUser user.Core) (user.Core, error) {
 	res, err := uuc.qry.Register(newUser)
 	if err != nil {
 		msg := ""
-		if strings.Contains(err.Error(), "Duplicate") && strings.Contains(err.Error(), "users.email") {
-			msg = "user already exist"
-		} else if strings.Contains(err.Error(), "Duplicate") && strings.Contains(err.Error(), "users.phone_number") {
-			msg = "phone number already exist"
+		if strings.Contains(err.Error(), "duplicate") && strings.Contains(err.Error(), "users.email") {
+			msg = "register new user email: already exist"
+		} else if strings.Contains(err.Error(), "duplicate") && strings.Contains(err.Error(), "users.phone_number") {
+			msg = "register new user phone number: already exist"
 		} else {
 			msg = "server problem"
 		}
@@ -132,10 +132,10 @@ func (uuc *userUseCase) Update(userToken interface{}, updateData user.Core) (use
 		errmsg := ""
 		if strings.Contains(err.Error(), "not found") {
 			errmsg = "data not found"
-		} else if strings.Contains(err.Error(), "Duplicate") && strings.Contains(err.Error(), "users.email") {
-			errmsg = "user already exist"
-		} else if strings.Contains(err.Error(), "Duplicate") && strings.Contains(err.Error(), "users.phone_number") {
-			errmsg = "phone number already exist"
+		} else if strings.Contains(err.Error(), "duplicate") && strings.Contains(err.Error(), "users.email") {
+			errmsg = "update user email: already exist"
+		} else if strings.Contains(err.Error(), "duplicate") && strings.Contains(err.Error(), "users.phone_number") {
+			errmsg = "update user phone number: already exist"
 		} else {
 			errmsg = "server problem"
 		}

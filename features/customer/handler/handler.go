@@ -6,6 +6,7 @@ import (
 	"sirloinapi/features/customer"
 	"sirloinapi/helper"
 	"strconv"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -62,7 +63,12 @@ func (cc *customerControl) Update() echo.HandlerFunc {
 		// res, err := cc.srv.Update(token, uint(cCusId), *ToCore(input))
 		_, err := cc.srv.Update(token, uint(cCusId), *ToCore(updatedData))
 		if err != nil {
-			return c.JSON(helper.PrintErrorResponse(err.Error()))
+			if strings.Contains(err.Error(), "not found") {
+				log.Println("error calling update customer service: ", err.Error())
+				return c.JSON(http.StatusNotFound, helper.ErrorResponse("customer not found"))
+			} else {
+				return c.JSON(helper.PrintErrorResponse(err.Error()))
+			}
 		}
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			// "data":    ToResponse(res),
@@ -95,7 +101,12 @@ func (cc *customerControl) GetCustomerById() echo.HandlerFunc {
 
 		res, err := cc.srv.GetCustomerById(token, uint(cCusId))
 		if err != nil {
-			return c.JSON(helper.PrintErrorResponse(err.Error()))
+			if strings.Contains(err.Error(), "not found") {
+				log.Println("error calling update customer service: ", err.Error())
+				return c.JSON(http.StatusNotFound, helper.ErrorResponse("customer not found"))
+			} else {
+				return c.JSON(helper.PrintErrorResponse(err.Error()))
+			}
 		}
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"data":    ToResponse(res),

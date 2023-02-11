@@ -10,8 +10,8 @@ import (
 type Customer struct {
 	gorm.Model
 	UserId      uint
-	Email       string `gorm:"unique"`
-	PhoneNumber string `gorm:"unique"`
+	Email       string
+	PhoneNumber string
 	Name        string
 	Address     string
 

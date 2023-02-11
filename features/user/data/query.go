@@ -18,7 +18,26 @@ func New(db *gorm.DB) user.UserData {
 	}
 }
 
+func (uq *userQry) CheckUser(newUser user.Core) error {
+	u := User{}
+	uq.db.Where("email = ? OR phone_number = ?", newUser.Email, newUser.PhoneNumber).First(&u)
+	if u.ID != 0 {
+		if u.Email == newUser.Email {
+			return errors.New("duplicate users.email")
+		} else {
+			return errors.New("duplicate users.phone_number")
+		}
+	}
+	return nil
+}
+
 func (uq *userQry) Register(newUser user.Core) (user.Core, error) {
+	// Chek User
+	if err := uq.CheckUser(newUser); err != nil {
+		log.Println("error create new user: ", err.Error())
+		return user.Core{}, err
+	}
+
 	cnv := CoreToData(newUser)
 	err := uq.db.Create(&cnv).Error
 	if err != nil {
@@ -52,6 +71,23 @@ func (uq *userQry) Profile(id uint) (user.Core, error) {
 }
 
 func (uq *userQry) Update(id uint, updateData user.Core) (user.Core, error) {
+	// Chek User
+	res, err := uq.Profile(id)
+	if err != nil {
+		log.Println("\tupdate user query error: ", err.Error())
+		return user.Core{}, errors.New("not found")
+	}
+	if res.Email == updateData.Email {
+		updateData.Email = ""
+	}
+	if res.PhoneNumber == updateData.PhoneNumber {
+		updateData.PhoneNumber = ""
+	}
+
+	if err := uq.CheckUser(updateData); err != nil {
+		log.Println("error update user: ", err.Error())
+		return user.Core{}, err
+	}
 	cnvUpd := CoreToData(updateData)
 	qry := uq.db.Where("id = ?", id).Updates(cnvUpd)
 	if qry.RowsAffected <= 0 {
