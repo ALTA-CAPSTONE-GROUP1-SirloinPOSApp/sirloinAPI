@@ -27,7 +27,7 @@ func ToCore(data interface{}) *product.Core {
 		res.MinimumStock = cnv.MinimumStock
 		res.BuyingPrice = cnv.BuyingPrice
 		res.Price = cnv.Price
-		res.ProductImage = cnv.ProductImage
+		// res.ProductImage = cnv.ProductImage
 		res.Supplier = cnv.Supplier
 	default:
 		return nil
