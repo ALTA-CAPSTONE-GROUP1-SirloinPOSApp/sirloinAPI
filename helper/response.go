@@ -59,21 +59,19 @@ func PrintErrorResponse(msg string) (int, interface{}) {
 		code = http.StatusBadRequest
 		resp["message"] = logMsg + " are only allowed to contain letters and spaces"
 
-	} else if strings.Contains(msg, "update business name") && strings.Contains(msg, "alpha_space") {
-		log.Println("error running update user service: business names must be alpha_space")
-		code = http.StatusBadRequest
-		resp["message"] = "business names are only allowed to contain letters and spaces"
-
-	} else if strings.Contains(msg, "AddCustomerValidate.Name") && strings.Contains(msg, "alpha_space") {
-		log.Println("error running add customer service: business names must be alpha_space")
-		code = http.StatusBadRequest
-		resp["message"] = "customer names are only allowed to contain letters and spaces"
-
 	} else if strings.Contains(msg, "Email") && strings.Contains(msg, "email") {
-		words := strings.Split(msg, ": ")
-		log.Println("error running " + words[0] + " service: Email must be email format")
+		logMsg := ""
+		if strings.Contains(msg, "RegisterValidate.Email") {
+			logMsg = "register business email"
+		} else if strings.Contains(msg, "AddCustomerValidate.Email") {
+			logMsg = "register customer email"
+		} else {
+			words := strings.Split(msg, ": ")
+			logMsg = words[0]
+		}
+		log.Println("error running " + logMsg + " service: Email must be email format")
 		code = http.StatusBadRequest
-		resp["message"] = "incorrect e-mail format"
+		resp["message"] = "incorrect " + logMsg + " format"
 
 	} else if strings.Contains(msg, "token error") && strings.Contains(msg, "customer") {
 		log.Println("error running register service: extract token error")
