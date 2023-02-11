@@ -71,6 +71,23 @@ func (uq *userQry) Profile(id uint) (user.Core, error) {
 }
 
 func (uq *userQry) Update(id uint, updateData user.Core) (user.Core, error) {
+	// Chek User
+	res, err := uq.Profile(id)
+	if err != nil {
+		log.Println("\tupdate user query error: ", err.Error())
+		return user.Core{}, errors.New("not found")
+	}
+	if res.Email == updateData.Email {
+		updateData.Email = ""
+	}
+	if res.PhoneNumber == updateData.PhoneNumber {
+		updateData.PhoneNumber = ""
+	}
+
+	if err := uq.CheckUser(updateData); err != nil {
+		log.Println("error update user: ", err.Error())
+		return user.Core{}, err
+	}
 	cnvUpd := CoreToData(updateData)
 	qry := uq.db.Where("id = ?", id).Updates(cnvUpd)
 	if qry.RowsAffected <= 0 {
