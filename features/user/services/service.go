@@ -109,21 +109,21 @@ func (uuc *userUseCase) Update(userToken interface{}, updateData user.Core) (use
 	if updateData.BusinessName != "" {
 		err := helper.Validasi(helper.ToValidate("as", updateData))
 		if err != nil {
-			return user.Core{}, fmt.Errorf("update business name , %v", err)
+			return user.Core{}, fmt.Errorf("update business name: , %v", err)
 		}
 	}
 
 	if updateData.Email != "" {
 		err := helper.Validasi(helper.ToValidate("email", updateData))
 		if err != nil {
-			return user.Core{}, err
+			return user.Core{}, fmt.Errorf("update business email: , %v", err)
 		}
 	}
 
 	if updateData.PhoneNumber != "" {
 		err := helper.Validasi(helper.ToValidate("pn", updateData))
 		if err != nil {
-			return user.Core{}, err
+			return user.Core{}, fmt.Errorf("update business phone number: , %v", err)
 		}
 	}
 
