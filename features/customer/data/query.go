@@ -18,7 +18,25 @@ func New(db *gorm.DB) customer.CustomerData {
 	}
 }
 
+func (cq *customerQry) CheckCustomer(userId uint, newCustomer customer.Core) error {
+	c := Customer{}
+	cq.db.Where("email = ? AND user_id = ?", newCustomer.Email, newCustomer.PhoneNumber, userId).First(&c)
+	if c.ID != 0 {
+		return errors.New("duplicate customers.email")
+	}
+	cq.db.Where("phone_number = ? AND user_id = ?", newCustomer.Email, newCustomer.PhoneNumber, userId).First(&c)
+	if c.ID != 0 {
+		return errors.New("duplicate customers.phone_number")
+	}
+	return nil
+}
+
 func (cq *customerQry) Add(userId uint, newCustomer customer.Core) (customer.Core, error) {
+	// Chek Customer
+	if err := cq.CheckCustomer(userId, newCustomer); err != nil {
+		log.Println("error create new customer: ", err.Error())
+		return customer.Core{}, err
+	}
 	cnv := CoreToData(newCustomer)
 	cnv.UserId = userId
 	err := cq.db.Create(&cnv).Error
@@ -31,6 +49,22 @@ func (cq *customerQry) Add(userId uint, newCustomer customer.Core) (customer.Cor
 }
 
 func (cq *customerQry) Update(userId, customerId uint, updateData customer.Core) (customer.Core, error) {
+	// Chek Customer
+	res, err := cq.GetCustomerById(userId, customerId)
+	if err != nil {
+		log.Println("\tupdate customer query error: ", err.Error())
+		return customer.Core{}, errors.New("not found")
+	}
+	if res.Email == updateData.Email {
+		updateData.Email = ""
+	}
+	if res.PhoneNumber == updateData.PhoneNumber {
+		updateData.PhoneNumber = ""
+	}
+	if err := cq.CheckCustomer(userId, updateData); err != nil {
+		log.Println("error update customer: ", err.Error())
+		return customer.Core{}, err
+	}
 	cnvUpd := CoreToData(updateData)
 	cnvUpd.UserId = userId
 	qry := cq.db.Where("id = ? AND user_id = ?", customerId, userId).Updates(&cnvUpd)
