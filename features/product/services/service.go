@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"mime/multipart"
 	"sirloinapi/features/product"
@@ -57,6 +58,54 @@ func (ps *productSvc) Update(token interface{}, productId uint, updProduct produ
 	if userId <= 0 {
 		log.Println("error extract token add product")
 		return product.Core{}, errors.New("user not found")
+	}
+	if updProduct.ProductName != "" {
+		err := helper.Validasi(helper.ToValidate("asn", updProduct))
+		if err != nil {
+			return product.Core{}, fmt.Errorf("update product name: , %v", err)
+		}
+	}
+
+	if updProduct.Category != "" {
+		err := helper.Validasi(helper.ToValidate("as", updProduct))
+		if err != nil {
+			return product.Core{}, fmt.Errorf("update product category: , %v", err)
+		}
+	}
+
+	if updProduct.Upc != "" {
+		err := helper.Validasi(helper.ToValidate("pn", updProduct))
+		if err != nil {
+			return product.Core{}, fmt.Errorf("update product upc: , %v", err)
+		}
+	}
+
+	if updProduct.Stock != 0 {
+		err := helper.Validasi(helper.ToValidate("pn", updProduct))
+		if err != nil {
+			return product.Core{}, fmt.Errorf("update product stock: , %v", err)
+		}
+	}
+
+	if updProduct.MinimumStock != 0 {
+		err := helper.Validasi(helper.ToValidate("pn", updProduct))
+		if err != nil {
+			return product.Core{}, fmt.Errorf("update product minimum stock: , %v", err)
+		}
+	}
+
+	if updProduct.BuyingPrice != 0 {
+		err := helper.Validasi(helper.ToValidate("pn", updProduct))
+		if err != nil {
+			return product.Core{}, fmt.Errorf("update product buying price: , %v", err)
+		}
+	}
+
+	if updProduct.Price != 0 {
+		err := helper.Validasi(helper.ToValidate("pn", updProduct))
+		if err != nil {
+			return product.Core{}, fmt.Errorf("update product price: , %v", err)
+		}
 	}
 
 	res, err := ps.qry.Update(uint(userId), productId, updProduct, productImage)
