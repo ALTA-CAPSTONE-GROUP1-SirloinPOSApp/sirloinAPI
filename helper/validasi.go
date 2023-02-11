@@ -29,7 +29,7 @@ type AddCustomerValidate struct {
 }
 
 type ProductValidate struct {
-	Upc          string  `validate:"required,numeric"`
+	Upc          string  `validate:"required,numeric,upc_length"`
 	Category     string  `validate:"required,alpha_space"`
 	ProductName  string  `validate:"required,alpha_space_numeric"`
 	Stock        int     `validate:"required,numeric"`
@@ -170,11 +170,20 @@ func securePassword(fl validator.FieldLevel) bool {
 	return true
 }
 
+func upcLength(fl validator.FieldLevel) bool {
+	upc := fl.Field().String()
+	if len(upc) < 12 || len(upc) > 13 {
+		return false
+	}
+	return true
+}
+
 func Validasi(data interface{}) error {
 	validate = validator.New()
 	validate.RegisterValidation("alpha_space", alphaSpace)
 	validate.RegisterValidation("alpha_space_numeric", alphaSpaceNumeric)
 	validate.RegisterValidation("secure_password", securePassword)
+	validate.RegisterValidation("upc_length", upcLength)
 	err := validate.Struct(data)
 	if err != nil {
 		log.Println("log on helper validasi: ", err)

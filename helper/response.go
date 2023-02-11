@@ -40,6 +40,11 @@ func PrintErrorResponse(msg string) (int, interface{}) {
 		code = http.StatusBadRequest
 		resp["message"] = "required fields must be filled"
 
+	} else if strings.Contains(msg, "upc_length") {
+		log.Println("error running register service: upc length not meet requirement")
+		code = http.StatusBadRequest
+		resp["message"] = "upc should only 12 or 13 digits"
+
 	} else if strings.Contains(msg, "'numeric'") {
 		logMsg := ""
 		if strings.Contains(msg, "RegisterValidate.PhoneNumber") {
