@@ -84,6 +84,7 @@ func (tq *transactionQuery) UpdateProductStock(transId uint) error {
 		log.Println("error update stock: ", err.Error())
 		return err
 	}
+	tx.Commit()
 	return nil
 }
 func (tq *transactionQuery) CheckLowStockProducts(userId uint) ([]product.Product, error) {
@@ -524,7 +525,7 @@ func (tq *transactionQuery) NotificationTransactionStatus(invNo, transStatus str
 	if trans.TransactionStatus == "success" {
 		err := tq.UpdateProductStock(trans.ID)
 		if err != nil {
-			return errors.New("failed update product stock")
+			return errors.New(color.Red("failed update product stock"))
 		}
 
 		//send success payment to the tenant
@@ -562,7 +563,6 @@ func (tq *transactionQuery) NotificationTransactionStatus(invNo, transStatus str
 
 		// check running low stock product and send push notification
 		tq.LowStockProductNotif(trans.UserId)
-
 	}
 
 	return nil
@@ -585,7 +585,12 @@ func (tq *transactionQuery) UpdateStatus(transId uint, status string) error {
 			if input.TransactionStatus == "success" {
 				err := tq.UpdateProductStock(input.ID)
 				if err != nil {
-					return errors.New("failed update product stock")
+					return errors.New(color.Red("failed update product stock"))
+				}
+
+				//send success payment to the tenant
+				if input.UserId != uint(1) {
+					tq.TransactionPaidNotif(input.InvoiceNumber, input.UserId)
 				}
 
 				if input.ProductStatus == "sell" {
