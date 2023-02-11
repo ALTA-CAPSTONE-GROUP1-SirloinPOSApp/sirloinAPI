@@ -20,11 +20,11 @@ func New(db *gorm.DB) customer.CustomerData {
 
 func (cq *customerQry) CheckCustomer(userId uint, newCustomer customer.Core) error {
 	c := Customer{}
-	cq.db.Where("email = ? AND user_id = ?", newCustomer.Email, newCustomer.PhoneNumber, userId).First(&c)
+	cq.db.Where("email = ? AND user_id = ?", newCustomer.Email, userId).First(&c)
 	if c.ID != 0 {
 		return errors.New("duplicate customers.email")
 	}
-	cq.db.Where("phone_number = ? AND user_id = ?", newCustomer.Email, newCustomer.PhoneNumber, userId).First(&c)
+	cq.db.Where("phone_number = ? AND user_id = ?", newCustomer.PhoneNumber, userId).First(&c)
 	if c.ID != 0 {
 		return errors.New("duplicate customers.phone_number")
 	}
