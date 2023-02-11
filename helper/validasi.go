@@ -107,6 +107,9 @@ func ToValidate(option string, data interface{}) interface{} {
 		if v, ok := data.(customer.Core); ok {
 			res.AlphaSpace = v.Name
 		}
+		if v, ok := data.(product.Core); ok {
+			res.AlphaSpace = v.Category
+		}
 		return res
 	case "asn":
 		res := AlphaSpaceNumericValidate{}
