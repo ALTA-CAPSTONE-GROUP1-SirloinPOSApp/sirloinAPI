@@ -40,33 +40,57 @@ func PrintErrorResponse(msg string) (int, interface{}) {
 		code = http.StatusBadRequest
 		resp["message"] = "required fields must be filled"
 
-	} else if strings.Contains(msg, "numeric") {
+	} else if strings.Contains(msg, "'numeric'") {
 		logMsg := ""
 		if strings.Contains(msg, "RegisterValidate.PhoneNumber") {
 			logMsg = "register business phone number"
 		} else if strings.Contains(msg, "AddCustomerValidate.PhoneNumber") {
 			logMsg = "register customer phone number"
+		} else if strings.Contains(msg, "ProductValidate.Upc") {
+			logMsg = "register product upc"
+		} else if strings.Contains(msg, "ProductValidate.Stock") {
+			logMsg = "register product stock"
+		} else if strings.Contains(msg, "ProductValidate.MinimumStock") {
+			logMsg = "register product minimum stock"
+		} else if strings.Contains(msg, "ProductValidate.BuyingPrice") {
+			logMsg = "register product buying price"
+		} else if strings.Contains(msg, "ProductValidate.Price") {
+			logMsg = "register product price"
 		} else {
 			words := strings.Split(msg, ": ")
 			logMsg = words[0]
 		}
-		log.Println("error running " + logMsg + " service: phone number must be numeric")
+		log.Println("error running " + logMsg + " service: must be numeric")
 		code = http.StatusBadRequest
 		resp["message"] = logMsg + " must be a number"
 
-	} else if strings.Contains(msg, "alpha_space") {
+	} else if strings.Contains(msg, "'alpha_space'") {
 		logMsg := ""
 		if strings.Contains(msg, "RegisterValidate.BusinessName") {
 			logMsg = "register business name"
 		} else if strings.Contains(msg, "AddCustomerValidate.Name") {
 			logMsg = "register customer name"
+		} else if strings.Contains(msg, "ProductValidate.Category") {
+			logMsg = "register product category"
 		} else {
 			words := strings.Split(msg, ": ")
 			logMsg = words[0]
 		}
-		log.Println("error running " + logMsg + " service: business names must be alpha_space")
+		log.Println("error running " + logMsg + " service: must be alpha_space")
 		code = http.StatusBadRequest
 		resp["message"] = logMsg + " are only allowed to contain letters and spaces"
+
+	} else if strings.Contains(msg, "'alpha_space_numeric'") {
+		logMsg := ""
+		if strings.Contains(msg, "ProductValidate.ProductName") {
+			logMsg = "register product name"
+		} else {
+			words := strings.Split(msg, ": ")
+			logMsg = words[0]
+		}
+		log.Println("error running " + logMsg + " service: must be alpha_space_numeric")
+		code = http.StatusBadRequest
+		resp["message"] = logMsg + " are only allowed to contain letters, spaces and numeric"
 
 	} else if strings.Contains(msg, "email") {
 		logMsg := ""
@@ -78,7 +102,7 @@ func PrintErrorResponse(msg string) (int, interface{}) {
 			words := strings.Split(msg, ": ")
 			logMsg = words[0]
 		}
-		log.Println("error running " + logMsg + " service: Email must be email format")
+		log.Println("error running " + logMsg + " service: must be email format")
 		code = http.StatusBadRequest
 		resp["message"] = "incorrect " + logMsg + " format"
 
