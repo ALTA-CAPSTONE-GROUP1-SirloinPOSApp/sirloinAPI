@@ -505,14 +505,9 @@ func (tq *transactionQuery) NotificationTransactionStatus(invNo, transStatus str
 
 	//update stock product
 	if trans.TransactionStatus == "success" {
-		transProds := []TransactionProduct{}
-		tq.db.Find(&transProds, "transaction_id", trans.ID)
-		for _, item := range transProds {
-			prod := product.Product{}
-			tq.db.First(&prod, item.ProductId)
-			prod.Stock -= item.Quantity
-			prod.ItemsSold += item.Quantity
-			tq.db.Save(&prod)
+		err := tq.UpdateProductStock(trans.ID)
+		if err != nil {
+			return errors.New("failed update product stock")
 		}
 
 		if trans.ProductStatus == "sell" {
@@ -585,14 +580,9 @@ func (tq *transactionQuery) UpdateStatus(transId uint, status string) error {
 		} else {
 			//update stock product
 			if input.TransactionStatus == "success" {
-				transProds := []TransactionProduct{}
-				tq.db.Find(&transProds, "transaction_id", input.ID)
-				for _, item := range transProds {
-					prod := product.Product{}
-					tq.db.First(&prod, item.ProductId)
-					prod.Stock -= item.Quantity
-					prod.ItemsSold += item.Quantity
-					tq.db.Save(&prod)
+				err := tq.UpdateProductStock(input.ID)
+				if err != nil {
+					return errors.New("failed update product stock")
 				}
 
 				if input.ProductStatus == "sell" {
