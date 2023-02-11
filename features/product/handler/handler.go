@@ -107,6 +107,9 @@ func (pc *productControl) Update() echo.HandlerFunc {
 			} else if strings.Contains(err.Error(), "server") {
 				log.Println("\terror running update product service: ", err.Error())
 				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
+			} else if strings.Contains(err.Error(), "not found") {
+				log.Println("error calling delete product service: ", err.Error())
+				return c.JSON(http.StatusNotFound, helper.ErrorResponse("product not found"))
 			} else if strings.Contains(err.Error(), "format") {
 				log.Println("\terror running update product service: ", err.Error())
 				return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
