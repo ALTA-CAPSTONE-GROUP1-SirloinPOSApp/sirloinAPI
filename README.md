@@ -28,6 +28,7 @@ This application has features as listed below.
 - Show profile
 - Edit profile
 - Deactive account
+- Register Device
 
 <div>
 
@@ -40,6 +41,7 @@ This application has features as listed below.
 | GET | /users | - | YES | Get tenant information details. |
 | PUT | /users | - | YES | Edit tenant details. |
 | DELETE | /users | - | YES | Delete/deactive account. |
+| POST | /register_device | - | YES | Register device token for notification. |
 
 </details>
 

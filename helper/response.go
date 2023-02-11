@@ -32,9 +32,31 @@ func PrintErrorResponse(msg string) (int, interface{}) {
 		resp["message"] = "password must be at least 8 characters long, must contain uppercase letters, must contain lowercase letters, must contain numbers, must not be too general"
 
 	} else if strings.Contains(msg, "required") {
-		log.Println("error running register service: required fields")
-		code = http.StatusBadRequest
-		resp["message"] = "required fields must be filled"
+		if strings.Contains(msg, "'Upc'") {
+			log.Println("error running register service: required fields")
+			code = http.StatusBadRequest
+			resp["message"] = "upc shouldn't be empty"
+		} else if strings.Contains(msg, "'Category'") {
+			log.Println("error running register service: required fields")
+			code = http.StatusBadRequest
+			resp["message"] = "category shouldn't be empty"
+		} else if strings.Contains(msg, "'ProductName'") {
+			log.Println("error running register service: required fields")
+			code = http.StatusBadRequest
+			resp["message"] = "product name shouldn't be empty"
+		} else if strings.Contains(msg, "'Stock'") {
+			log.Println("error running register service: required fields")
+			code = http.StatusBadRequest
+			resp["message"] = "stock shouldn't be empty"
+		} else if strings.Contains(msg, "'Price'") {
+			log.Println("error running register service: required fields")
+			code = http.StatusBadRequest
+			resp["message"] = "price shouldn't be empty"
+		} else {
+			log.Println("error running register service: required fields")
+			code = http.StatusBadRequest
+			resp["message"] = "required fields must be filled"
+		}
 
 	} else if strings.Contains(msg, "upc_length") {
 		log.Println("error running register service: upc length not meet requirement")

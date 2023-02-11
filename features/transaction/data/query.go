@@ -38,7 +38,7 @@ func (tq *transactionQuery) TransactionPaidNotif(invNo string, userId uint) {
 		log.Println(color.Red("error check user device: "), err)
 	} else if len(dvc) != 0 {
 		for _, v := range dvc {
-			err := helper.PushNotification("Pembayaran berhasil", fmt.Sprint("Transaksi dengan nomor ", invNo, " telah berhasil dibayar"), v.Token)
+			err := helper.PushNotification("Pembayaran berhasil", "Transaksi dengan nomor "+invNo+" telah berhasil dibayar", v.Token)
 			if err != nil {
 				log.Println(color.Red("error sending push notification: "), err)
 			}

@@ -29,43 +29,31 @@ func (pc *productControl) Add() echo.HandlerFunc {
 		var productImage *multipart.FileHeader
 
 		if err := c.Bind(&input); err != nil {
-			log.Println("\tbind input error: ", err.Error())
+			log.Println("bind input error: ", err.Error())
 			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("wrong input"))
-		}
-
-		if input.Upc == "" {
-			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("upc shouldn't be empty"))
-		} else if input.ProductName == "" {
-			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("product_name shouldn't be empty"))
-		} else if input.Category == "" {
-			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("category shouldn't be empty"))
-		} else if input.Price == 0.0 {
-			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("price shouldn't be empty"))
-		} else if input.Stock == 0 {
-			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("stock shouldn't be empty"))
 		}
 
 		file, err := c.FormFile("product_image")
 		if file != nil && err == nil {
 			productImage = file
 		} else if file != nil && err != nil {
-			log.Println("\terror read product image: ", err.Error())
+			log.Println("error read product image: ", err.Error())
 			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("wrong image input"))
 		}
 
 		res, err := pc.srv.Add(token, *ToCore(input), productImage)
 		if err != nil {
 			if strings.Contains(err.Error(), "duplicated") {
-				log.Println("\terror running add product service: ", err.Error())
+				log.Println("error running add product service: ", err.Error())
 				return c.JSON(http.StatusConflict, helper.ErrorResponse(err.Error()))
 			} else if strings.Contains(err.Error(), "server") {
-				log.Println("\terror running add product service: ", err.Error())
+				log.Println("error running add product service: ", err.Error())
 				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
 			} else if strings.Contains(err.Error(), "format") {
-				log.Println("\terror running add product service: ", err.Error())
+				log.Println("error running add product service: ", err.Error())
 				return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 			} else {
-				log.Println("\terror running add product service: ", err.Error())
+				log.Println("error running add product service: ", err.Error())
 				return c.JSON(helper.PrintErrorResponse(err.Error()))
 			}
 		}
@@ -95,26 +83,26 @@ func (pc *productControl) Update() echo.HandlerFunc {
 		if file != nil && err == nil {
 			prodImg = file
 		} else if file != nil && err != nil {
-			log.Println("\terror read product image: ", err.Error())
+			log.Println("error read product image: ", err.Error())
 			return c.JSON(http.StatusBadRequest, helper.ErrorResponse("wrong image input"))
 		}
 
 		res, err := pc.srv.Update(token, uint(cProdId), *ToCore(input), prodImg)
 		if err != nil {
 			if strings.Contains(err.Error(), "duplicated") {
-				log.Println("\terror running update product service: ", err.Error())
+				log.Println("error running update product service: ", err.Error())
 				return c.JSON(http.StatusConflict, helper.ErrorResponse(err.Error()))
 			} else if strings.Contains(err.Error(), "server") {
-				log.Println("\terror running update product service: ", err.Error())
+				log.Println("error running update product service: ", err.Error())
 				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
 			} else if strings.Contains(err.Error(), "not found") {
 				log.Println("error calling delete product service: ", err.Error())
 				return c.JSON(http.StatusNotFound, helper.ErrorResponse("product not found"))
 			} else if strings.Contains(err.Error(), "format") {
-				log.Println("\terror running update product service: ", err.Error())
+				log.Println("error running update product service: ", err.Error())
 				return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 			} else {
-				log.Println("\terror running update product service: ", err.Error())
+				log.Println("error running update product service: ", err.Error())
 				return c.JSON(helper.PrintErrorResponse(err.Error()))
 			}
 		}
@@ -131,7 +119,7 @@ func (pc *productControl) Delete() echo.HandlerFunc {
 		input := c.Param("product_id")
 		cnv, err := strconv.Atoi(input)
 		if err != nil {
-			log.Println("\tRead param error: ", err.Error())
+			log.Println("Read param error: ", err.Error())
 			return c.JSON(http.StatusBadRequest, "wrong product id parameter")
 		}
 
@@ -180,7 +168,7 @@ func (pc *productControl) GetProductById() echo.HandlerFunc {
 		input := c.Param("product_id")
 		cnv, err := strconv.Atoi(input)
 		if err != nil {
-			log.Println("\tRead param error: ", err.Error())
+			log.Println("Read param error: ", err.Error())
 			return c.JSON(http.StatusBadRequest, "wrong product id parameter")
 		}
 
