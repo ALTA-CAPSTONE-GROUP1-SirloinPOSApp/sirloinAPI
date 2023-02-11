@@ -40,10 +40,19 @@ func PrintErrorResponse(msg string) (int, interface{}) {
 		code = http.StatusBadRequest
 		resp["message"] = "required fields must be filled"
 
-	} else if strings.Contains(msg, "PhoneNumber") && strings.Contains(msg, "numeric") {
-		log.Println("error running register service: phone number must be numeric")
+	} else if strings.Contains(msg, "numeric") {
+		logMsg := ""
+		if strings.Contains(msg, "RegisterValidate.PhoneNumber") {
+			logMsg = "register business phone number"
+		} else if strings.Contains(msg, "AddCustomerValidate.PhoneNumber") {
+			logMsg = "register customer phone number"
+		} else {
+			words := strings.Split(msg, ": ")
+			logMsg = words[0]
+		}
+		log.Println("error running " + logMsg + " service: phone number must be numeric")
 		code = http.StatusBadRequest
-		resp["message"] = "the phone number must be a number"
+		resp["message"] = logMsg + " must be a number"
 
 	} else if strings.Contains(msg, "alpha_space") {
 		logMsg := ""
@@ -59,7 +68,7 @@ func PrintErrorResponse(msg string) (int, interface{}) {
 		code = http.StatusBadRequest
 		resp["message"] = logMsg + " are only allowed to contain letters and spaces"
 
-	} else if strings.Contains(msg, "Email") && strings.Contains(msg, "email") {
+	} else if strings.Contains(msg, "email") {
 		logMsg := ""
 		if strings.Contains(msg, "RegisterValidate.Email") {
 			logMsg = "register business email"
