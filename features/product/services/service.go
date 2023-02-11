@@ -74,37 +74,9 @@ func (ps *productSvc) Update(token interface{}, productId uint, updProduct produ
 	}
 
 	if updProduct.Upc != "" {
-		err := helper.Validasi(helper.ToValidate("pn", updProduct))
+		err := helper.Validasi(helper.ToValidate("upc", updProduct))
 		if err != nil {
 			return product.Core{}, fmt.Errorf("update product upc: , %v", err)
-		}
-	}
-
-	if updProduct.Stock != 0 {
-		err := helper.Validasi(helper.ToValidate("pn", updProduct))
-		if err != nil {
-			return product.Core{}, fmt.Errorf("update product stock: , %v", err)
-		}
-	}
-
-	if updProduct.MinimumStock != 0 {
-		err := helper.Validasi(helper.ToValidate("pn", updProduct))
-		if err != nil {
-			return product.Core{}, fmt.Errorf("update product minimum stock: , %v", err)
-		}
-	}
-
-	if updProduct.BuyingPrice != 0 {
-		err := helper.Validasi(helper.ToValidate("pn", updProduct))
-		if err != nil {
-			return product.Core{}, fmt.Errorf("update product buying price: , %v", err)
-		}
-	}
-
-	if updProduct.Price != 0 {
-		err := helper.Validasi(helper.ToValidate("pn", updProduct))
-		if err != nil {
-			return product.Core{}, fmt.Errorf("update product price: , %v", err)
 		}
 	}
 
