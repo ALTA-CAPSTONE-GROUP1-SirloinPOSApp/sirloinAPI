@@ -100,10 +100,6 @@ func (pq *productQuery) Update(userId, productId uint, updProduct product.Core, 
 	cnvP := CoreToData(updProduct)
 	cnvP.UserId = userId
 	// Check Product
-	if err := pq.CheckProduct(userId, cnvP); err != nil {
-		log.Println(color.Red("error: check product "), err.Error())
-		return product.Core{}, err
-	}
 	res, err := pq.GetProductById(userId, productId)
 	if err != nil {
 		log.Println("\tget product by id query error: data not found")
@@ -114,6 +110,11 @@ func (pq *productQuery) Update(userId, productId uint, updProduct product.Core, 
 	}
 	if res.ProductName == updProduct.ProductName {
 		updProduct.ProductName = ""
+	}
+
+	if err := pq.CheckProduct(userId, cnvP); err != nil {
+		log.Println(color.Red("error: check product "), err.Error())
+		return product.Core{}, err
 	}
 
 	if productImage != nil {
