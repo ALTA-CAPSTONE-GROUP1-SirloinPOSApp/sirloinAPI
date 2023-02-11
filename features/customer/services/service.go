@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"sirloinapi/features/customer"
 	"sirloinapi/helper"
@@ -59,21 +60,21 @@ func (cuc *customerUseCase) Update(userToken interface{}, customerId uint, updat
 	if updateData.Name != "" {
 		err := helper.Validasi(helper.ToValidate("as", updateData))
 		if err != nil {
-			return customer.Core{}, err
+			return customer.Core{}, fmt.Errorf("update customer name: , %v", err)
 		}
 	}
 
 	if updateData.Email != "" {
 		err := helper.Validasi(helper.ToValidate("email", updateData))
 		if err != nil {
-			return customer.Core{}, err
+			return customer.Core{}, fmt.Errorf("update customer email: , %v", err)
 		}
 	}
 
 	if updateData.PhoneNumber != "" {
 		err := helper.Validasi(helper.ToValidate("pn", updateData))
 		if err != nil {
-			return customer.Core{}, err
+			return customer.Core{}, fmt.Errorf("update customer phone number: , %v", err)
 		}
 	}
 	res, err := cuc.qry.Update(uint(userId), customerId, updateData)
