@@ -63,10 +63,10 @@ func (pc *productControl) Add() echo.HandlerFunc {
 				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
 			} else if strings.Contains(err.Error(), "format") {
 				log.Println("\terror running add product service: ", err.Error())
-				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse(err.Error()))
+				return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 			} else {
 				log.Println("\terror running add product service: ", err.Error())
-				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("bad request: UPC, stock, minimum_stock, buying_price, price should only numeric and product_name, category should only alpha space, "))
+				return c.JSON(helper.PrintErrorResponse(err.Error()))
 			}
 		}
 
@@ -102,17 +102,17 @@ func (pc *productControl) Update() echo.HandlerFunc {
 		res, err := pc.srv.Update(token, uint(cProdId), *ToCore(input), prodImg)
 		if err != nil {
 			if strings.Contains(err.Error(), "duplicated") {
-				log.Println("\terror running add product service: ", err.Error())
+				log.Println("\terror running update product service: ", err.Error())
 				return c.JSON(http.StatusConflict, helper.ErrorResponse(err.Error()))
 			} else if strings.Contains(err.Error(), "server") {
-				log.Println("\terror running add product service: ", err.Error())
+				log.Println("\terror running update product service: ", err.Error())
 				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse("server problem"))
 			} else if strings.Contains(err.Error(), "format") {
-				log.Println("\terror running add product service: ", err.Error())
-				return c.JSON(http.StatusInternalServerError, helper.ErrorResponse(err.Error()))
+				log.Println("\terror running update product service: ", err.Error())
+				return c.JSON(http.StatusBadRequest, helper.ErrorResponse(err.Error()))
 			} else {
-				log.Println("\terror running add product service: ", err.Error())
-				return c.JSON(http.StatusBadRequest, helper.ErrorResponse("bad request: UPC, stock, minimum_stock, buying_price, price should only numeric and product_name, category should only alpha space, "))
+				log.Println("\terror running update product service: ", err.Error())
+				return c.JSON(helper.PrintErrorResponse(err.Error()))
 			}
 		}
 

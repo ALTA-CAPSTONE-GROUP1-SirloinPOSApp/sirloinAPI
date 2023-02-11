@@ -53,6 +53,10 @@ type AlphaSpaceValidate struct {
 	AlphaSpace string `validate:"alpha_space"`
 }
 
+type AlphaSpaceNumericValidate struct {
+	AlphaSpaceNumeric string `validate:"alpha_space_numeric"`
+}
+
 func ToValidate(option string, data interface{}) interface{} {
 	switch option {
 	case "register":
@@ -96,6 +100,12 @@ func ToValidate(option string, data interface{}) interface{} {
 		}
 		if v, ok := data.(customer.Core); ok {
 			res.AlphaSpace = v.Name
+		}
+		return res
+	case "asn":
+		res := AlphaSpaceNumericValidate{}
+		if v, ok := data.(product.Core); ok {
+			res.AlphaSpaceNumeric = v.ProductName
 		}
 		return res
 	case "customer":
