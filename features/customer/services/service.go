@@ -38,10 +38,10 @@ func (cuc *customerUseCase) Add(userToken interface{}, newCustomer customer.Core
 		errmsg := ""
 		if strings.Contains(err.Error(), "not found") {
 			errmsg = "data not found"
-		} else if strings.Contains(err.Error(), "Duplicate") && strings.Contains(err.Error(), "customers.email") {
-			errmsg = "user already exist"
-		} else if strings.Contains(err.Error(), "Duplicate") && strings.Contains(err.Error(), "customers.phone_number") {
-			errmsg = "phone number already exist"
+		} else if strings.Contains(err.Error(), "duplicate") && strings.Contains(err.Error(), "customers.email") {
+			errmsg = "register new customer email: already exist"
+		} else if strings.Contains(err.Error(), "duplicate") && strings.Contains(err.Error(), "customers.phone_number") {
+			errmsg = "register new customer phone number: already exist"
 		} else {
 			errmsg = "server problem"
 		}
@@ -82,10 +82,10 @@ func (cuc *customerUseCase) Update(userToken interface{}, customerId uint, updat
 		errmsg := ""
 		if strings.Contains(err.Error(), "not found") {
 			errmsg = "data not found"
-		} else if strings.Contains(err.Error(), "Duplicate") && strings.Contains(err.Error(), "customers.email") {
-			errmsg = "user already exist"
-		} else if strings.Contains(err.Error(), "Duplicate") && strings.Contains(err.Error(), "customers.phone_number") {
-			errmsg = "phone number already exist"
+		} else if strings.Contains(err.Error(), "duplicate") && strings.Contains(err.Error(), "customers.email") {
+			errmsg = "update customer email: already exist"
+		} else if strings.Contains(err.Error(), "duplicate") && strings.Contains(err.Error(), "customers.phone_number") {
+			errmsg = "update customer phone number: already exist"
 		} else {
 			errmsg = "server problem"
 		}
