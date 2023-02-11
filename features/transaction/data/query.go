@@ -33,6 +33,28 @@ func New(db *gorm.DB) transaction.TransactionData {
 	}
 }
 
+func (tq *transactionQuery) LowStockProductNotif(userId uint) {
+	msg := ""
+	lowProds, err := tq.CheckLowStockProducts(userId)
+	if err != nil {
+		log.Println(color.Red("error check low stock product: "), err)
+	} else if len(lowProds) != 0 {
+		for _, v := range lowProds {
+			msg += "- " + v.ProductName + "\n"
+		}
+		dvc, err := tq.CheckUserDevice(userId)
+		if err != nil {
+			log.Println(color.Red("error check user device: "), err)
+		} else if len(dvc) != 0 {
+			for _, v := range dvc {
+				err := helper.PushNotification("Stock produk rendah", msg, v.Token)
+				if err != nil {
+					log.Println(color.Red("error sending push notification: "), err)
+				}
+			}
+		}
+	}
+}
 func (tq *transactionQuery) UpdateProductStock(transId uint) error {
 	transProds := []TransactionProduct{}
 	tx := tq.db.Begin()
