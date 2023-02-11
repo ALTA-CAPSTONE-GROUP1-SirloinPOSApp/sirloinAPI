@@ -20,15 +20,11 @@ func PrintErrorResponse(msg string) (int, interface{}) {
 		resp["message"] = msg
 	}
 
-	if strings.Contains(msg, "user already exist") {
-		log.Println("error running register service: user already exist")
-		resp["message"] = "email already exist"
+	if strings.Contains(msg, "already exist") {
+		words := strings.Split(msg, ": ")
+		log.Println("error running " + words[0] + " service: already exist")
+		resp["message"] = words[0] + " already exist"
 		code = http.StatusConflict
-
-	} else if strings.Contains(msg, "phone number already exist") {
-		log.Println("error running register service: phone number already exist")
-		code = http.StatusConflict
-		resp["message"] = "phone number already exist"
 
 	} else if strings.Contains(msg, "secure_password") {
 		log.Println("error running register service: the password does not meet security requirements")
