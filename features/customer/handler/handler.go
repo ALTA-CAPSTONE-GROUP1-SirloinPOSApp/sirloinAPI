@@ -69,7 +69,6 @@ func (cc *customerControl) Update() echo.HandlerFunc {
 			} else {
 				return c.JSON(helper.PrintErrorResponse(err.Error()))
 			}
-
 		}
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			// "data":    ToResponse(res),
@@ -102,7 +101,12 @@ func (cc *customerControl) GetCustomerById() echo.HandlerFunc {
 
 		res, err := cc.srv.GetCustomerById(token, uint(cCusId))
 		if err != nil {
-			return c.JSON(helper.PrintErrorResponse(err.Error()))
+			if strings.Contains(err.Error(), "not found") {
+				log.Println("error calling update customer service: ", err.Error())
+				return c.JSON(http.StatusNotFound, helper.ErrorResponse("customer not found"))
+			} else {
+				return c.JSON(helper.PrintErrorResponse(err.Error()))
+			}
 		}
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"data":    ToResponse(res),
