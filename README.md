@@ -134,7 +134,7 @@ This application has features as listed below.
 
 
 # ERD
-![ERD](https://mediasosial.s3.ap-southeast-1.amazonaws.com/Sirloin.drawio+(4).png "ERD")
+![ERD](https://mediasosial.s3.ap-southeast-1.amazonaws.com/Sirloin.drawio.png "ERD")
 
 # API Documentations
 
